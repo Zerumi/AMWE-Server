@@ -1,9 +1,9 @@
-﻿namespace AMWE_RealTime_Server.Models
+﻿namespace ReportHandler
 {
     public class ProcessesDetails
     {
         public uint ChangesCount { get; set; }
         public string[] ProcessesNow { get; set; }
-        public ProcessChange[] ProccesChanges { get; set; }
+        public ProccesChange[] ProccesChanges { get; set; }
     }
 }

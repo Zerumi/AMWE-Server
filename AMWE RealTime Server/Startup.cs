@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using AMWE_RealTime_Server.Hubs;
 using AMWE_RealTime_Server.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 
 namespace AMWE_RealTime_Server
 {
@@ -16,6 +23,17 @@ namespace AMWE_RealTime_Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<ApplicationContext>(options => options.UseInMemoryDatabase("AppContext"));
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = new PathString("/Account/Login");
+                    options.AccessDeniedPath = new PathString("/Account/Login");
+                });
+
+            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -26,71 +44,12 @@ namespace AMWE_RealTime_Server
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Run(async (context) =>
+            app.UseAuthentication();
+
+            app.UseMvc();
+            app.UseSignalR(routes =>
             {
-                await context.Response.WriteAsync("Hello World!");
-                Report report = new Report()
-                {
-                    Client = new Client()
-                    {
-                        Id = 0,
-                        Nameofpc = "Zerumi"
-                    },
-                    DangerLevel = new AlarmList()
-                    {
-                        OverallRating = 0.7m,
-                        KeyboardRating = 1,
-                        MouseRating = 0,
-                        ProcessRating = 1
-                    },
-                    ReportDetails = new ReportDetails()
-                    {
-                        KeyboardDetails = new KeyboardDetails()
-                        {
-                            KeyPressedCount = 23,
-                            PressedInfo = new KeyPressedInfo[]
-                            {
-                                new KeyPressedInfo()
-                                {
-                                    Key = "F4",
-                                    PressTimes = 1
-                                },
-                                new KeyPressedInfo()
-                                {
-                                    Key = "Alt",
-                                    PressTimes = 1
-                                },
-                                new KeyPressedInfo()
-                                {
-                                    Key = "V",
-                                    PressTimes = 17
-                                },
-                                new KeyPressedInfo()
-                                {
-                                    Key = "I",
-                                    PressTimes = 4
-                                }
-                            }
-                        },
-                        MouseDetails = new MouseDetails()
-                        {
-                            isMouseCoordChanged = false
-                        },
-                        ProcessesDetails = new ProcessesDetails()
-                        {
-                            ChangesCount = 1,
-                            ProcessesNow = new string[] { "System", "notepad.exe" },
-                            ProccesChanges = new ProccesChange[]
-                            {
-                                new ProccesChange()
-                                {
-                                    Action = ProcessAction.Created,
-                                    ProcessName = "notepad.exe"
-                                }
-                            }
-                        }
-                    }
-                };
+                routes.MapHub<ReportHub>("/report");
             });
         }
     }
