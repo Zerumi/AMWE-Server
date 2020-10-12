@@ -1,4 +1,5 @@
-﻿using AMWE_RealTime_Server.Models;
+﻿using AMWE_RealTime_Server.Controllers;
+using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -21,23 +22,50 @@ namespace AMWE_RealTime_Server.Hubs
 
         public ReportHub(ApplicationContext context)
         {
+            AuthController.OnUserAuth += AuthController_OnUserAuth;
             _context = context;
+        }
+
+        private void AuthController_OnUserAuth(Client client)
+        {
+
         }
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.Group("Admin").SendAsync("UpdateUserInfo", Context.ConnectionId);
+            if (Context.User.IsInRole(Role.GlobalUserRole))
+            {
+
+            }
+            else if (Context.User.IsInRole(Role.GlobalUserRole))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, "Admin");
+            }
             await base.OnConnectedAsync();
         }
+
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await Clients.Group("Admin").SendAsync("onUserDisconnected", Context.ConnectionId, exception);
+            if (Context.User.IsInRole(Role.GlobalUserRole))
+            {
+
+            }
+            else if (Context.User.IsInRole(Role.GlobalUserRole))
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Admin");
+            }
             await base.OnDisconnectedAsync(exception);
         }
-        [Authorize(Roles="admin")]
+
+        [Authorize(Roles ="admin")]
         public int GetIntIfAdmin()
         {
             return 1;
+        }
+        [Authorize(Roles ="user")]
+        public int GetIntIfUser()
+        {
+            return 2;
         }
     }
 }

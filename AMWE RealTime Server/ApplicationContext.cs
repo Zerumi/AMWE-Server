@@ -15,18 +15,19 @@ namespace AMWE_RealTime_Server
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            string adminRoleName = "admin";
-            string userRoleName = "user";
-
-            Role adminRole = new Role { Id = 1, Name = adminRoleName };
-            Role userRole = new Role { Id = 2, Name = userRoleName };
+            Role adminRole = new Role { Id = 1, Name = Role.GlobalAdminRole };
+            Role userRole = new Role { Id = 2, Name = Role.GlobalUserRole };
 
             modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole });
             base.OnModelCreating(modelBuilder);
         }
     }
+
     public class Role
     {
+        public const string GlobalAdminRole = "admin";
+        public const string GlobalUserRole = "user";
+
         public int Id { get; set; }
         public string Name { get; set; }
         public List<User> Users { get; set; }
@@ -38,8 +39,6 @@ namespace AMWE_RealTime_Server
     public class User
     {
         public int Id { get; set; }
-        public string NameOfPC { get; set; }
-        public string Password { get; set; }
 
         public int? RoleId { get; set; }
         public Role Role { get; set; }
