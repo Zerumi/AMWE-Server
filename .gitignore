@@ -342,3 +342,4 @@ healthchecksdb
 # Crypt data
 cryptcode.txt
 password.txt
+devpassword.txt

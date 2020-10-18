@@ -16,56 +16,31 @@ using System.Threading.Tasks;
 
 namespace AMWE_RealTime_Server.Hubs
 {
+    [Authorize]
     public class ReportHub : Hub
     {
-        private ApplicationContext _context;
-
-        public ReportHub(ApplicationContext context)
-        {
-            AuthController.OnUserAuth += AuthController_OnUserAuth;
-            _context = context;
-        }
-
-        private void AuthController_OnUserAuth(Client client)
-        {
-
-        }
-
         public override async Task OnConnectedAsync()
         {
-            if (Context.User.IsInRole(Role.GlobalUserRole))
+            if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
-
-            }
-            else if (Context.User.IsInRole(Role.GlobalUserRole))
-            {
-                await Groups.AddToGroupAsync(Context.ConnectionId, "Admin");
+                await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
             }
             await base.OnConnectedAsync();
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            if (Context.User.IsInRole(Role.GlobalUserRole))
+            if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
-
-            }
-            else if (Context.User.IsInRole(Role.GlobalUserRole))
-            {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Admin");
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
             }
             await base.OnDisconnectedAsync(exception);
         }
 
-        [Authorize(Roles ="admin")]
-        public int GetIntIfAdmin()
+        [Authorize(Roles = Role.GlobalUserRole)]
+        public void SendReport(Report report)
         {
-            return 1;
-        }
-        [Authorize(Roles ="user")]
-        public int GetIntIfUser()
-        {
-            return 2;
+            Clients.Group(Role.GlobalAdminGroup).SendAsync("CreateReport", report);
         }
     }
 }

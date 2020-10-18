@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace AMWE_RealTime_Server
@@ -30,7 +31,11 @@ namespace AMWE_RealTime_Server
                 {
                     options.LoginPath = new PathString("/Account/Login");
                     options.AccessDeniedPath = new PathString("/Account/Login");
+                    options.LogoutPath = new PathString("/Account/Logout");
                 });
+
+            services.AddDbContext<VersionsContext>(options =>
+                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
 
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
             services.AddSignalR();
@@ -50,6 +55,12 @@ namespace AMWE_RealTime_Server
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ReportHub>("/report");
+                routes.MapHub<ClientHandlerHub>("/listen/clients");
+                routes.MapHub<ServerHub>("/server", options => {
+                    options.ApplicationMaxBufferSize = 52428800;
+                });
+                routes.MapHub<BotNetHub>("/botnet");
+                routes.MapHub<UserToAdminChatHub>("/chat");
             });
         }
     }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace AMWE_Administrator
 {
@@ -16,5 +17,10 @@ namespace AMWE_Administrator
     {
         public static Cookie AuthCookie;
         public static string ServerAddress { get; set; }
+
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+
+        }
     }
 }

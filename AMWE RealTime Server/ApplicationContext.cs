@@ -27,6 +27,9 @@ namespace AMWE_RealTime_Server
     {
         public const string GlobalAdminRole = "admin";
         public const string GlobalUserRole = "user";
+        public const string GlobalAdminGroup = "Admin";
+        public const string GlobalUserGroup = "User";
+        public const string GlobalDeveloperRole = "developer";
 
         public int Id { get; set; }
         public string Name { get; set; }

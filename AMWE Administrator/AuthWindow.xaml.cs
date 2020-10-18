@@ -28,9 +28,9 @@ namespace AMWE_Administrator
             InitializeComponent();
         }
 
-        public static bool AuthUser((string, string) authdata, out Cookie cookie)
+        public static object AuthUser(string[] authdata, out Cookie cookie)
         {
-            bool returnproduct = default;
+            object returnproduct = default;
             try
             {
                 CookieContainer cookies = new CookieContainer();
@@ -46,8 +46,8 @@ namespace AMWE_Administrator
                 string json = new JavaScriptSerializer().Serialize(authdata);
                 HttpResponseMessage response = client.PostAsync($"auth", new StringContent(json, Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
                 response.EnsureSuccessStatusCode();
-                returnproduct = response.Content.ReadAsAsync<bool>().GetAwaiter().GetResult();
-                if (returnproduct)
+                returnproduct = response.Content.ReadAsAsync<object>().GetAwaiter().GetResult();
+                try
                 {
                     Uri uri = new Uri($"{App.ServerAddress}auth");
                     IEnumerable<Cookie> responseCookies = cookies.GetCookies(uri).Cast<Cookie>();
@@ -58,7 +58,7 @@ namespace AMWE_Administrator
                     });
                     cookie = collection[".AspNetCore.Cookies"];
                 }
-                else
+                catch (Exception)
                 {
                     cookie = default;
                 }
@@ -70,7 +70,6 @@ namespace AMWE_Administrator
             }
             return returnproduct;
         }
-
 
         public string ResponseText
         {
@@ -120,21 +119,32 @@ namespace AMWE_Administrator
                 AuthButton.IsEnabled = false;
                 App.ServerAddress = ServerText;
                 AuthButton.Content = "Проверка...";
-                if (AuthUser((UsernameTextBox.Text, Encryption.Encrypt(ResponseText)), out App.AuthCookie))
+                var authresult = AuthUser(new string[] { UsernameTextBox.Text, Encryption.Encrypt(ResponseText), "0.6.0.0", "1.0.0.0", "1.4.1.0", "1.3.1.0" }, out App.AuthCookie);
+                if (authresult is bool)
                 {
-                    ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                    AuthButton.Content = "Загрузка сборок...";
-                    if (await CheckVersion())
+                    if ((bool)authresult)
                     {
+                        ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
+                        AuthButton.Content = "Загрузка сборок...";
                         AuthButton.Content = "Загрузка...";
                         MainWindow mainWindow = new MainWindow();
                         mainWindow.Show();
                         System.Windows.Application.Current.MainWindow.Close();
                     }
+                    else
+                    {
+                        MessageBox.Show("Неправильный пароль");
+                    }
                 }
-                else
+                else if (authresult is string)
                 {
-                    MessageBox.Show("Неправильный пароль");
+                    if ((string)authresult == "Developer")
+                    {
+                        ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
+                        DeveloperControlPanel controlPanel = new DeveloperControlPanel();
+                        controlPanel.Show();
+                        System.Windows.Application.Current.MainWindow.Close();
+                    }
                 }
             }
             catch (Exception ex)
@@ -148,11 +158,6 @@ namespace AMWE_Administrator
                 ResponseTextBox.KeyDown += Field_KeyDown;
                 sResponseTextBox.KeyDown += Field_KeyDown;
             }
-        }
-
-        private async Task<bool> CheckVersion()
-        {
-            return true;
         }
 
         private void CheckBox_Checked(object sender, RoutedEventArgs e)

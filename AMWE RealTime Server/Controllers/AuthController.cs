@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,8 +16,14 @@ namespace AMWE_RealTime_Server.Controllers
 {
     [Route("/[controller]")]
     [ApiController]
+    [Authorize]
     public class AuthController : ControllerBase
     {
+        public AuthController()
+        {
+            OnClientLogin += UserAuth;
+        }
+
         private void UserAuth(Client client)
         {
             GlobalUsersList.Add(client);
@@ -26,44 +33,108 @@ namespace AMWE_RealTime_Server.Controllers
         public static List<Client> GlobalUsersList = new List<Client>();
 
         [HttpPost]
-        public async Task<bool> Auth((string, string) authdata)
+        [AllowAnonymous]
+        public async Task<dynamic> Auth([FromBody] string[] authdata)
         {
-            if (authdata.Item2 == "user")
+            if (authdata[1] == "user")
             {
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata.Item1),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-                UserAuth(new Client
+                var client = new Client
                 {
                     Id = GlobalClientId++,
-                    Nameofpc = authdata.Item1
-                });
-                return true;
+                    Nameofpc = authdata[0]
+                };
+                OnClientLogin?.Invoke(client);
+                return client;
             }
-            else if (Encryption.Decrypt(authdata.Item2) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
+            else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
             {
+                VerifyVersion version = Array.Find(adminversions, x => x.version == authdata[2]);
+                if (version.isNotSupported || !version.rephandler.Contains(authdata[3]) || !version.m3md2.Contains(authdata[4]) || !version.m3md2_startup.Contains(authdata[5]))
+                {
+                    return Redirect("~/update/latest/admin");
+                }
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata.Item1),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, "admin")
+                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalAdminRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
                 return true;
             }
+            else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"devpassword.txt")).ReadToEnd())
+            {
+                var claims = new List<Claim>
+                {
+                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
+                new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalDeveloperRole)
+                };
+                ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
+                    ClaimsIdentity.DefaultRoleClaimType);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+                return "Developer";
+            }
             return false;
         }
 
         [HttpDelete]
-        public async Task Logout()
+        public async Task Logout(Client client)
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            OnClientLogout?.Invoke(client);
         }
+
+        public delegate void ClientHandler(Client client);
+
+        public static event ClientHandler OnClientLogin;
+        public static event ClientHandler OnClientLogout;
+
+        VerifyVersion[] adminversions = new VerifyVersion[]
+            {
+                new VerifyVersion()
+                {
+                    version = "0.6.0.0",
+                    isNotSupported = false,
+                    isNotLatest = false,
+                    isUpdateNeeded = false,
+                    rephandler = new List<string> {"1.0.0.0"},
+                    m3md2 = new List<string> {"1.4.1.0"},
+                    m3md2_startup = new List<string> {"1.3.1.0"}
+                },
+                new VerifyVersion()
+                {
+                    version = "1.0.0.0",
+                    isNotSupported = true,
+                    isNotLatest = false,
+                    isUpdateNeeded = false,
+                    rephandler = new List<string> {"1.0.0.0"},
+                    m3md2 = new List<string> {"1.4.1.0"},
+                    m3md2_startup = new List<string> {"1.3.1.0"}
+                }
+            };
+
+
+        VerifyVersion[] userversions = new VerifyVersion[]
+            {
+                new VerifyVersion()
+                {
+                    version = "1.0.0.0",
+                    isNotSupported = false,
+                    isNotLatest = false,
+                    isUpdateNeeded = false,
+                    rephandler = new List<string> {"2.1.0.0"},
+                    m3md2 = new List<string> {"1.4.1.0"},
+                    m3md2_startup = new List<string> {"1.3.1.0"}
+                }
+            };
     }
 }
