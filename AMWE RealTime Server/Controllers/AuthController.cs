@@ -1,4 +1,7 @@
-﻿using System;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,11 +59,11 @@ namespace AMWE_RealTime_Server.Controllers
             }
             else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
             {
-                VerifyVersion version = Array.Find(adminversions, x => x.version == authdata[2]);
-                if (version.isNotSupported || !version.rephandler.Contains(authdata[3]) || !version.m3md2.Contains(authdata[4]) || !version.m3md2_startup.Contains(authdata[5]))
-                {
-                    return Redirect("~/update/latest/admin");
-                }
+                //VerifyVersion version = Array.Find(adminversions, x => x.version == authdata[2]);
+                //if (version.isNotSupported || !version.rephandler.Contains(authdata[3]) || !version.m3md2.Contains(authdata[4]) || !version.m3md2_startup.Contains(authdata[5]))
+                //{
+                //    return Redirect("~/api/update/latest/admin");
+                //}
                 var claims = new List<Claim>
                 {
                 new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
@@ -98,13 +101,13 @@ namespace AMWE_RealTime_Server.Controllers
         public static event ClientHandler OnClientLogin;
         public static event ClientHandler OnClientLogout;
 
-        VerifyVersion[] adminversions = new VerifyVersion[]
+        public static VerifyVersion[] adminversions = new VerifyVersion[]
             {
                 new VerifyVersion()
                 {
                     version = "0.6.0.0",
                     isNotSupported = false,
-                    isNotLatest = false,
+                    isLatest = true,
                     isUpdateNeeded = false,
                     rephandler = new List<string> {"1.0.0.0"},
                     m3md2 = new List<string> {"1.4.1.0"},
@@ -114,7 +117,7 @@ namespace AMWE_RealTime_Server.Controllers
                 {
                     version = "1.0.0.0",
                     isNotSupported = true,
-                    isNotLatest = false,
+                    isLatest = false,
                     isUpdateNeeded = false,
                     rephandler = new List<string> {"1.0.0.0"},
                     m3md2 = new List<string> {"1.4.1.0"},
@@ -123,13 +126,13 @@ namespace AMWE_RealTime_Server.Controllers
             };
 
 
-        VerifyVersion[] userversions = new VerifyVersion[]
+        public static VerifyVersion[] userversions = new VerifyVersion[]
             {
                 new VerifyVersion()
                 {
                     version = "1.0.0.0",
                     isNotSupported = false,
-                    isNotLatest = false,
+                    isLatest = false,
                     isUpdateNeeded = false,
                     rephandler = new List<string> {"2.1.0.0"},
                     m3md2 = new List<string> {"1.4.1.0"},

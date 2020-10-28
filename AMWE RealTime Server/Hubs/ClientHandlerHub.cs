@@ -1,4 +1,7 @@
-﻿using AMWE_RealTime_Server.Controllers;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using AMWE_RealTime_Server.Controllers;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -22,11 +25,17 @@ namespace AMWE_RealTime_Server.Hubs
         public ClientHandlerHub()
         {
             AuthController.OnClientLogin += AuthController_OnUserAuth;
+            AuthController.OnClientLogout += AuthController_OnClientLogout;
+        }
+
+        private void AuthController_OnClientLogout(Client client)
+        {
+            Clients.All.SendAsync("OnUserAuth", client);
         }
 
         private void AuthController_OnUserAuth(Client client)
         {
-            Clients.All.SendAsync("OnUserAuth", client);
+            Clients.All.SendAsync("OnUserLeft", client);
         }
 
         public override async Task OnConnectedAsync()

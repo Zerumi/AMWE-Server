@@ -1,4 +1,7 @@
-﻿using m3md2;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using ReportHandler.Version;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,13 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace AMWE_Administrator
 {
@@ -102,9 +99,9 @@ namespace AMWE_Administrator
             Load();
         }
 
-        private void Field_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void Field_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Enter)
+            if (e.Key == Key.Enter)
             {
                 Load();
             }
@@ -119,17 +116,26 @@ namespace AMWE_Administrator
                 AuthButton.IsEnabled = false;
                 App.ServerAddress = ServerText;
                 AuthButton.Content = "Проверка...";
-                var authresult = AuthUser(new string[] { UsernameTextBox.Text, Encryption.Encrypt(ResponseText), "0.6.0.0", "1.0.0.0", "1.4.1.0", "1.3.1.0" }, out App.AuthCookie);
+                object authresult = default;
+                var username = UsernameTextBox.Text;
+                var nocryptpass = ResponseText;
+                await Task.Run(() => 
+                {
+                    authresult = AuthUser(new string[] { username, Encryption.Encrypt(nocryptpass), "0.6.0.0", "1.0.0.0", "1.4.1.0", "1.3.1.0" }, out App.AuthCookie);
+                });
+                if (authresult is List<VersionFile>)
+                {
+                    // update
+                }
                 if (authresult is bool)
                 {
                     if ((bool)authresult)
                     {
                         ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                        AuthButton.Content = "Загрузка сборок...";
                         AuthButton.Content = "Загрузка...";
                         MainWindow mainWindow = new MainWindow();
                         mainWindow.Show();
-                        System.Windows.Application.Current.MainWindow.Close();
+                        Application.Current.MainWindow.Close();
                     }
                     else
                     {
@@ -193,7 +199,9 @@ namespace AMWE_Administrator
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            UsernameTextBox.Text = Environment.UserName;
             ServerText = ConfigurationRequest.GetValueByKey("MainUri");
+            ResponseTextBox.Focus();
         }
     }
 }

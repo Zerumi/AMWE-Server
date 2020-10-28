@@ -1,4 +1,7 @@
-﻿using System;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -34,8 +37,8 @@ namespace AMWE_RealTime_Server
                     options.LogoutPath = new PathString("/Account/Logout");
                 });
 
-            services.AddDbContext<VersionsContext>(options =>
-                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
+            //services.AddDbContext<VersionsContext>(options =>
+            //    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
 
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
             services.AddSignalR();
@@ -56,9 +59,9 @@ namespace AMWE_RealTime_Server
             {
                 routes.MapHub<ReportHub>("/report");
                 routes.MapHub<ClientHandlerHub>("/listen/clients");
-                routes.MapHub<ServerHub>("/server", options => {
-                    options.ApplicationMaxBufferSize = 52428800;
-                });
+                //routes.MapHub<ServerHub>("/server", options => {
+                //    options.ApplicationMaxBufferSize = 52428800;
+                //});
                 routes.MapHub<BotNetHub>("/botnet");
                 routes.MapHub<UserToAdminChatHub>("/chat");
             });

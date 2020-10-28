@@ -8,7 +8,7 @@
         Title="DeveloperControlPanel" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid>
         <Label x:Name="curVer" Content="Current version: loading..." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="250"/>
-        <Label Content="Server status for (loading address...): loading..." HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top" Width="490"/>
+        <Label x:Name="serverStatus" Content="Server status for (loading address...): loading..." HorizontalAlignment="Left" Margin="10,36,0,0" VerticalAlignment="Top" Width="490"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="10,0,0,5" Height="343" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="461">
             <TextBlock x:Name="tb_FilesInDir" HorizontalAlignment="Left" Text="Current files in (path loading...): loading..." VerticalAlignment="Top"/>
         </ScrollViewer>

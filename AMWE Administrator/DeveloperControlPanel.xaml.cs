@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler.Version;
 using System;
 using System.Collections.Generic;
@@ -8,6 +11,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,6 +42,44 @@ namespace AMWE_Administrator
             tb_FilesInDir.Text = $"Current files in {Directory.GetCurrentDirectory()}: {FilesInDir}";
 
             curVer.Content = $"Current version: {Assembly.GetExecutingAssembly().GetName().Version}";
+
+
+            connection = new HubConnectionBuilder().WithUrl($"{ConfigurationRequest.GetValueByKey("MainUri")}server", options =>
+            {
+                options.UseDefaultCredentials = true;
+                options.Cookies.Add(App.AuthCookie);
+            })
+            .Build();
+
+            connection.Closed += async (error) =>
+            {
+                serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State} // ({error})";
+                await Task.Delay(new Random().Next(0, 5) * 1000);
+                await connection.StartAsync();
+            };
+
+            connection.Reconnecting += async (error) =>
+            {
+                serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State} // ({error})";
+            };
+
+            connection.Reconnected += async (error) =>
+            {
+                serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State} // ({error})";
+            };
+
+            connection.StartAsync();
+            serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State}";
+            Task.Run(async() => {
+                await Task.Run(() =>
+                {
+                    while (true)
+                    {
+                        serverStatus.Dispatcher.BeginInvoke(new Action(() => Content = $"Server status for {connection.ConnectionId}: {connection.State}"));
+                        Thread.Sleep(3000);
+                    }
+                });
+            });
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -52,22 +94,12 @@ namespace AMWE_Administrator
             {
                 version.Add(new VersionFile() { filename = FilesPath[i], filebytes = File.ReadAllBytes(FilesPath[i]) });
             }
-            connection = new HubConnectionBuilder().WithUrl($"{ConfigurationRequest.GetValueByKey("MainUri")}server", options =>
+            bool overwritesave = false;
+            if (await connection.InvokeAsync<bool>("CheckConflict", "admin", Assembly.GetExecutingAssembly().GetName().Version.ToString()))
             {
-                options.UseDefaultCredentials = true;
-                options.Cookies.Add(App.AuthCookie);
-            })
-            .Build();
-
-            connection.Closed += async (error) =>
-            {
-                await Task.Delay(new Random().Next(0, 5) * 1000);
-                await connection.StartAsync();
-            };
-
-            await connection.StartAsync();
-
-            MessageBox.Show(Convert.ToString(await connection.InvokeAsync<object>("NewLatestVersion", "admin", "0.6.0.0", version)));
+                overwritesave = MessageBox.Show("Обнаружен конфликт версий. Версия с таким же кодом уже загружена на сервере. Вы хотите перезаписать версию?", "Конфликт версий", MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes;
+            }
+            MessageBox.Show(Convert.ToString(await connection.InvokeAsync<object>("NewLatestVersion", "admin", Assembly.GetExecutingAssembly().GetName().Version.ToString(), version, overwritesave)));
         }
 
         private void Moverect_Drop(object sender, DragEventArgs e)

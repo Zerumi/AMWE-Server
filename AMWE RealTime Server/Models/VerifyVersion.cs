@@ -1,4 +1,7 @@
-﻿using System;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +12,7 @@ namespace AMWE_RealTime_Server.Models
     {
         public string version { get; internal set; }
         public bool isNotSupported { get; internal set; }
-        public bool isNotLatest { get; internal set; }
+        public bool isLatest { get; internal set; }
         public bool isUpdateNeeded { get; internal set; }
         public List<string> rephandler { get; internal set; }
         public List<string> m3md2 { get; internal set; }
