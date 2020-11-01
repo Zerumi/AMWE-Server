@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler;
 
 namespace AMWE_Administrator
@@ -24,19 +25,39 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class MainWindow : Window
     {
+        HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}/client").Build();
+
         public MainWindow()
         {
+            ClientHandlerConnection.On<List<Client>>("GetAllClients", UpdateClients);
             InitializeComponent();
+        }
+
+        public void UpdateClients(List<Client> clients)
+        {
+
         }
 
         private void TextBlock_GotMouseCapture(object sender, MouseEventArgs e)
         {
-            (sender as TextBlock).Visibility = Visibility.Hidden;
+            (e.Source as UIElement).Opacity = 0;
+            e.Handled = true;
         }
 
         private void TextBlock_LostMouseCapture(object sender, MouseEventArgs e)
         {
-            (sender as TextBlock).Visibility = Visibility.Visible;
+            (e.Source as UIElement).Opacity = 1;
+            e.Handled = true;
+        }
+
+        private void Notification_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            (e.Source as TextBlock).Foreground = new SolidColorBrush(Color.FromRgb(0,0,238));
+        }
+
+        private void Notification_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            (e.Source as TextBlock).Foreground = new SolidColorBrush(Colors.Black);
         }
     }
 }
