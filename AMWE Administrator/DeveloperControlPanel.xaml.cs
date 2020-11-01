@@ -29,7 +29,7 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class DeveloperControlPanel : Window
     {
-        string[] FilesPath;
+        readonly string[] FilesPath;
         HubConnection connection;
 
         public DeveloperControlPanel()
@@ -58,14 +58,16 @@ namespace AMWE_Administrator
                 await connection.StartAsync();
             };
 
-            connection.Reconnecting += async (error) =>
+            connection.Reconnecting += (error) =>
             {
                 serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State} // ({error})";
+                return Task.CompletedTask;
             };
 
-            connection.Reconnected += async (error) =>
+            connection.Reconnected += (error) =>
             {
                 serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State} // ({error})";
+                return Task.CompletedTask;
             };
 
             connection.StartAsync();

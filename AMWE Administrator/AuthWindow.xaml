@@ -24,6 +24,6 @@
         <TextBox x:Name="sResponseTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" KeyDown="Field_KeyDown" Grid.Row="5" Visibility="Collapsed"/>
         <PasswordBox x:Name="ResponseTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" KeyDown="Field_KeyDown" Grid.Row="5"/>
         <Button x:Name="AuthButton" Content="OK" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="OKButton_Click" Grid.Row="6"/>
-        <CheckBox x:Name="cbShow" Content="Show letters" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsChecked="False" Checked="CheckBox_Checked" Unchecked="cbShow_Unchecked" Grid.Row="7"/>
+        <CheckBox x:Name="cbShow" Content="Show letters" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsChecked="False" Checked="CheckBox_Checked" Unchecked="CbShow_Unchecked" Grid.Row="7"/>
     </Grid>
 </Window>

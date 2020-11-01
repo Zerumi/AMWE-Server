@@ -29,6 +29,14 @@ namespace AMWE_Administrator
             InitializeComponent();
         }
 
+        private void TextBlock_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            (sender as TextBlock).Visibility = Visibility.Hidden;
+        }
 
+        private void TextBlock_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            (sender as TextBlock).Visibility = Visibility.Visible;
+        }
     }
 }

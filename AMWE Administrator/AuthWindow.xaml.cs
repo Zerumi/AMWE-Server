@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
@@ -31,8 +32,10 @@ namespace AMWE_Administrator
             try
             {
                 CookieContainer cookies = new CookieContainer();
-                HttpClientHandler handler = new HttpClientHandler();
-                handler.CookieContainer = cookies;
+                HttpClientHandler handler = new HttpClientHandler
+                {
+                    CookieContainer = cookies
+                };
 
                 HttpClient client = new HttpClient(handler)
                 {
@@ -62,7 +65,7 @@ namespace AMWE_Administrator
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                ExceptionHandler.RegisterNew(ex);
                 cookie = default;
             }
             return returnproduct;
@@ -121,36 +124,51 @@ namespace AMWE_Administrator
                 var nocryptpass = ResponseText;
                 await Task.Run(() => 
                 {
-                    authresult = AuthUser(new string[] { username, Encryption.Encrypt(nocryptpass), "0.6.0.0", "1.0.0.0", "1.4.1.0", "1.3.1.0" }, out App.AuthCookie);
+                    authresult = AuthUser(new string[] { username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2_startup.dll").GetName().Version.ToString() }, out App.AuthCookie);
                 });
                 if (authresult is List<VersionFile>)
                 {
                     // update
                 }
-                if (authresult is bool)
+                switch (authresult)
                 {
-                    if ((bool)authresult)
-                    {
-                        ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                        AuthButton.Content = "Загрузка...";
-                        MainWindow mainWindow = new MainWindow();
-                        mainWindow.Show();
-                        Application.Current.MainWindow.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Неправильный пароль");
-                    }
-                }
-                else if (authresult is string)
-                {
-                    if ((string)authresult == "Developer")
-                    {
-                        ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                        DeveloperControlPanel controlPanel = new DeveloperControlPanel();
-                        controlPanel.Show();
-                        System.Windows.Application.Current.MainWindow.Close();
-                    }
+                    case bool _:
+                        {
+                            if ((bool)authresult)
+                            {
+                                ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
+                                AuthButton.Content = "Загрузка...";
+                                MainWindow mainWindow = new MainWindow();
+                                mainWindow.Show();
+                                Application.Current.MainWindow.Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Неправильный пароль");
+                            }
+
+                            break;
+                        }
+
+                    case string _:
+                        {
+                            if ((string)authresult == "Developer")
+                            {
+                                ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
+                                DeveloperControlPanel controlPanel = new DeveloperControlPanel();
+                                controlPanel.Show();
+                                Application.Current.MainWindow.Close();
+                            }
+
+                            break;
+                        }
+
+                    default:
+                        {
+                            MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать:{authresult}");
+
+                            break;
+                        }
                 }
             }
             catch (Exception ex)
@@ -181,14 +199,13 @@ namespace AMWE_Administrator
             }
         }
 
-        private void cbShow_Unchecked(object sender, RoutedEventArgs e)
+        private void CbShow_Unchecked(object sender, RoutedEventArgs e)
         {
             try
             {
                 sResponseTextBox.Visibility = Visibility.Collapsed;
                 ResponseTextBox.Visibility = Visibility.Visible;
                 ResponseTextBox.Password = sResponseTextBox.Text;
-
                 ResponseTextBox.Focus();
             }
             catch (Exception ex)

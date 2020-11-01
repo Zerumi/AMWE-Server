@@ -20,6 +20,7 @@ namespace AMWE_Administrator
     {
         public static Cookie AuthCookie;
         public static string ServerAddress { get; set; }
+        public static string Username { get; set; }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
