@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -23,6 +24,9 @@ namespace AMWE_RealTime_Server
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseUrls("http://*:59885");
+                .UseKestrel(serverOptions =>
+                {
+                    serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromDays(1);
+                });
     }
 }

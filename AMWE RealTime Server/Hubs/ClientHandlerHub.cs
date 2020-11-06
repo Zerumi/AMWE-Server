@@ -28,14 +28,13 @@ namespace AMWE_RealTime_Server.Hubs
             AuthController.OnClientLogout += AuthController_OnClientLogout;
         }
 
-        private void AuthController_OnClientLogout(Client client)
+        private async void AuthController_OnClientLogout(Client client)
         {
-            Clients.All.SendAsync("OnUserAuth", client);
+            await Clients.All.SendAsync("OnUserLeft", client);
         }
 
-        private void AuthController_OnUserAuth(Client client)
+        private async void AuthController_OnUserAuth(Client client)
         {
-            Clients.All.SendAsync("OnUserLeft", client);
         }
 
         public override async Task OnConnectedAsync()

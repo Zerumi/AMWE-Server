@@ -8,12 +8,14 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AMWE_RealTime_Server.Hubs;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace AMWE_RealTime_Server.Controllers
 {
@@ -22,14 +24,11 @@ namespace AMWE_RealTime_Server.Controllers
     [Authorize]
     public class AuthController : ControllerBase
     {
-        public AuthController()
-        {
-            OnClientLogin += UserAuth;
-        }
+        private readonly IHubContext<ClientHandlerHub> _hubContext;
 
-        private void UserAuth(Client client)
+        public AuthController(IHubContext<ClientHandlerHub> hubContext)
         {
-            GlobalUsersList.Add(client);
+            _hubContext = hubContext;
         }
 
         public static uint GlobalClientId = 0;
@@ -54,7 +53,8 @@ namespace AMWE_RealTime_Server.Controllers
                     Id = GlobalClientId++,
                     Nameofpc = authdata[0]
                 };
-                OnClientLogin?.Invoke(client);
+                GlobalUsersList.Add(client);
+                await _hubContext.Clients.All.SendAsync("OnUserAuth", client);
                 return client;
             }
             else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
@@ -93,13 +93,7 @@ namespace AMWE_RealTime_Server.Controllers
         public async Task Logout(Client client)
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            OnClientLogout?.Invoke(client);
         }
-
-        public delegate void ClientHandler(Client client);
-
-        public static event ClientHandler OnClientLogin;
-        public static event ClientHandler OnClientLogout;
 
         public static VerifyVersion[] adminversions = new VerifyVersion[]
             {
