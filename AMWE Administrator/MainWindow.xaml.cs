@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,7 +27,14 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<Notification> notifications = new List<Notification>();
+
         HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
+            options.UseDefaultCredentials = true;
+            options.Cookies.Add(App.AuthCookie);
+        }).Build();
+
+        HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
             options.UseDefaultCredentials = true;
             options.Cookies.Add(App.AuthCookie);
         }).Build();
@@ -45,7 +53,40 @@ namespace AMWE_Administrator
             ClientHandlerConnection.StartAsync();
             #endregion
 
+            #region Configure ReportHandler Connection
+            ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
+            ReportHandleConnection.On<Report>("CreateReport", CreateReport);
+            ReportHandleConnection.Closed += async (error) =>
+            {
+                await ClientHandlerConnection.StartAsync();
+            };
+            ReportHandleConnection.StartAsync();
+            #endregion
+
             InitializeComponent();
+        }
+
+        private void CreateReport(Report report)
+        {
+            TextBlock textBlock = new TextBlock()
+            {
+                Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})"
+            };
+
+            textBlock.MouseEnter += Notification_GotMouseCapture;
+            textBlock.MouseLeave += Notification_LostMouseCapture;
+            textBlock.MouseDown += ReportNotification_MouseDown;
+
+            App.reports.Add(report);
+
+            Notification notification = new ReportNotification()
+            {
+                NotifyBlock = textBlock,
+                NotifyReportIndex = App.reports.Count - 1
+            };
+
+            notifications.Add(notification);
+            spNotifications.Children.Add(textBlock);
         }
 
         private void UpdateClients(List<Client> clients)
@@ -111,9 +152,16 @@ namespace AMWE_Administrator
             (e.Source as TextBlock).Foreground = new SolidColorBrush(Colors.Black);
         }
 
+        private void ReportNotification_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ReportNotification notification = notifications.Find(x => (x as ReportNotification).NotifyBlock == e.Source as TextBlock) as ReportNotification;
+
+            ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
+        }
+
         private void MenuDiagnostics_CheckConnectionState(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}");
+            MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: -\nBotNet System: -");
         }
 
         private void MenuManage_Settings_Click(object sender, RoutedEventArgs e)

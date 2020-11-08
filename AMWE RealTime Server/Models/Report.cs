@@ -7,6 +7,8 @@ namespace AMWE_RealTime_Server.Models
 {
     public class Report
     {
+        public Client Client { get; set; }
+
         public float OverallRating { get; set; }
         public int KeyBoardRating { get; set; }
         public int MouseRating { get; set; }

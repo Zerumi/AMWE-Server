@@ -22,21 +22,6 @@ namespace AMWE_RealTime_Server.Hubs
     [Authorize(Roles = Role.GlobalAdminRole)]
     public class ClientHandlerHub : Hub
     {
-        public ClientHandlerHub()
-        {
-            AuthController.OnClientLogin += AuthController_OnUserAuth;
-            AuthController.OnClientLogout += AuthController_OnClientLogout;
-        }
-
-        private async void AuthController_OnClientLogout(Client client)
-        {
-            await Clients.All.SendAsync("OnUserLeft", client);
-        }
-
-        private async void AuthController_OnUserAuth(Client client)
-        {
-        }
-
         public override async Task OnConnectedAsync()
         {
             await Clients.Caller.SendAsync("GetAllClients", AuthController.GlobalUsersList);

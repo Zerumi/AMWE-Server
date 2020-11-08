@@ -35,15 +35,7 @@
         </Menu>
         <Label Content="Уведомления:" Grid.Column="1" HorizontalAlignment="Left" Margin="8.8,0,0,0" Grid.Row="2" VerticalAlignment="Top" Height="26" Width="87"/>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" VerticalAlignment="Stretch" Margin="18.8,26,8.6,15" Grid.Row="2" Grid.Column="1">
-            <TextBlock x:Name="Notifications" TextWrapping="Wrap">
-                <TextBlock Text="(11м) ID 1: Отправлен отчет (0,7)" MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-                <TextBlock Text="(11м) ID 21: Отправлен отчет (0,7)" MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-                <TextBlock Text="(11м) ID 331: Отправлен отчет (0,7)"  MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-                <TextBlock Text="(11м) ID 1: Отправлен отчет (0,7)" MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-                <TextBlock Text="(11м) ID 1: Отправлен отчет (0,7)" MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-                <TextBlock Text="(11м) ID 1: Отправлен отчет (0,7)" MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-                <TextBlock Text="(11м) ID 1: Отправлен отчет (0,7)" MouseEnter="Notification_GotMouseCapture" MouseLeave="Notification_LostMouseCapture"/><LineBreak/>
-            </TextBlock>
+            <StackPanel x:Name="spNotifications"/>
         </ScrollViewer>
     </Grid>
 </Window>

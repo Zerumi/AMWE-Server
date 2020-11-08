@@ -118,6 +118,7 @@ namespace AMWE_Administrator
                 sResponseTextBox.KeyDown -= Field_KeyDown;
                 AuthButton.IsEnabled = false;
                 App.ServerAddress = ServerText;
+                // разбудить сервер первичным подключением
                 AuthButton.Content = "Проверка...";
                 object authresult = default;
                 var username = UsernameTextBox.Text;

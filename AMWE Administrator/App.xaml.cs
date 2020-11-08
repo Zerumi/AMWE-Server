@@ -1,6 +1,7 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using ReportHandler;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -21,6 +22,7 @@ namespace AMWE_Administrator
         public static Cookie AuthCookie;
         public static string ServerAddress { get; set; }
         public static string Username { get; set; }
+        public static List<Report> reports = new List<Report>();
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
