@@ -40,14 +40,18 @@ namespace AMWE_RealTime_Server
             //services.AddDbContext<VersionsContext>(options =>
             //    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
 
-            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
             services.AddSignalR(options => {
                 options.KeepAliveInterval = TimeSpan.FromDays(1);
                 options.EnableDetailedErrors = true;
                 options.HandshakeTimeout = TimeSpan.FromDays(1);
             }).AddHubOptions<ClientHandlerHub>(options => {
                 options.KeepAliveInterval = TimeSpan.FromDays(1);
+                options.HandshakeTimeout = TimeSpan.FromDays(1);
+            }).AddHubOptions<ReportHub>(options => {
+                options.KeepAliveInterval = TimeSpan.FromDays(1);
+                options.HandshakeTimeout = TimeSpan.FromDays(1);
             });
+            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -60,7 +64,6 @@ namespace AMWE_RealTime_Server
 
             app.UseAuthentication();
 
-            app.UseMvc();
             app.UseSignalR(routes =>
             {
                 routes.MapHub<ReportHub>("/report");
@@ -71,6 +74,7 @@ namespace AMWE_RealTime_Server
                 routes.MapHub<BotNetHub>("/botnet");
                 routes.MapHub<UserToAdminChatHub>("/chat");
             });
+            app.UseMvc();
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,6 +43,8 @@ namespace AMWE_Administrator
         public MainWindow()
         {
             #region Configure ClientListener Connection
+            ClientHandlerConnection.KeepAliveInterval = TimeSpan.FromDays(1);
+            ClientHandlerConnection.HandshakeTimeout = TimeSpan.FromDays(1);
             ClientHandlerConnection.ServerTimeout = TimeSpan.FromDays(2);
             ClientHandlerConnection.On<List<Client>>("GetAllClients", UpdateClients);
             ClientHandlerConnection.On<Client>("OnUserAuth", AddClient);
@@ -54,11 +57,13 @@ namespace AMWE_Administrator
             #endregion
 
             #region Configure ReportHandler Connection
+            ReportHandleConnection.KeepAliveInterval = TimeSpan.FromDays(1);
+            ReportHandleConnection.HandshakeTimeout = TimeSpan.FromDays(1);
             ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
             ReportHandleConnection.On<Report>("CreateReport", CreateReport);
             ReportHandleConnection.Closed += async (error) =>
             {
-                await ClientHandlerConnection.StartAsync();
+                await ReportHandleConnection.StartAsync();
             };
             ReportHandleConnection.StartAsync();
             #endregion
@@ -68,6 +73,10 @@ namespace AMWE_Administrator
 
         private void CreateReport(Report report)
         {
+            if (report == null)
+            {
+                // cancel this report
+            }
             TextBlock textBlock = new TextBlock()
             {
                 Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})"
@@ -89,20 +98,27 @@ namespace AMWE_Administrator
             spNotifications.Children.Add(textBlock);
         }
 
-        private void UpdateClients(List<Client> clients)
+        [STAThread]
+        private async void UpdateClients(List<Client> clients)
         {
-            ClientList.Children.Clear();
-            foreach (var client in clients)
+            await ClientList.Dispatcher.BeginInvoke(new Action(() => ClientList.Children.Clear()));
+            Thread thread = new Thread(ForEachUpdateCleints);
+            thread.SetApartmentState(ApartmentState.STA);
+            _clients = clients;
+            thread.Start();
+        }
+
+        List<Client> _clients;
+
+        [STAThread]
+        private void ForEachUpdateCleints()
+        {
+            foreach (var client in _clients)
             {
-                TextBlock temptextblock = new TextBlock()
-                {
-                    Text = $"ID {client.Id} - {client.Nameofpc}"
-                };
-                temptextblock.MouseEnter += TextBlock_GotMouseCapture;
-                ClientList.Children.Add(temptextblock);
+                ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
             }
         }
-        
+
         private void AddClient(Client client)
         {
             TextBlock temptextblock = new TextBlock()
@@ -130,9 +146,15 @@ namespace AMWE_Administrator
                 Content = $"Управление {(e.Source as TextBlock).Text.Remove(0, id.ToString().Length + 6)}",
                 Margin = (e.Source as FrameworkElement).Margin
             };
+            button.Click += ManageUser;
             button.MouseLeave += TextBlock_LostMouseCapture;
             ClientList.Children.Insert(id, button);
             e.Handled = true;
+        }
+
+        private void ManageUser(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show((e.Source as Button).Content.ToString());
         }
 
         private void TextBlock_LostMouseCapture(object sender, MouseEventArgs e)
@@ -157,11 +179,12 @@ namespace AMWE_Administrator
             ReportNotification notification = notifications.Find(x => (x as ReportNotification).NotifyBlock == e.Source as TextBlock) as ReportNotification;
 
             ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
+            reportWindow.Show();
         }
 
         private void MenuDiagnostics_CheckConnectionState(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: -\nBotNet System: -");
+            MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nBotNet System: -");
         }
 
         private void MenuManage_Settings_Click(object sender, RoutedEventArgs e)
@@ -195,6 +218,11 @@ namespace AMWE_Administrator
             {
                 return;
             }
+        }
+
+        private void PrintInfo(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator version 0.7.2020.1511\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
         }
     }
 }
