@@ -117,15 +117,17 @@ namespace AMWE_Administrator
                 ResponseTextBox.KeyDown -= Field_KeyDown;
                 sResponseTextBox.KeyDown -= Field_KeyDown;
                 AuthButton.IsEnabled = false;
+                App.Username = UsernameTextBox.Text;
                 App.ServerAddress = ServerText;
-                
+                m3md2.ApiRequest.BaseAddress = ServerText;
+                AuthButton.Content = "Подключение...";
+                App.ServerDateTime = await m3md2.ApiRequest.GetProductAsync<DateTime>("time");
                 AuthButton.Content = "Проверка...";
                 object authresult = default;
-                var username = UsernameTextBox.Text;
                 var nocryptpass = ResponseText;
                 await Task.Run(() => 
                 {
-                    authresult = AuthUser(new string[] { username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2_startup.dll").GetName().Version.ToString() }, out App.AuthCookie);
+                    authresult = AuthUser(new string[] { App.Username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2_startup.dll").GetName().Version.ToString() }, out App.AuthCookie);
                 });
                 if (authresult is List<VersionFile>)
                 {

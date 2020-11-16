@@ -69,6 +69,8 @@ namespace AMWE_Administrator
             #endregion
 
             InitializeComponent();
+
+            WelcomeLabel.Content = $"{m3md2.Parser.GetWelcomeLabel(m3md2.Parser.GetTimeDescription(App.ServerDateTime))}, {App.Username}";
         }
 
         private void CreateReport(Report report)
@@ -222,7 +224,7 @@ namespace AMWE_Administrator
 
         private void PrintInfo(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator version 0.7.2020.1511\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
+            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator version 0.7.2020.1611\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
         }
     }
 }

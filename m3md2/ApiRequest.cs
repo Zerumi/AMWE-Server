@@ -10,7 +10,7 @@ namespace m3md2
     /// <summary>
     /// Предоставляет систему обращения к AMWE API
     /// </summary>
-    static class ApiRequest
+    public static class ApiRequest
     {
         /// <summary>
         /// Адрес API в сети Интернет

@@ -20,8 +20,10 @@ namespace AMWE_RealTime_Server
         {
             Role adminRole = new Role { Id = 1, Name = Role.GlobalAdminRole };
             Role userRole = new Role { Id = 2, Name = Role.GlobalUserRole };
+            Role devRole = new Role { Id = 3, Name = Role.GlobalDeveloperRole };
 
-            modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole });
+
+            modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole, devRole });
             base.OnModelCreating(modelBuilder);
         }
     }

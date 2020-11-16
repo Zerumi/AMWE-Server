@@ -40,6 +40,7 @@ namespace AMWE_RealTime_Server
             //services.AddDbContext<VersionsContext>(options =>
             //    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
 
+            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
             services.AddSignalR(options => {
                 options.KeepAliveInterval = TimeSpan.FromDays(1);
                 options.EnableDetailedErrors = true;
@@ -51,7 +52,6 @@ namespace AMWE_RealTime_Server
                 options.KeepAliveInterval = TimeSpan.FromDays(1);
                 options.HandshakeTimeout = TimeSpan.FromDays(1);
             });
-            services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,10 +64,20 @@ namespace AMWE_RealTime_Server
 
             app.UseAuthentication();
 
+            app.UseWebSockets();
             app.UseSignalR(routes =>
             {
-                routes.MapHub<ReportHub>("/report");
-                routes.MapHub<ClientHandlerHub>("/listen/clients");
+                routes.MapHub<ReportHub>("/report", options => {
+                    options.ApplicationMaxBufferSize = 52428800;
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+                    options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
+                    options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
+                });
+                routes.MapHub<ClientHandlerHub>("/listen/clients", options => {
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+                    options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
+                    options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
+                });
                 //routes.MapHub<ServerHub>("/server", options => {
                 //    options.ApplicationMaxBufferSize = 52428800;
                 //});
