@@ -1,6 +1,7 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace AMWE_RealTime_Server.Models
@@ -14,7 +15,7 @@ namespace AMWE_RealTime_Server.Models
         public int MouseRating { get; set; }
         public int ProcessRating { get; set; }
 
-        public KeyPressedInfo[] KeyPressedInfo { get; set; }
+        public ICollection<KeyPressedInfo> KeyPressedInfo { get; set; }
         public bool isMouseCoordChanged { get; set; }
 
         public Process[] OldProcesses { get; set; }

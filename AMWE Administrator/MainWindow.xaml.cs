@@ -184,9 +184,16 @@ namespace AMWE_Administrator
             reportWindow.Show();
         }
 
-        private void MenuDiagnostics_CheckConnectionState(object sender, RoutedEventArgs e)
+        private async void MenuDiagnostics_CheckConnectionState(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nBotNet System: -");
+            try
+            {
+                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nBotNet System: -");
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
         }
 
         private void MenuManage_Settings_Click(object sender, RoutedEventArgs e)
@@ -224,7 +231,7 @@ namespace AMWE_Administrator
 
         private void PrintInfo(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator version 0.7.2020.1611\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
+            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.7.2020.1711\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
         }
     }
 }

@@ -6,6 +6,7 @@ using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -44,6 +45,11 @@ namespace AMWE_RealTime_Server.Hubs
         public void SendReport(Report report)
         {
             Clients.Group(Role.GlobalAdminGroup).SendAsync("CreateReport", report);
+        }
+
+        public string GetTransportType()
+        {
+            return Context.Features.Get<IHttpTransportFeature>().TransportType.ToString();
         }
     }
 }

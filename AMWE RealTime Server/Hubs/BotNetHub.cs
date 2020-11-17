@@ -2,6 +2,7 @@
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,11 @@ namespace AMWE_RealTime_Server.Hubs
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
             }
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public string GetTransportType()
+        {
+            return Context.Features.Get<IHttpTransportFeature>().TransportType.ToString();
         }
     }
 }

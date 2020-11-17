@@ -19,9 +19,10 @@ namespace ReportHandler
         public int MouseRating { get; set; }
         public int ProcessRating { get; set; }
 
-        public KeyPressedInfo[] KeyPressedInfo { get; set; }
+        public ICollection<KeyPressedInfo> KeyPressedInfo { get; set; }
         public bool isMouseCoordChanged { get; set; }
 
+        public int ProcessChangedCount { get; set; }
         public Process[] OldProcesses { get; set; }
         public Process[] LastProcesses { get; set; }
     }
