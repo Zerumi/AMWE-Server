@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 
 namespace m3md2
 {
@@ -10,31 +9,29 @@ namespace m3md2
     {
         public static TimeDescription GetTimeDescription(DateTime dateTime)
         {
-            if (dateTime.Hour >= 4 && dateTime.Hour <= 11)
-            {
-                return TimeDescription.Morning;
-            }
-            else if (dateTime.Hour >= 12 && dateTime.Hour <= 16)
-            {
-                return TimeDescription.Afternoon;
-            }
-            else if (dateTime.Hour >= 17 && dateTime.Hour <= 23)
-            {
-                return TimeDescription.Evening;
-            }
-            else if (dateTime.Hour >= 0 && dateTime.Hour <= 3)
+            if (dateTime.Hour <= 3)
             {
                 return TimeDescription.Night;
             }
-            return TimeDescription.Undefinded;
+            else if (dateTime.Hour <= 11)
+            {
+                return TimeDescription.Morning;
+            }
+            else if (dateTime.Hour <= 16)
+            {
+                return TimeDescription.Afternoon;
+            }
+            else if (dateTime.Hour <= 23)
+            {
+                return TimeDescription.Evening;
+            }
+            throw new ArgumentException($"(17.1) Получено неожиданное значение для datetime.Hour: {dateTime.Hour}");
         }
 
         public static string GetWelcomeLabel(TimeDescription timedesc)
         {
             switch (timedesc)
             {
-                case TimeDescription.Undefinded:
-                    return "Добро пожаловать";
                 case TimeDescription.Morning:
                     return "Доброе утро";
                 case TimeDescription.Afternoon:
@@ -44,17 +41,16 @@ namespace m3md2
                 case TimeDescription.Night:
                     return "Доброй ночи";
                 default:
-                    return "Приветствую";
+                    throw new ArgumentException($"(17) Значение определено неверно: timedesc {timedesc}");
             }
         }
     }
 
     public enum TimeDescription
     {
-        Undefinded,
+        Night,
         Morning,
         Afternoon,
-        Evening,
-        Night
+        Evening
     }
 }

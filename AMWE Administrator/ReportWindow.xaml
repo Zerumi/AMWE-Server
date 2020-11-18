@@ -5,8 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
-        Title="ReportWindow" Height="304" Width="541">
+        Title="Информация об отчете" Height="300" Width="540" ResizeMode="NoResize">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="166*"/>
+            <ColumnDefinition Width="367*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="2*"/>
+            <RowDefinition Height="9*"/>
+        </Grid.RowDefinitions>
+        <Rectangle Margin="10" Grid.Row="1" HorizontalAlignment="Stretch" StrokeThickness="1" Stroke="Black" VerticalAlignment="Stretch">
+            <Rectangle.Clip>
+                <RectangleGeometry Rect="0,0,146.395,201.595" RadiusX="11" RadiusY="11"/>
+            </Rectangle.Clip>
+        </Rectangle>
+        <Label x:Name="ReportHeader" Content="Отчет №{No} от {pcusername}:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="36" Width="420" FontSize="15" FontWeight="Bold" Grid.ColumnSpan="2"/>
+        <ScrollViewer Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="9.6,10.2,0,10.4" Grid.Row="1" Width="347">
+            <TextBlock x:Name="ReportOutput" TextWrapping="WrapWithOverflow" Text="Report details loading..."/>
+        </ScrollViewer>
+        <TextBlock Text="looks like it's Beta /_/ \_\" Grid.Column="1" HorizontalAlignment="Left" Margin="268.6,7,0,0" VerticalAlignment="Top" Width="89" Height="39" TextWrapping="WrapWithOverflow" TextAlignment="Center"/>
     </Grid>
 </Window>

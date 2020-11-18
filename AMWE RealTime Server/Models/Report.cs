@@ -2,7 +2,6 @@
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace AMWE_RealTime_Server.Models
 {
@@ -18,7 +17,8 @@ namespace AMWE_RealTime_Server.Models
         public ICollection<KeyPressedInfo> KeyPressedInfo { get; set; }
         public bool isMouseCoordChanged { get; set; }
 
-        public Process[] OldProcesses { get; set; }
-        public Process[] LastProcesses { get; set; }
+        public int ProcessChangedCount { get; set; }
+        public ICollection<string> OldProcesses { get; set; }
+        public ICollection<string> LastProcesses { get; set; }
     }
 }

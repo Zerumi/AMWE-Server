@@ -41,17 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlarmList.cs" />
     <Compile Include="Client.cs" />
-    <Compile Include="KeyboardDetails.cs" />
     <Compile Include="KeyPressedInfo.cs" />
-    <Compile Include="MouseDetails.cs" />
-    <Compile Include="ProccesChange.cs" />
-    <Compile Include="ProcessAction.cs" />
-    <Compile Include="ProcessesDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Report.cs" />
-    <Compile Include="ReportDetails.cs" />
     <Compile Include="Version\VersionFile.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

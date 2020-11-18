@@ -231,7 +231,7 @@ namespace AMWE_Administrator
 
         private void PrintInfo(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.7.2020.1711\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
+            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.7.2020.1811\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
         }
     }
 }

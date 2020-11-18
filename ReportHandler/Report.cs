@@ -23,7 +23,7 @@ namespace ReportHandler
         public bool isMouseCoordChanged { get; set; }
 
         public int ProcessChangedCount { get; set; }
-        public Process[] OldProcesses { get; set; }
-        public Process[] LastProcesses { get; set; }
+        public ICollection<string> OldProcesses { get; set; }
+        public ICollection<string> LastProcesses { get; set; }
     }
 }
