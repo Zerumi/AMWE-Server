@@ -282,7 +282,6 @@
       <Name>ReportHandler</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="cryptcode.txt" />
   </ItemGroup>
