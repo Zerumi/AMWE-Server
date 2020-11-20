@@ -78,6 +78,8 @@ namespace AMWE_Administrator
             if (report == null)
             {
                 // cancel this report
+                MessageBox.Show("(17.2) Получен пустой отчет");
+                return;
             }
             TextBlock textBlock = new TextBlock()
             {
@@ -231,7 +233,20 @@ namespace AMWE_Administrator
 
         private void PrintInfo(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.7.2020.1811\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
+            MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.7.2020.2011\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
+        }
+
+        private void Main_Closed(object sender, EventArgs e)
+        {
+            try
+            {
+                Application.Current.Shutdown();
+                return;
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
         }
     }
 }
