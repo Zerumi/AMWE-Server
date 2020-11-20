@@ -12,7 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using System.Windows.Forms;
 
 namespace AMWE_Administrator
 {
@@ -32,16 +31,6 @@ namespace AMWE_Administrator
             foreach (var item in report.KeyPressedInfo)
             {
                 sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
-                try
-                {
-                    var alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / _Report.pressingCount)));
-                    alpha += (byte)(0.1 * (byte)(255 - alpha));
-                    m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, item.Key).Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
-                }
-                catch (NullReferenceException)
-                {
-                    // this is a hotkey
-                }
             }
             string sOldProcesses = string.Empty;
             foreach (var item in report.OldProcesses)
@@ -53,7 +42,7 @@ namespace AMWE_Administrator
             {
                 sLastProcesses += $"\n{item}";
             }
-            ReportOutput.Text = $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.isMouseCoordChanged? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
+            ReportOutput.Text = $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.isMouseCoordChanged? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
         }
     }
 }

@@ -15,12 +15,11 @@ namespace ReportHandler
         public Client Client { get; set; }
 
         public float OverallRating { get; set; }
-        public float KeyBoardRating { get; set; }
+        public int KeyBoardRating { get; set; }
         public int MouseRating { get; set; }
         public int ProcessRating { get; set; }
 
         public ICollection<KeyPressedInfo> KeyPressedInfo { get; set; }
-        public int pressingCount { get; set; }
         public bool isMouseCoordChanged { get; set; }
 
         public int ProcessChangedCount { get; set; }

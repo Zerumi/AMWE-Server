@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
-        Title="AMWE Server UI by Zerumi" Height="450" Width="420" Closed="Main_Closed">
+        Title="AMWE Server UI by Zerumi" Height="450" Width="420">
     <Grid ShowGridLines="False" x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="160"/>
