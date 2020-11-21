@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace AMWE_RealTime_Server.Controllers
 {
     [Route("/[controller]")]
+    [Produces("application/json")]
     [ApiController]
     [Authorize]
     public class AuthController : ControllerBase
@@ -89,10 +90,14 @@ namespace AMWE_RealTime_Server.Controllers
             return false;
         }
 
-        [HttpDelete]
-        public async Task Logout(Client client)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Logout(uint id)
         {
+            var a = GlobalUsersList.Find(x => x.Id == id);
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await _hubContext.Clients.Group(Role.GlobalAdminGroup).SendAsync("OnUserLeft", a);
+            GlobalUsersList.Remove(a);
+            return NoContent();
         }
 
         public static VerifyVersion[] adminversions = new VerifyVersion[]

@@ -27,6 +27,154 @@ namespace AMWE_Administrator
         {
             _Report = report;
             InitializeComponent();
+            LinearGradientBrush ovbrush = new LinearGradientBrush()
+            {
+                StartPoint = new Point(1, 0),
+                GradientStops = new GradientStopCollection()
+                {
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 1 ? (Color)ColorConverter.ConvertFromString("#C1ff0000") : Colors.White,
+                        Offset = 0.09
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.1
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.9 ? (Color)ColorConverter.ConvertFromString("#C1ff4000") : Colors.White,
+                        Offset = 0.11
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.9 ? (Color)ColorConverter.ConvertFromString("#C1ff4000") : Colors.White,
+                        Offset = 0.19
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.2
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.8 ? (Color)ColorConverter.ConvertFromString("#C1ff8000") : Colors.White,
+                        Offset = 0.21
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.8 ? (Color)ColorConverter.ConvertFromString("#C1ff8000") : Colors.White,
+                        Offset = 0.29
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.3
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.7 ? (Color)ColorConverter.ConvertFromString("#C1ffc000") : Colors.White,
+                        Offset = 0.31
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.7 ? (Color)ColorConverter.ConvertFromString("#C1ffc000") : Colors.White,
+                        Offset = 0.39
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.4
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.6 ? (Color)ColorConverter.ConvertFromString("#C1ffff00") : Colors.White,
+                        Offset = 0.41
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.6 ? (Color)ColorConverter.ConvertFromString("#C1ffff00") : Colors.White,
+                        Offset = 0.49
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.5
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.5 ? (Color)ColorConverter.ConvertFromString("#C1c0ff00") : Colors.White,
+                        Offset = 0.51
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.5 ? (Color)ColorConverter.ConvertFromString("#C1c0ff00") : Colors.White,
+                        Offset = 0.59
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.6
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.4 ? (Color)ColorConverter.ConvertFromString("#C1a0ff00") : Colors.White,
+                        Offset = 0.61
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.4 ? (Color)ColorConverter.ConvertFromString("#C1a0ff00") : Colors.White,
+                        Offset = 0.69
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.7
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.3 ? (Color)ColorConverter.ConvertFromString("#C180ff00") : Colors.White,
+                        Offset = 0.71
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.3 ? (Color)ColorConverter.ConvertFromString("#C180ff00") : Colors.White,
+                        Offset = 0.79
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.8
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.2 ? (Color)ColorConverter.ConvertFromString("#C160ff00") : Colors.White,
+                        Offset = 0.81
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.2 ? (Color)ColorConverter.ConvertFromString("#C160ff00") : Colors.White,
+                        Offset = 0.89
+                    },
+                    new GradientStop()
+                    {
+                        Color = Colors.Black,
+                        Offset = 0.9
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C120ff00") : Colors.White,
+                        Offset = 0.91
+                    },
+                    new GradientStop()
+                    {
+                        Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C120ff00") : Colors.White,
+                        Offset = 1
+                    }
+                }
+            };
+            rOverallRating.Fill = ovbrush;
             ReportHeader.Content = $"Отчет №{App.reports.IndexOf(report)} от {report.Client.Nameofpc} ({report.Client.Id}):";
             string sKeyPressedInfo = string.Empty;
             foreach (var item in report.KeyPressedInfo)
