@@ -39,7 +39,6 @@ namespace AMWE_Administrator
             options.UseDefaultCredentials = true; 
             options.Transports = HttpTransportType.WebSockets;
             options.Headers.Add("User-Agent", "Mozilla/5.0");
-            options.WebSocketConfiguration = HackWebSocketConfiguration; 
             options.SkipNegotiation = true;
             options.Cookies.Add(App.AuthCookie);
         }).Build();
@@ -48,26 +47,16 @@ namespace AMWE_Administrator
             options.UseDefaultCredentials = true;
             options.Transports = HttpTransportType.WebSockets;
             options.Headers.Add("User-Agent", "Mozilla/5.0");
-            options.WebSocketConfiguration = HackWebSocketConfiguration;
             options.SkipNegotiation = true;
             options.Cookies.Add(App.AuthCookie);
         }).Build();
-
-        public static void HackWebSocketConfiguration(ClientWebSocketOptions wso)
-        {
-            FieldInfo whcField = typeof(ClientWebSocketOptions).GetField("requestHeaders", BindingFlags.Instance | BindingFlags.NonPublic);
-            WebHeaderCollection whc = (WebHeaderCollection)whcField.GetValue(wso);
-
-            MethodInfo awov = typeof(ClientWebSocketOptions).GetMethod("AddWithoutValidate", BindingFlags.Instance | BindingFlags.NonPublic);
-            awov.Invoke(whc, new object[] { "User-Agent", "Mozilla/5.0" });
-        }
 
         public MainWindow()
         {
             try
             {
                 #region Configure ClientListener Connection
-                ClientHandlerConnection.ServerTimeout = Timeout.InfiniteTimeSpan;
+                ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
                 ClientHandlerConnection.On<List<Client>>("GetAllClients", UpdateClients);
                 ClientHandlerConnection.On<Client>("OnUserAuth", AddClient);
                 ClientHandlerConnection.On<Client>("OnUserLeft", DeleteClient);
@@ -90,7 +79,7 @@ namespace AMWE_Administrator
                 #endregion
 
                 #region Configure ReportHandler Connection
-                ReportHandleConnection.ServerTimeout = Timeout.InfiniteTimeSpan;
+                ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
                 ReportHandleConnection.On<Report>("CreateReport", CreateReport);
                 ReportHandleConnection.On("GetWorkdayValue", new Action<bool>(async(x) => {
                     await Task.Run(() => CheckWorkdayOnProgramStart(x));
@@ -133,24 +122,27 @@ namespace AMWE_Administrator
                     MessageBox.Show("(17.2) Получен пустой отчет");
                     return;
                 }
-                TextBlock textBlock = new TextBlock()
+
+                await Dispatcher.BeginInvoke((Action)(async() =>
                 {
-                    Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})"
-                };
+                    TextBlock textBlock = new TextBlock()
+                    {
+                        Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})"
+                    };
+                    textBlock.MouseEnter += Notification_GotMouseCapture;
+                    textBlock.MouseLeave += Notification_LostMouseCapture;
+                    textBlock.MouseDown += ReportNotification_MouseDown;
 
-                textBlock.MouseEnter += Notification_GotMouseCapture;
-                textBlock.MouseLeave += Notification_LostMouseCapture;
-                textBlock.MouseDown += ReportNotification_MouseDown;
+                    App.reports.Add(report);
 
-                App.reports.Add(report);
+                    Notification notification = new ReportNotification()
+                    {
+                        NotifyBlock = textBlock,
+                        NotifyReportIndex = App.reports.Count - 1
+                    };
 
-                Notification notification = new ReportNotification()
-                {
-                    NotifyBlock = textBlock,
-                    NotifyReportIndex = App.reports.Count - 1
-                };
-
-                await Task.Run(() => AddNotification(notification));
+                    await Task.Run(() => AddNotification(notification));
+                }));
             }
             catch (Exception ex)
             {
@@ -221,16 +213,19 @@ namespace AMWE_Administrator
             }
         }
 
-        private void AddClient(Client client)
+        private async void AddClient(Client client)
         {
             try
             {
-                TextBlock temptextblock = new TextBlock()
+                await Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    Text = $"ID {client.Id} - {client.Nameofpc}"
-                };
-                temptextblock.MouseEnter += TextBlock_GotMouseCapture;
-                ClientList.Children.Add(temptextblock);
+                    TextBlock temptextblock = new TextBlock()
+                    {
+                        Text = $"ID {client.Id} - {client.Nameofpc}"
+                    };
+                    temptextblock.MouseEnter += TextBlock_GotMouseCapture;
+                    ClientList.Children.Add(temptextblock);
+                }));
             }
             catch (Exception ex)
             {
@@ -331,7 +326,10 @@ namespace AMWE_Administrator
             {
                 ReportNotification notification = notifications.Find(x => x.NotifyBlock == e.Source as TextBlock) as ReportNotification;
 
-                ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
+                ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex])
+                {
+                    ShowActivated = true
+                };
                 reportWindow.Show();
             }
             catch (Exception ex)
@@ -356,7 +354,11 @@ namespace AMWE_Administrator
         {
             try
             {
-                throw new NotImplementedException();
+                Settings settings = new Settings
+                {
+                    ShowActivated = true
+                };
+                settings.Show();
             }
             catch (Exception ex)
             {
@@ -368,7 +370,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory);
+                Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory);
             }
             catch (Exception ex)
             {
@@ -403,7 +405,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.7.2020.2011\nAMWE RealTime server version 0.3.0.0\nMade by Zerumi (Discord: Zerumi#4666)");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.9.2020.0112\nAMWE RealTime server version 0.9.2020.3011\nMade by Zerumi (Discord: Zerumi#4666)");
             }
             catch (Exception ex)
             {

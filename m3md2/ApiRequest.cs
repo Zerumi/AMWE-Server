@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace m3md2
 {
@@ -33,7 +33,7 @@ namespace m3md2
                     BaseAddress = new Uri(BaseAddress)
                 };
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36");
-                string json = new JavaScriptSerializer().Serialize(product);
+                string json = JsonConvert.SerializeObject(product);
                 response = await client.PostAsync($"{apilist}", new StringContent(json, Encoding.UTF8, "application/json"));
                 response.EnsureSuccessStatusCode();
             }
@@ -62,7 +62,7 @@ namespace m3md2
                     BaseAddress = new Uri(BaseAddress)
                 };
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36");
-                string json = new JavaScriptSerializer().Serialize(product);
+                string json = JsonConvert.SerializeObject(product);
                 response = await client.PostAsync($"{apilist}", new StringContent(json, Encoding.UTF8, "application/json"));
                 response.EnsureSuccessStatusCode();
                 returnproduct = await response.Content.ReadAsAsync<T1>();

@@ -21,18 +21,8 @@ namespace AMWE_Administrator
         }
         public static void RegisterNew(Exception ex)
         {
-            if (!m3md2.StaticVariables.Settings.IsDataProblem.Contains(true))
-            {
-                MessageBox.Show(ex.ToString());
-                RegisterToM3MD2(ex);
-            }
-            else
-            {
-                if (!(ex.GetType() == typeof(NullReferenceException)))
-                {
-                    RegisterToM3MD2(ex);
-                }
-            }
+            MessageBox.Show(ex.ToString());
+            RegisterToM3MD2(ex);
         }
         public static void RegisterNew(Exception ex, bool iswithmessage)
         {

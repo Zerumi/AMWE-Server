@@ -24,6 +24,7 @@ namespace AMWE_Administrator
         public static string Username { get; set; }
         public static List<Report> reports = new List<Report>();
         public static DateTime ServerDateTime;
+        public static IEnumerable<string> ColorThemes = m3md2.ColorThemes.GetColorNames();
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {

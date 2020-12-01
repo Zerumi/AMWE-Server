@@ -10,7 +10,6 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Input;
 
@@ -43,7 +42,7 @@ namespace AMWE_Administrator
                 };
                 client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36");
-                string json = new JavaScriptSerializer().Serialize(authdata);
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(authdata);
                 HttpResponseMessage response = client.PostAsync($"auth", new StringContent(json, Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
                 response.EnsureSuccessStatusCode();
                 returnproduct = response.Content.ReadAsAsync<object>().GetAwaiter().GetResult();
@@ -127,7 +126,7 @@ namespace AMWE_Administrator
                 var nocryptpass = ResponseText;
                 await Task.Run(() => 
                 {
-                    authresult = AuthUser(new string[] { App.Username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2_startup.dll").GetName().Version.ToString() }, out App.AuthCookie);
+                    authresult = AuthUser(new string[] { App.Username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString()}, out App.AuthCookie);
                 });
                 AuthButton.Content = "Загрузка...";
                 if (authresult is List<VersionFile>)
