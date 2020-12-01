@@ -129,6 +129,7 @@ namespace AMWE_Administrator
                 {
                     authresult = AuthUser(new string[] { App.Username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2_startup.dll").GetName().Version.ToString() }, out App.AuthCookie);
                 });
+                AuthButton.Content = "Загрузка...";
                 if (authresult is List<VersionFile>)
                 {
                     // update
@@ -140,7 +141,6 @@ namespace AMWE_Administrator
                             if ((bool)authresult)
                             {
                                 ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                                AuthButton.Content = "Загрузка...";
                                 MainWindow mainWindow = new MainWindow();
                                 mainWindow.Show();
                                 Application.Current.MainWindow.Close();

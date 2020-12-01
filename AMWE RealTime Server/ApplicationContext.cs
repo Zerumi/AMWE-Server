@@ -9,6 +9,7 @@ namespace AMWE_RealTime_Server
 {
     public class ApplicationContext : DbContext
     {
+        public bool WorkdayValue = false;
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public ApplicationContext(DbContextOptions<ApplicationContext> options)

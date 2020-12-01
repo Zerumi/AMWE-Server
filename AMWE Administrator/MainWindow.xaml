@@ -26,6 +26,7 @@
                 <MenuItem Header="Настройки" Click="MenuManage_Settings_Click"/>
                 <MenuItem Header="Открыть в проводнике" Click="MenuManage_OpenAtExplorer_Click"/>
                 <MenuItem Header="Сменить адрес" Click="MenuManage_ChangeServer_Click"/>
+                <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="mWorkday_Click"/>
             </MenuItem>
             <MenuItem Header="Диагностика">
                 <MenuItem Header="Посмотреть статусы подключения" Click="MenuDiagnostics_CheckConnectionState"/>

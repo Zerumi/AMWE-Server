@@ -8,14 +8,19 @@ using System.Windows.Controls;
 
 namespace AMWE_Administrator
 {
-    abstract class Notification
+    public abstract class Notification
     {
-
+        public string Name { get; set; }
+        public TextBlock NotifyBlock { get; set; }
     }
 
-    class ReportNotification : Notification
+    public class ReportNotification : Notification
     {
-        public TextBlock NotifyBlock { get; set; }
         public int NotifyReportIndex { get; set; }
+    }
+
+    public class TextActionNotification : Notification
+    {
+        
     }
 }

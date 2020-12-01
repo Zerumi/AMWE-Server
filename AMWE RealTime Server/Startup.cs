@@ -42,15 +42,7 @@ namespace AMWE_RealTime_Server
 
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
             services.AddSignalR(options => {
-                options.KeepAliveInterval = TimeSpan.FromDays(1);
                 options.EnableDetailedErrors = true;
-                options.HandshakeTimeout = TimeSpan.FromDays(1);
-            }).AddHubOptions<ClientHandlerHub>(options => {
-                options.KeepAliveInterval = TimeSpan.FromDays(1);
-                options.HandshakeTimeout = TimeSpan.FromDays(1);
-            }).AddHubOptions<ReportHub>(options => {
-                options.KeepAliveInterval = TimeSpan.FromDays(1);
-                options.HandshakeTimeout = TimeSpan.FromDays(1);
             });
         }
 
@@ -69,12 +61,10 @@ namespace AMWE_RealTime_Server
             {
                 routes.MapHub<ReportHub>("/report", options => {
                     options.ApplicationMaxBufferSize = 52428800;
-                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
                     options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
                     options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
                 });
                 routes.MapHub<ClientHandlerHub>("/listen/clients", options => {
-                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
                     options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
                     options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
                 });
