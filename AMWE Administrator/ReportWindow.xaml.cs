@@ -1,16 +1,11 @@
-﻿using ReportHandler;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using ReportHandler;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace AMWE_Administrator
@@ -20,12 +15,33 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class ReportWindow : Window
     {
-        private Report _Report { get; set; }
+        private Report Report { get; set; }
 
         public ReportWindow(Report report)
         {
-            _Report = report;
+            Report = report;
             InitializeComponent();
+            
+            Grid.Background = App.MainColor;
+
+            foreach(var obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
+            {
+                obj.Stroke = App.FontColor;
+            }
+
+            foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(gKeyboard))
+            {
+                obj.Foreground = App.FontColor;
+            }
+
+            foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(Grid))
+            {
+                obj.Foreground = App.FontColor;
+            }
+
+            ReportOutput.Foreground = App.FontColor;
+            ReportOutput.Background = App.SecondColor;
+
             LinearGradientBrush ovbrush = new LinearGradientBrush()
             {
                 StartPoint = new Point(1, 0),
@@ -181,7 +197,7 @@ namespace AMWE_Administrator
                 sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
                 try
                 {
-                    var alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / _Report.pressingCount)));
+                    var alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / Report.pressingCount)));
                     alpha += (byte)(0.1 * (byte)(255 - alpha));
                     m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, item.Key).Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
                 }

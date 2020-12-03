@@ -5,22 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.WebSockets;
 using System.Reflection;
-using System.Security.AccessControl;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using m3md2;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler;
@@ -35,28 +27,39 @@ namespace AMWE_Administrator
         readonly List<Notification> notifications = new List<Notification>();
         bool isWorkdayStarted = false;
 
-        HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
-            options.UseDefaultCredentials = true; 
-            options.Transports = HttpTransportType.WebSockets;
+        readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
+            options.UseDefaultCredentials = true;
+            if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
+            {
+                options.Transports = HttpTransportType.WebSockets;
+            }
             options.Headers.Add("User-Agent", "Mozilla/5.0");
             options.SkipNegotiation = true;
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
+        readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
             options.UseDefaultCredentials = true;
-            options.Transports = HttpTransportType.WebSockets;
+            if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
+            {
+                options.Transports = HttpTransportType.WebSockets;
+            }
             options.Headers.Add("User-Agent", "Mozilla/5.0");
             options.SkipNegotiation = true;
             options.Cookies.Add(App.AuthCookie);
         }).Build();
+
+        private readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new System.Windows.Forms.NotifyIcon()
+        {
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
+        };
 
         public MainWindow()
         {
             try
             {
                 #region Configure ClientListener Connection
-                ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
+                ClientHandlerConnection.ServerTimeout = TimeSpan.FromDays(2);
                 ClientHandlerConnection.On<List<Client>>("GetAllClients", UpdateClients);
                 ClientHandlerConnection.On<Client>("OnUserAuth", AddClient);
                 ClientHandlerConnection.On<Client>("OnUserLeft", DeleteClient);
@@ -65,7 +68,7 @@ namespace AMWE_Administrator
                     ExceptionHandler.RegisterNew(error);
                     await ClientHandlerConnection.StartAsync();
                 };
-                Task.Factory.StartNew(async () =>
+                Task.Run(async () =>
                 {
                     try
                     {
@@ -81,8 +84,8 @@ namespace AMWE_Administrator
                 #region Configure ReportHandler Connection
                 ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
                 ReportHandleConnection.On<Report>("CreateReport", CreateReport);
-                ReportHandleConnection.On("GetWorkdayValue", new Action<bool>(async(x) => {
-                    await Task.Run(() => CheckWorkdayOnProgramStart(x));
+                ReportHandleConnection.On("SetWorkday", new Action<bool>(async(x) => {
+                    await Task.Run(() => ChangeWorkdayValue(x));
                 }));
                 ReportHandleConnection.Closed += async (error) =>
                 {
@@ -102,14 +105,37 @@ namespace AMWE_Administrator
                 });
                 #endregion
 
+                notifyIcon1.Visible = true;
+                notifyIcon1.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+                notifyIcon1.ContextMenuStrip.Items.Add("Exit", null, ExitItem_Click);
+                notifyIcon1.DoubleClick += NotifyIcon1_MouseDoubleClick;
+
                 InitializeComponent();
 
-                WelcomeLabel.Content = $"{m3md2.Parser.GetWelcomeLabel(m3md2.Parser.GetTimeDescription(App.ServerDateTime))}, {App.Username}";
+                foreach(var obj in WinHelper.FindVisualChildren<Label>(Grid))
+                {
+                    obj.Foreground = App.FontColor;
+                }
+
+                Grid.Background = App.MainColor;
+
+                WelcomeLabel.Content = $"{Parser.GetWelcomeLabel(Parser.GetTimeDescription(App.ServerDateTime))}, {App.Username}";
             }
             catch (Exception ex)
             {
                 ExceptionHandler.RegisterNew(ex);
             }
+        }
+
+        private void NotifyIcon1_MouseDoubleClick(object sender, EventArgs e)
+        {
+            App.Current.Windows[0].Show();
+            App.Current.Windows[0].Activate();
+        }
+
+        private void ExitItem_Click(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
         }
 
         private async void CreateReport(Report report)
@@ -127,11 +153,14 @@ namespace AMWE_Administrator
                 {
                     TextBlock textBlock = new TextBlock()
                     {
-                        Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})"
+                        Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})",
+                        Foreground = App.FontColor
                     };
                     textBlock.MouseEnter += Notification_GotMouseCapture;
                     textBlock.MouseLeave += Notification_LostMouseCapture;
                     textBlock.MouseDown += ReportNotification_MouseDown;
+
+                    WinHelper.FindChild<TextBlock>(ClientList, $"ID{report.Client.Id}").Foreground = report.OverallRating > 0.5? App.RedColor : App.GreenColor;
 
                     App.reports.Add(report);
 
@@ -150,13 +179,14 @@ namespace AMWE_Administrator
             }
         }
 
+#nullable enable
         [STAThread]
-        public async void AddNotification(Notification notification)
+        public async void AddNotification(Notification? notification)
         {
             try
             {
                 notifications.Add(notification);
-                await Dispatcher.BeginInvoke(new ThreadStart(() => spNotifications.Children.Add(notification.NotifyBlock)));
+                await Dispatcher.BeginInvoke(new ThreadStart(() => spNotifications.Children.Add(notification?.NotifyBlock)));
             }
             catch (Exception ex)
             {
@@ -165,47 +195,32 @@ namespace AMWE_Administrator
         }
 
         [STAThread]
-        public async void RemoveNotification(Notification notification)
+        public async void RemoveNotification(Notification? notification)
         {
             try
             {
                 notifications.Remove(notification);
-                await Dispatcher.BeginInvoke(new ThreadStart(() => spNotifications.Children.Remove(notification.NotifyBlock)));
+                await Dispatcher.BeginInvoke(new ThreadStart(() => spNotifications.Children.Remove(notification?.NotifyBlock)));
             }
             catch (Exception ex)
             {
                 ExceptionHandler.RegisterNew(ex);
             }
         }
+#nullable disable
 
         [STAThread]
         private async void UpdateClients(List<Client> clients)
         {
             try
             {
-                await ClientList.Dispatcher.BeginInvoke(new Action(() => ClientList.Children.Clear()));
-                Thread thread = new Thread(ForEachUpdateCleints);
-                thread.SetApartmentState(ApartmentState.STA);
-                _clients = clients;
-                thread.Start();
-            }
-            catch (Exception ex)
-            {
-                ExceptionHandler.RegisterNew(ex);
-            }
-        }
-
-        List<Client> _clients;
-
-        [STAThread]
-        private async void ForEachUpdateCleints()
-        {
-            try
-            {
-                foreach (var client in _clients)
-                {
-                    await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
-                }
+                await Dispatcher.BeginInvoke(new Action(async() => { 
+                    ClientList.Children.Clear();
+                    foreach (var client in clients)
+                    {
+                        await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
+                    }
+                }));
             }
             catch (Exception ex)
             {
@@ -221,7 +236,9 @@ namespace AMWE_Administrator
                 {
                     TextBlock temptextblock = new TextBlock()
                     {
-                        Text = $"ID {client.Id} - {client.Nameofpc}"
+                        Name = $"ID{client.Id}",
+                        Text = $"ID {client.Id} - {client.Nameofpc}",
+                        Foreground = App.FontColor
                     };
                     temptextblock.MouseEnter += TextBlock_GotMouseCapture;
                     ClientList.Children.Add(temptextblock);
@@ -239,7 +256,7 @@ namespace AMWE_Administrator
             {
                 ClientList.Children.Remove(new TextBlock()
                 {
-                    Text = $"ID {client.Id} - {client.Nameofpc}"
+                    Text = $"ID {client.Id} - {client.Nameofpc}",
                 });
             }
             catch (Exception ex)
@@ -312,7 +329,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                (e.Source as TextBlock).Foreground = new SolidColorBrush(Colors.Black);
+                (e.Source as TextBlock).Foreground = App.FontColor;
             }
             catch (Exception ex)
             {
@@ -388,7 +405,7 @@ namespace AMWE_Administrator
                 {
                     System.Windows.Forms.Application.Restart();
 
-                    Application.Current.Shutdown();
+                    Environment.Exit(0);
                 }
                 else
                 {
@@ -413,12 +430,27 @@ namespace AMWE_Administrator
             }
         }
 
+        private void Main_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                if (bool.Parse(ConfigurationRequest.GetValueByKey("MinimizeToTray")))
+                {
+                    Array.ForEach(App.Current.Windows.OfType<Window>().ToArray(), (x) => x.Hide());
+                    e.Cancel = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
         private void Main_Closed(object sender, EventArgs e)
         {
             try
             {
-                Application.Current.Shutdown();
-                return;
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {
@@ -427,7 +459,7 @@ namespace AMWE_Administrator
         }
 
         [STAThread]
-        private async void CheckWorkdayOnProgramStart(bool x)
+        private async void ChangeWorkdayValue(bool x)
         {
             try
             {
@@ -439,7 +471,8 @@ namespace AMWE_Administrator
                     {
                         textBlock = new TextBlock()
                         {
-                            Text = "Вы - первый администратор в сети. Всем клиентам сейчас сообщено что собирать и отправлять отчеты бесполезно и не нужно. Запустите рабочий день, чтобы начать сбор отчетов."
+                            Text = "Всем клиентам сейчас сообщено что собирать и отправлять отчеты бесполезно и не нужно. Запустите рабочий день, чтобы начать сбор отчетов.",
+                            Foreground = App.FontColor
                         };
                         textBlock.MouseEnter += Notification_GotMouseCapture;
                         textBlock.MouseLeave += Notification_LostMouseCapture;
@@ -452,6 +485,10 @@ namespace AMWE_Administrator
 
                         await Task.Run(() => AddNotification(notification));
                     }));
+                }
+                else
+                {
+                    await Task.Run(() => RemoveNotification(notifications.Find(x => x.Name == "WorkdayNotStartedOnConnected")));
                 }
                 UpdateMenuHeader();
                 await Dispatcher.BeginInvoke((Action)(() => mWorkday.IsEnabled = true));
@@ -466,10 +503,8 @@ namespace AMWE_Administrator
         {
             try
             {
-                isWorkdayStarted = true;
-                await ReportHandleConnection.InvokeAsync("SetWorkdayValue", isWorkdayStarted);
+                await ReportHandleConnection.InvokeAsync("SetWorkdayValue", true);
                 UpdateMenuHeader();
-                RemoveNotification(notifications.Find(x => x.Name == "WorkdayNotStartedOnConnected"));
             }
             catch (Exception ex)
             {
@@ -477,12 +512,11 @@ namespace AMWE_Administrator
             }
         }
 
-        private async void mWorkday_Click(object sender, RoutedEventArgs e)
+        private async void MWorkday_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                isWorkdayStarted = !isWorkdayStarted;
-                await ReportHandleConnection.InvokeAsync("SetWorkdayValue", isWorkdayStarted);
+                await ReportHandleConnection.InvokeAsync("SetWorkdayValue", !isWorkdayStarted);
                 UpdateMenuHeader();
             }
             catch (Exception ex)

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Login" Height="226" Width="270" Loaded="Window_Loaded">
+        Title="Login" Height="226" Width="270" Loaded="Window_Loaded" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -16,14 +16,14 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Text="Enter server address:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0"/>
+        <TextBlock Text="Введите адрес сервера:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="0"/>
         <TextBox x:Name="ServerTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" KeyDown="Field_KeyDown" Grid.Row="1"/>
-        <TextBlock Text="Enter username:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="2"/>
+        <TextBlock Text="Введите отображаемое имя:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="2"/>
         <TextBox x:Name="UsernameTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" KeyDown="Field_KeyDown" Grid.Row="3"/>
-        <TextBlock Text="Enter admin password:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="4"/>
+        <TextBlock Text="Введите пароль администратора:" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="4"/>
         <TextBox x:Name="sResponseTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" KeyDown="Field_KeyDown" Grid.Row="5" Visibility="Collapsed"/>
         <PasswordBox x:Name="ResponseTextBox" HorizontalAlignment="Stretch" VerticalAlignment="Center" KeyDown="Field_KeyDown" Grid.Row="5"/>
         <Button x:Name="AuthButton" Content="OK" HorizontalAlignment="Stretch" VerticalAlignment="Center" Click="OKButton_Click" Grid.Row="6"/>
-        <CheckBox x:Name="cbShow" Content="Show letters" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsChecked="False" Checked="CheckBox_Checked" Unchecked="CbShow_Unchecked" Grid.Row="7"/>
+        <CheckBox x:Name="cbShow" Content="Показывать символы" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsChecked="False" Checked="CheckBox_Checked" Unchecked="CbShow_Unchecked" Grid.Row="7"/>
     </Grid>
 </Window>

@@ -7,7 +7,11 @@
         mc:Ignorable="d"
         Title="Настройки" Height="470" Width="400" ResizeMode="NoResize">
     <Grid>
-        <TabControl Grid.Column="1" Grid.Row="1" Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <TabControl Margin="10,10,10,6">
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
@@ -21,7 +25,7 @@
                             <RowDefinition Height="25"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <CheckBox x:Name="cbAllowSocketsOnly" Content="Разрешать соединение только через WebSockets" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
+                        <CheckBox x:Name="cbAllowSocketsOnly" Content="Разрешать соединение только через WebSockets" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Checked="cbAllowSocketsOnly_Checked" Unchecked="cbAllowSocketsOnly_Checked"/>
                         <CheckBox x:Name="cbExpect100Continue" Content="Игнорировать ожидание" Grid.Row="1" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
                     </Grid>
                 </TabItem.Content>
@@ -39,7 +43,7 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label Content="Цветовая тема" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="comboxColorTheme" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="comboxColorTheme" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Center" SelectionChanged="comboxColorTheme_SelectionChanged"/>
                     </Grid>
                 </TabItem.Content>
             </TabItem>
@@ -60,5 +64,7 @@
                 </TabItem.Content>
             </TabItem>
         </TabControl>
+        <Label x:Name="lbRestartRequired" Content="Требуется перезапуск программы" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Grid.Row="1" Visibility="Hidden"/>
+        <Button Content="Применить и выйти" HorizontalAlignment="Right" Margin="10" Grid.Row="1" VerticalAlignment="Stretch" Click="Apply"/>
     </Grid>
 </Window>

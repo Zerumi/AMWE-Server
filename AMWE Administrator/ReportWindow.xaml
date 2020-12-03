@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
         Title="Информация об отчете" Height="400" Width="1000" ResizeMode="CanMinimize">
-    <Grid>
+    <Grid x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="166.4"/>
             <ColumnDefinition/>
@@ -53,7 +53,7 @@
             </Rectangle.Fill>
         </Rectangle>
         <Label x:Name="ReportHeader" Content="Отчет №{No} от {pcusername}:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="36" Width="420" FontSize="15" FontWeight="Bold" Grid.ColumnSpan="2"/>
-        <TabControl x:Name="products" Grid.Column="1" Grid.Row="1" Margin="0,0,10,10">
+        <TabControl x:Name="tcReportVisualiser" Grid.Column="1" Grid.Row="1" Margin="0,0,10,10">
             <TabItem x:Name="TextOutputTab">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
-        Title="AMWE Server UI by Zerumi" Height="450" Width="420" Closed="Main_Closed">
+        Title="AMWE Server UI by Zerumi" Height="450" Width="420" Closing="Main_Closing" Closed="Main_Closed">
     <Grid ShowGridLines="False" x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="160"/>
@@ -21,12 +21,12 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" Margin="20,26,0,15" Grid.Row="2" Width="138">
             <StackPanel x:Name="ClientList"/>
         </ScrollViewer>
-        <Menu HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,-0.4,31" Grid.ColumnSpan="2" Grid.RowSpan="2">
+        <Menu x:Name="mwMenu" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,0,-0.4,31" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <MenuItem Header="Управление">
                 <MenuItem Header="Настройки" Click="MenuManage_Settings_Click"/>
                 <MenuItem Header="Открыть в проводнике" Click="MenuManage_OpenAtExplorer_Click"/>
                 <MenuItem Header="Сменить адрес" Click="MenuManage_ChangeServer_Click"/>
-                <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="mWorkday_Click"/>
+                <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="MWorkday_Click"/>
             </MenuItem>
             <MenuItem Header="Диагностика">
                 <MenuItem Header="Посмотреть статусы подключения" Click="MenuDiagnostics_CheckConnectionState"/>

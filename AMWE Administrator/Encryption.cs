@@ -23,7 +23,7 @@ namespace AMWE_Administrator
             }
             return code;
         }
-        private static string passPhrase = loadcode();
+        private static readonly string passPhrase = loadcode();
 
         // This constant is used to determine the keysize of the encryption algorithm in bits.
         // We divide this by 8 within the code below to get the equivalent number of bytes.
