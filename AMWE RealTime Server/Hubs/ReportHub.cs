@@ -1,15 +1,18 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using AMWE_RealTime_Server.Controllers;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using HubCallerContextDict = System.Collections.Concurrent.ConcurrentDictionary<string, Microsoft.AspNetCore.SignalR.HubCallerContext>;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -19,10 +22,12 @@ namespace AMWE_RealTime_Server.Hubs
         static bool WorkdayValue = false;
 
         private readonly ILogger _logger;
+        private readonly IHubContext<ClientHandlerHub> _hubContext;
 
-        public ReportHub(ILogger<ReportHub> logger)
+        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext)
         {
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         public override async Task OnConnectedAsync()
@@ -42,8 +47,8 @@ namespace AMWE_RealTime_Server.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            _logger.LogError($"От хаба был отключен клиент {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} по причине {exception.Message}");
-            _logger.LogDebug($"Подробности: {exception}");
+            //_logger.LogError($"От хаба был отключен клиент {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} по причине {exception.Message}");
+            //_logger.LogDebug($"Подробности: {exception}");
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
@@ -68,6 +73,18 @@ namespace AMWE_RealTime_Server.Hubs
             WorkdayValue = value;
             _logger.LogInformation($"Администратор {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} изменил значение Workday на {value}");
             await Clients.All.SendAsync("SetWorkday", value);
+        }
+
+        [Authorize(Roles=Role.GlobalAdminRole)]
+        public async void ShutdownAllConnections()
+        {
+            await Clients.Group(Role.GlobalUserGroup).SendAsync("ShutdownHubConnection");
+            var a = AuthController.GlobalUsersList.Count;
+            var b = AuthController.GlobalUsersList.Select(x => x.Id).ToArray();
+            for (uint i = 0; i < a; i++)
+            {
+                await new AuthController(_hubContext).Logout(b[i]);
+            }
         }
 
         public bool GetWorkdayValue()

@@ -49,7 +49,7 @@ namespace AMWE_Administrator
                 {
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 1 ? (Color)ColorConverter.ConvertFromString("#C1ff0000") : Colors.White,
+                        Color = report.OverallRating >= 1 ? (Color)ColorConverter.ConvertFromString("#C0ff0000") : Colors.White,
                         Offset = 0.09
                     },
                     new GradientStop()
@@ -59,12 +59,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.9 ? (Color)ColorConverter.ConvertFromString("#C1ff4000") : Colors.White,
+                        Color = report.OverallRating >= 0.9 ? (Color)ColorConverter.ConvertFromString("#C0ff4000") : Colors.White,
                         Offset = 0.11
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.9 ? (Color)ColorConverter.ConvertFromString("#C1ff4000") : Colors.White,
+                        Color = report.OverallRating >= 0.9 ? (Color)ColorConverter.ConvertFromString("#C0ff4000") : Colors.White,
                         Offset = 0.19
                     },
                     new GradientStop()
@@ -74,12 +74,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.8 ? (Color)ColorConverter.ConvertFromString("#C1ff8000") : Colors.White,
+                        Color = report.OverallRating >= 0.8 ? (Color)ColorConverter.ConvertFromString("#C0ff8000") : Colors.White,
                         Offset = 0.21
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.8 ? (Color)ColorConverter.ConvertFromString("#C1ff8000") : Colors.White,
+                        Color = report.OverallRating >= 0.8 ? (Color)ColorConverter.ConvertFromString("#C0ff8000") : Colors.White,
                         Offset = 0.29
                     },
                     new GradientStop()
@@ -89,12 +89,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.7 ? (Color)ColorConverter.ConvertFromString("#C1ffc000") : Colors.White,
+                        Color = report.OverallRating >= 0.7 ? (Color)ColorConverter.ConvertFromString("#C0ffc000") : Colors.White,
                         Offset = 0.31
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.7 ? (Color)ColorConverter.ConvertFromString("#C1ffc000") : Colors.White,
+                        Color = report.OverallRating >= 0.7 ? (Color)ColorConverter.ConvertFromString("#C0ffc000") : Colors.White,
                         Offset = 0.39
                     },
                     new GradientStop()
@@ -104,12 +104,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.6 ? (Color)ColorConverter.ConvertFromString("#C1ffff00") : Colors.White,
+                        Color = report.OverallRating >= 0.6 ? (Color)ColorConverter.ConvertFromString("#C0ffff00") : Colors.White,
                         Offset = 0.41
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.6 ? (Color)ColorConverter.ConvertFromString("#C1ffff00") : Colors.White,
+                        Color = report.OverallRating >= 0.6 ? (Color)ColorConverter.ConvertFromString("#C0ffff00") : Colors.White,
                         Offset = 0.49
                     },
                     new GradientStop()
@@ -119,12 +119,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.5 ? (Color)ColorConverter.ConvertFromString("#C1c0ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.5 ? (Color)ColorConverter.ConvertFromString("#C0c0ff00") : Colors.White,
                         Offset = 0.51
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.5 ? (Color)ColorConverter.ConvertFromString("#C1c0ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.5 ? (Color)ColorConverter.ConvertFromString("#C0c0ff00") : Colors.White,
                         Offset = 0.59
                     },
                     new GradientStop()
@@ -134,12 +134,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.4 ? (Color)ColorConverter.ConvertFromString("#C1a0ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.4 ? (Color)ColorConverter.ConvertFromString("#C0a0ff00") : Colors.White,
                         Offset = 0.61
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.4 ? (Color)ColorConverter.ConvertFromString("#C1a0ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.4 ? (Color)ColorConverter.ConvertFromString("#C0a0ff00") : Colors.White,
                         Offset = 0.69
                     },
                     new GradientStop()
@@ -149,12 +149,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.3 ? (Color)ColorConverter.ConvertFromString("#C180ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.3 ? (Color)ColorConverter.ConvertFromString("#C080ff00") : Colors.White,
                         Offset = 0.71
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.3 ? (Color)ColorConverter.ConvertFromString("#C180ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.3 ? (Color)ColorConverter.ConvertFromString("#C080ff00") : Colors.White,
                         Offset = 0.79
                     },
                     new GradientStop()
@@ -164,12 +164,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.2 ? (Color)ColorConverter.ConvertFromString("#C160ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.2 ? (Color)ColorConverter.ConvertFromString("#C060ff00") : Colors.White,
                         Offset = 0.81
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.2 ? (Color)ColorConverter.ConvertFromString("#C160ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.2 ? (Color)ColorConverter.ConvertFromString("#C060ff00") : Colors.White,
                         Offset = 0.89
                     },
                     new GradientStop()
@@ -179,12 +179,12 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C120ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C020ff00") : Colors.White,
                         Offset = 0.91
                     },
                     new GradientStop()
                     {
-                        Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C120ff00") : Colors.White,
+                        Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C020ff00") : Colors.White,
                         Offset = 1
                     }
                 }

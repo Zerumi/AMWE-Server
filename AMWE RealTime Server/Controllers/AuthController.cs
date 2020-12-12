@@ -40,7 +40,7 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {GlobalClientId} / " + authdata[0]),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
@@ -48,11 +48,12 @@ namespace AMWE_RealTime_Server.Controllers
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
                 var client = new Client
                 {
-                    Id = GlobalClientId++,
+                    Id = GlobalClientId,
                     Nameofpc = authdata[0]
                 };
                 GlobalUsersList.Add(client);
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", client);
+                GlobalClientId++;
                 return client;
             }
             else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
@@ -91,7 +92,7 @@ namespace AMWE_RealTime_Server.Controllers
         public async Task<ActionResult> Logout(uint id)
         {
             var a = GlobalUsersList.Find(x => x.Id == id);
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            (HttpContext.User.Identity as ClaimsIdentity).RemoveClaim(new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole));
             await _hubContext.Clients.Group(Role.GlobalAdminGroup).SendAsync("OnUserLeft", a);
             GlobalUsersList.Remove(a);
             return NoContent();

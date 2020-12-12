@@ -5,7 +5,7 @@ using System;
 
 namespace m3md2
 {
-    public class Parser
+    public static class Parser
     {
         public static TimeDescription GetTimeDescription(DateTime dateTime)
         {
@@ -43,6 +43,21 @@ namespace m3md2
                 default:
                     throw new ArgumentException($"(17) Значение определено неверно: timedesc {timedesc}");
             }
+        }
+
+        public static string GetUntilOrEmpty(this string text, string stopAt = "-")
+        {
+            if (!String.IsNullOrWhiteSpace(text))
+            {
+                int charLocation = text.IndexOf(stopAt, StringComparison.Ordinal);
+
+                if (charLocation > 0)
+                {
+                    return text.Substring(0, charLocation);
+                }
+            }
+
+            return String.Empty;
         }
     }
 

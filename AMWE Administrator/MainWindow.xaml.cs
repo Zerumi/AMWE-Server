@@ -25,6 +25,8 @@ namespace AMWE_Administrator
     public partial class MainWindow : Window
     {
         readonly List<Notification> notifications = new List<Notification>();
+        readonly List<Client> clients = new List<Client>();
+        readonly List<Chat> chats = new List<Chat>();
         bool isWorkdayStarted = false;
 
         readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
@@ -32,9 +34,9 @@ namespace AMWE_Administrator
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
                 options.Transports = HttpTransportType.WebSockets;
+                options.SkipNegotiation = true;
             }
             options.Headers.Add("User-Agent", "Mozilla/5.0");
-            options.SkipNegotiation = true;
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
@@ -43,9 +45,20 @@ namespace AMWE_Administrator
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
                 options.Transports = HttpTransportType.WebSockets;
+                options.SkipNegotiation = true;
             }
             options.Headers.Add("User-Agent", "Mozilla/5.0");
-            options.SkipNegotiation = true;
+            options.Cookies.Add(App.AuthCookie);
+        }).Build();
+
+        readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options => {
+            options.UseDefaultCredentials = true;
+            if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
+            {
+                options.Transports = HttpTransportType.WebSockets;
+                options.SkipNegotiation = true;
+            }
+            options.Headers.Add("User-Agent", "Mozilla/5.0");
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
@@ -105,6 +118,30 @@ namespace AMWE_Administrator
                 });
                 #endregion
 
+                #region Configure ChatSystem Connection
+                ChatSystemConnection.ServerTimeout = TimeSpan.FromDays(2);
+                ChatSystemConnection.On<uint, string>("ReceiveMessage", RecieveMessage);
+                ChatSystemConnection.On<uint>("AcceptChatID", AcceptChat);
+                ChatSystemConnection.On<uint>("CloseDeleteChat", DeleteChat);
+                ChatSystemConnection.Closed += async (error) =>
+                {
+                    ExceptionHandler.RegisterNew(error);
+                    await ChatSystemConnection.StartAsync();
+                };
+                Task.Factory.StartNew(async () =>
+                {
+                    try
+                    {
+                        await ChatSystemConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                    }
+                });
+
+                #endregion
+
                 notifyIcon1.Visible = true;
                 notifyIcon1.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
                 notifyIcon1.ContextMenuStrip.Items.Add("Exit", null, ExitItem_Click);
@@ -125,6 +162,27 @@ namespace AMWE_Administrator
             {
                 ExceptionHandler.RegisterNew(ex);
             }
+        }
+
+        private void DeleteChat(uint id)
+        {
+            chats.Remove(chats.Find(x => x.ChatID == id));
+        }
+
+        private void RecieveMessage(uint id, string message)
+        {
+            var chat = chats.Find(x => x.ChatID == id);
+            chat.Dispatcher.BeginInvoke((Action)(() => chat.AddMessage(message)));
+        }
+
+        private void AcceptChat(uint id)
+        {
+            var chat = chats.Find(x => x.ChatID == id);
+            chat.Dispatcher.BeginInvoke((Action)(() => {
+                chat.Show();
+                chat.Activate();
+            }));
+            RemoveNotification(notifications.Find(x => x.Name == $"ChatWait{id}"));
         }
 
         private void NotifyIcon1_MouseDoubleClick(object sender, EventArgs e)
@@ -216,6 +274,7 @@ namespace AMWE_Administrator
             {
                 await Dispatcher.BeginInvoke(new Action(async() => { 
                     ClientList.Children.Clear();
+                    clients.Clear();
                     foreach (var client in clients)
                     {
                         await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
@@ -241,6 +300,7 @@ namespace AMWE_Administrator
                         Foreground = App.FontColor
                     };
                     temptextblock.MouseEnter += TextBlock_GotMouseCapture;
+                    clients.Add(client);
                     ClientList.Children.Add(temptextblock);
                 }));
             }
@@ -250,14 +310,18 @@ namespace AMWE_Administrator
             }
         }
 
-        private void DeleteClient(Client client)
+        private async void DeleteClient(Client client)
         {
             try
             {
-                ClientList.Children.Remove(new TextBlock()
+                await Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    Text = $"ID {client.Id} - {client.Nameofpc}",
-                });
+                    clients.Remove(client);
+                    ClientList.Children.Remove(new TextBlock()
+                    {
+                        Text = $"ID {client.Id} - {client.Nameofpc}",
+                    });
+                }));
             }
             catch (Exception ex)
             {
@@ -273,7 +337,7 @@ namespace AMWE_Administrator
                 int id = ClientList.Children.IndexOf(e.Source as UIElement);
                 Button button = new Button()
                 {
-                    Content = $"Управление {(e.Source as TextBlock).Text.Remove(0, id.ToString().Length + 6)}",
+                    Content = $"({id}) Начать чат",
                     Margin = (e.Source as FrameworkElement).Margin
                 };
                 button.Click += ManageUser;
@@ -287,11 +351,28 @@ namespace AMWE_Administrator
             }
         }
 
-        private void ManageUser(object sender, RoutedEventArgs e)
+        private async void ManageUser(object sender, RoutedEventArgs e)
         {
             try
             {
-                MessageBox.Show((e.Source as Button).Content.ToString());
+                var id = uint.Parse((e.Source as Button).Content.ToString().GetUntilOrEmpty(")").Remove(0,1));
+                var client = clients.Find(x => x.Id == id);
+                await Dispatcher.BeginInvoke((Action)(async() => {
+                    Chat chat = new Chat(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id));
+                    TextBlock textBlock = new TextBlock()
+                    {
+                        Text = $"Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
+                        Foreground = App.FontColor
+                    };
+                    textBlock.MouseEnter += Notification_GotMouseCapture;
+                    textBlock.MouseLeave += Notification_LostMouseCapture;
+                    Notification notification = new TextActionNotification()
+                    {
+                        Name = $"ChatWait{id}",
+                        NotifyBlock = textBlock
+                    };
+                    AddNotification(notification);
+                }));
             }
             catch (Exception ex)
             {
@@ -343,11 +424,9 @@ namespace AMWE_Administrator
             {
                 ReportNotification notification = notifications.Find(x => x.NotifyBlock == e.Source as TextBlock) as ReportNotification;
 
-                ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex])
-                {
-                    ShowActivated = true
-                };
+                ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
                 reportWindow.Show();
+                reportWindow.Activate();
             }
             catch (Exception ex)
             {
@@ -359,11 +438,11 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nBotNet System: -");
+                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nChat System: {ChatSystemConnection.State} [{await ChatSystemConnection.InvokeAsync<string>("GetTransportType")}]");
             }
             catch (Exception)
             {
-                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nBotNet System: -");
+                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nChat System: {ChatSystemConnection.State}");
             }
         }
 
@@ -371,11 +450,9 @@ namespace AMWE_Administrator
         {
             try
             {
-                Settings settings = new Settings
-                {
-                    ShowActivated = true
-                };
+                Settings settings = new Settings();
                 settings.Show();
+                settings.Activate();
             }
             catch (Exception ex)
             {
@@ -422,7 +499,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 0.9.2020.0112\nAMWE RealTime server version 0.9.2020.3011\nMade by Zerumi (Discord: Zerumi#4666)");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.0.2020.1112\nAMWE RealTime server version 1.0.2020.1112\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
