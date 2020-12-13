@@ -33,6 +33,11 @@ namespace AMWE_Administrator
             Client = client;
             InitializeComponent();
             lbChatState.Content = $"Вы ведете чат с {client.Id}: {client.Nameofpc} №{ChatID}";
+            Grid.Background = App.MainColor;
+            ChatBox.Foreground = App.FontColor;
+            tbMessage.Background = App.SecondColor;
+            tbMessage.Foreground = App.FontColor;
+            lbChatState.Foreground = App.FontColor;
         }
 
         public void AddMessage(string Message)

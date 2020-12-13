@@ -6,15 +6,15 @@
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
         Title="AMWE" Height="450" Width="400" ResizeMode="NoResize" Closing="Window_Closing">
-    <Grid>
+    <Grid x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.RowDefinitions>
             <RowDefinition Height="29*"/>
             <RowDefinition Height="363*"/>
             <RowDefinition Height="42*"/>
         </Grid.RowDefinitions>
         <TextBox x:Name="tbMessage" HorizontalAlignment="Left" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" Width="320" Height="22" Margin="10,0,0,0" KeyDown="Field_KeyDown"/>
-        <Button x:Name="SendButton" Content="->" HorizontalAlignment="Left" Margin="335,0,0,0" Grid.Row="2" VerticalAlignment="Center" Width="55" Height="22" Click="SendButton_Click"/>
-        <ScrollViewer Margin="10,10,10,10" Grid.Row="1">
+        <Button x:Name="SendButton" Content="->" Margin="335,10,10,10" Grid.Row="2" Click="SendButton_Click"/>
+        <ScrollViewer Margin="10" Grid.Row="1">
             <TextBlock x:Name="ChatBox"/>
         </ScrollViewer>
         <Label x:Name="lbChatState" Content="ChatState..." Margin="4,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>

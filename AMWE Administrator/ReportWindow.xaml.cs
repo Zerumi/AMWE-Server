@@ -23,6 +23,7 @@ namespace AMWE_Administrator
             InitializeComponent();
             
             Grid.Background = App.MainColor;
+            gKeyboard.Background = App.MainColor;
 
             foreach(var obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
             {
@@ -41,6 +42,7 @@ namespace AMWE_Administrator
 
             ReportOutput.Foreground = App.FontColor;
             ReportOutput.Background = App.SecondColor;
+            rOverallRating.Stroke = App.FontColor;
 
             LinearGradientBrush ovbrush = new LinearGradientBrush()
             {
@@ -197,13 +199,21 @@ namespace AMWE_Administrator
                 sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
                 try
                 {
-                    var alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / Report.pressingCount)));
-                    alpha += (byte)(0.1 * (byte)(255 - alpha));
-                    m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, item.Key).Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
+                    var arr = item.Key.Split(',');
+                    foreach (var key in arr)
+                    {
+                        var rect = m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, key);
+                        byte alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / arr.Length / Report.pressingCount)));
+                        byte fillalpha = (rect.Fill as SolidColorBrush)?.Color.A?? 0;
+                        byte alpha2 = (byte)(0.9 * fillalpha);
+                        alpha += alpha2;
+                        alpha += (byte)(0.1 * (byte)(255 - alpha));
+                        rect.Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
+                    }
                 }
-                catch (NullReferenceException)
+                catch (Exception)
                 {
-                    // this is a hotkey
+                    // unregistred hotkey
                 }
             }
             string sOldProcesses = string.Empty;

@@ -427,9 +427,12 @@ namespace AMWE_Administrator
             {
                 ReportNotification notification = notifications.Find(x => x.NotifyBlock == e.Source as TextBlock) as ReportNotification;
 
-                ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
-                reportWindow.Show();
-                reportWindow.Activate();
+                Dispatcher.BeginInvoke(new Action(delegate {
+                    ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
+                    reportWindow.Show();
+                    reportWindow.Activate();
+                }), System.Windows.Threading.DispatcherPriority.ContextIdle, null);
+                
             }
             catch (Exception ex)
             {
