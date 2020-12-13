@@ -40,7 +40,7 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {GlobalClientId} / " + authdata[0]),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {GlobalClientId}/" + authdata[0]),
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,

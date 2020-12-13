@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using ReportHandler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +21,18 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class Chat : Window
     {
-        HubConnection hubConnection;
+        readonly HubConnection hubConnection;
         public uint ChatID;
+        public Client Client;
+        public bool chatClosed;
 
-        public Chat(HubConnection chatHubConnection, uint _ChatID)
+        public Chat(HubConnection chatHubConnection, uint _ChatID, Client client)
         {
             hubConnection = chatHubConnection;
             ChatID = _ChatID;
+            Client = client;
             InitializeComponent();
+            lbChatState.Content = $"Вы ведете чат с {client.Id}: {client.Nameofpc} №{ChatID}";
         }
 
         public void AddMessage(string Message)
@@ -37,13 +42,31 @@ namespace AMWE_Administrator
 
         private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            await hubConnection.InvokeAsync("CloseChat", ChatID);
+            if (!chatClosed)
+            {
+                await hubConnection.InvokeAsync("CloseChat", ChatID);
+            }
         }
 
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
+            await Send();
+        }
+
+        private async void Field_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                await Send();
+            }
+        }
+
+        private async Task Send()
+        {
             await hubConnection.InvokeAsync("SendMessageToChat", ChatID, tbMessage.Text);
-            tbMessage.Text = string.Empty;
+            await Dispatcher.BeginInvoke((Action)(() => {
+                tbMessage.Text = string.Empty;
+            }));
         }
     }
 }

@@ -12,7 +12,7 @@
             <RowDefinition Height="363*"/>
             <RowDefinition Height="42*"/>
         </Grid.RowDefinitions>
-        <TextBox x:Name="tbMessage" HorizontalAlignment="Left" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" Width="320" Height="22" Margin="10,0,0,0"/>
+        <TextBox x:Name="tbMessage" HorizontalAlignment="Left" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Center" Width="320" Height="22" Margin="10,0,0,0" KeyDown="Field_KeyDown"/>
         <Button x:Name="SendButton" Content="->" HorizontalAlignment="Left" Margin="335,0,0,0" Grid.Row="2" VerticalAlignment="Center" Width="55" Height="22" Click="SendButton_Click"/>
         <ScrollViewer Margin="10,10,10,10" Grid.Row="1">
             <TextBlock x:Name="ChatBox"/>

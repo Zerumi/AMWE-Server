@@ -139,7 +139,6 @@ namespace AMWE_Administrator
                         ExceptionHandler.RegisterNew(ex);
                     }
                 });
-
                 #endregion
 
                 notifyIcon1.Visible = true;
@@ -164,9 +163,12 @@ namespace AMWE_Administrator
             }
         }
 
-        private void DeleteChat(uint id)
+        private async void DeleteChat(uint id)
         {
-            chats.Remove(chats.Find(x => x.ChatID == id));
+            var chat = chats.Find(x => x.ChatID == id);
+            await Dispatcher.BeginInvoke((Action)(() => { chat.chatClosed = true; chat.Close(); }));
+            MessageBox.Show($"Чат {id} был закрыт и удален, так как одна из сторон закрыла соединение. Вы можете заново открыть чат (пользователь: ID {chat.Client.Id} / {chat.Client.Nameofpc})");
+            chats.Remove(chat);
         }
 
         private void RecieveMessage(uint id, string message)
@@ -182,7 +184,7 @@ namespace AMWE_Administrator
                 chat.Show();
                 chat.Activate();
             }));
-            RemoveNotification(notifications.Find(x => x.Name == $"ChatWait{id}"));
+            RemoveNotification(notifications.Find(x => x.Name == $"ChatWait{chat.Client.Id}"));
         }
 
         private void NotifyIcon1_MouseDoubleClick(object sender, EventArgs e)
@@ -268,14 +270,14 @@ namespace AMWE_Administrator
 #nullable disable
 
         [STAThread]
-        private async void UpdateClients(List<Client> clients)
+        private async void UpdateClients(List<Client> _clients)
         {
             try
             {
                 await Dispatcher.BeginInvoke(new Action(async() => { 
                     ClientList.Children.Clear();
                     clients.Clear();
-                    foreach (var client in clients)
+                    foreach (var client in _clients)
                     {
                         await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
                     }
@@ -358,7 +360,8 @@ namespace AMWE_Administrator
                 var id = uint.Parse((e.Source as Button).Content.ToString().GetUntilOrEmpty(")").Remove(0,1));
                 var client = clients.Find(x => x.Id == id);
                 await Dispatcher.BeginInvoke((Action)(async() => {
-                    Chat chat = new Chat(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id));
+                    Chat chat = new Chat(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
+                    chats.Add(chat);
                     TextBlock textBlock = new TextBlock()
                     {
                         Text = $"Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
@@ -499,7 +502,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.0.2020.1112\nAMWE RealTime server version 1.0.2020.1112\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.0.2020.1312\nAMWE RealTime server version 1.0.2020.1312\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
