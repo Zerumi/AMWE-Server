@@ -96,18 +96,21 @@ namespace AMWE_RealTime_Server.Hubs
         {
             _logger.LogInformation($"Отправлено сообщение в чат {ChatID} от {Context.User.Identity.Name} // {Message}");
             var chat = chatStates.Find(x => x.ID == ChatID);
+            string user;
             bool check;
             try
             {
                 check = uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3)) == chat.User.Id;
+                user = chat.User.Nameofpc;
             }
             catch (Exception)
             {
                 check = Context.ConnectionId == chat.AdminConnectionID;
+                user = Context.User.Identity.Name;
             }
             if (chat.IsAccepted && check)
             {
-                await Clients.Group($"Chat {ChatID}").SendAsync("ReceiveMessage", ChatID, Message);
+                await Clients.Group($"Chat {ChatID}").SendAsync("ReceiveMessage", ChatID, Message, user, DateTime.Now);
             }
         }
 

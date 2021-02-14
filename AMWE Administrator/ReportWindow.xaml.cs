@@ -3,6 +3,7 @@
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using ReportHandler;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -21,7 +22,7 @@ namespace AMWE_Administrator
         {
             Report = report;
             InitializeComponent();
-            
+
             Grid.Background = App.MainColor;
             gKeyboard.Background = App.MainColor;
 
@@ -226,6 +227,25 @@ namespace AMWE_Administrator
             {
                 sLastProcesses += $"\n{item}";
             }
+
+            var added = report.LastProcesses.Except(report.OldProcesses).ToList();
+            var removed = report.OldProcesses.Except(report.LastProcesses).ToList();
+
+            string sChangesProcesses = "";
+            foreach (var item in added)
+            {
+                sChangesProcesses += $"+ {item}\n";
+            }
+            foreach (var item in removed)
+            {
+                sChangesProcesses += $"- {item}\n";
+            }
+
+            gpOverallInfo.Content = $"Количество измененных процессов: {report.ProcessChangedCount}";
+            tbLast.Text = sOldProcesses.Remove(0,1);
+            tbCurrent.Text = sLastProcesses.Remove(0,1);
+            tbChanges.Text = sChangesProcesses;
+
             ReportOutput.Text = $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.isMouseCoordChanged? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
         }
     }

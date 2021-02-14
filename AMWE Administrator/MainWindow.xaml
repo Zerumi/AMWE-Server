@@ -29,6 +29,7 @@
                 <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="MWorkday_Click"/>
             </MenuItem>
             <MenuItem Header="Диагностика">
+                <MenuItem x:Name="mConnect" Header="Подключено к: " IsEnabled="False"/>
                 <MenuItem Header="Посмотреть статусы подключения" Click="MenuDiagnostics_CheckConnectionState"/>
             </MenuItem>
             <MenuItem Header="Информация">

@@ -32,7 +32,7 @@ namespace AMWE_Administrator
             ChatID = _ChatID;
             Client = client;
             InitializeComponent();
-            lbChatState.Content = $"Вы ведете чат с {client.Id}: {client.Nameofpc} №{ChatID}";
+            lbChatState.Content = $"Вы ведете чат с ID {client.Id}: {client.Nameofpc} №{ChatID}";
             Grid.Background = App.MainColor;
             ChatBox.Foreground = App.FontColor;
             tbMessage.Background = App.SecondColor;
@@ -40,9 +40,9 @@ namespace AMWE_Administrator
             lbChatState.Foreground = App.FontColor;
         }
 
-        public void AddMessage(string Message)
+        public void AddMessage(DateTime timestamp, string user, string Message)
         {
-            ChatBox.Text += $"{Message}\n";
+            ChatBox.Text += $"({timestamp.ToLongTimeString()}) {user}: {Message}\n";
         }
 
         private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

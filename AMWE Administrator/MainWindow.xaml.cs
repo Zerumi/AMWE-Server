@@ -120,7 +120,7 @@ namespace AMWE_Administrator
 
                 #region Configure ChatSystem Connection
                 ChatSystemConnection.ServerTimeout = TimeSpan.FromDays(2);
-                ChatSystemConnection.On<uint, string>("ReceiveMessage", RecieveMessage);
+                ChatSystemConnection.On<uint, string, string, DateTime>("ReceiveMessage", RecieveMessage);
                 ChatSystemConnection.On<uint>("AcceptChatID", AcceptChat);
                 ChatSystemConnection.On<uint>("CloseDeleteChat", DeleteChat);
                 ChatSystemConnection.Closed += async (error) =>
@@ -148,7 +148,9 @@ namespace AMWE_Administrator
 
                 InitializeComponent();
 
-                foreach(var obj in WinHelper.FindVisualChildren<Label>(Grid))
+                mConnect.Header = $"Подключено к {App.ServerAddress}";
+
+                foreach (var obj in WinHelper.FindVisualChildren<Label>(Grid))
                 {
                     obj.Foreground = App.FontColor;
                 }
@@ -171,10 +173,10 @@ namespace AMWE_Administrator
             chats.Remove(chat);
         }
 
-        private void RecieveMessage(uint id, string message)
+        private void RecieveMessage(uint id, string message, string user, DateTime timestamp)
         {
             var chat = chats.Find(x => x.ChatID == id);
-            chat.Dispatcher.BeginInvoke((Action)(() => chat.AddMessage(message)));
+            chat.Dispatcher.BeginInvoke((Action)(() => chat.AddMessage(timestamp, user, message)));
         }
 
         private void AcceptChat(uint id)
@@ -364,7 +366,7 @@ namespace AMWE_Administrator
                     chats.Add(chat);
                     TextBlock textBlock = new TextBlock()
                     {
-                        Text = $"Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
+                        Text = $"({DateTime.Now.ToShortTimeString()}) Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
                         Foreground = App.FontColor
                     };
                     textBlock.MouseEnter += Notification_GotMouseCapture;
@@ -505,7 +507,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.0.2020.1312\nAMWE RealTime server version 1.0.2020.1312\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.1.2021.1402\nAMWE RealTime server version 1.0.2020.1312\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
@@ -554,7 +556,7 @@ namespace AMWE_Administrator
                     {
                         textBlock = new TextBlock()
                         {
-                            Text = "Всем клиентам сейчас сообщено что собирать и отправлять отчеты бесполезно и не нужно. Запустите рабочий день, чтобы начать сбор отчетов.",
+                            Text = $"({DateTime.Now.ToShortTimeString()}) Всем клиентам сейчас сообщено что собирать и отправлять отчеты бесполезно и не нужно. Запустите рабочий день, чтобы начать сбор отчетов.",
                             Foreground = App.FontColor
                         };
                         textBlock.MouseEnter += Notification_GotMouseCapture;
