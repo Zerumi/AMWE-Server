@@ -120,7 +120,7 @@ namespace AMWE_Administrator
                 App.ServerAddress = ServerText;
                 m3md2.ApiRequest.BaseAddress = ServerText;
                 AuthButton.Content = "Подключение...";
-                App.ServerDateTime = await m3md2.ApiRequest.GetProductAsync<DateTime>("time");
+                App.ServerDateTime = (await m3md2.ApiRequest.GetProductAsync<DateTime>("time")).ToLocalTime();
                 AuthButton.Content = "Проверка...";
                 object authresult = default;
                 var nocryptpass = ResponseText;

@@ -2,6 +2,7 @@
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System;
+using System.Windows;
 
 namespace m3md2
 {
@@ -30,19 +31,14 @@ namespace m3md2
 
         public static string GetWelcomeLabel(TimeDescription timedesc)
         {
-            switch (timedesc)
+            return timedesc switch
             {
-                case TimeDescription.Morning:
-                    return "Доброе утро";
-                case TimeDescription.Afternoon:
-                    return "Добрый день";
-                case TimeDescription.Evening:
-                    return "Добрый вечер";
-                case TimeDescription.Night:
-                    return "Доброй ночи";
-                default:
-                    throw new ArgumentException($"(17) Значение определено неверно: timedesc {timedesc}");
-            }
+                TimeDescription.Morning => "Доброе утро",
+                TimeDescription.Afternoon => "Добрый день",
+                TimeDescription.Evening => "Добрый вечер",
+                TimeDescription.Night => "Доброй ночи",
+                _ => throw new ArgumentException($"(17) Значение определено неверно: timedesc {timedesc}"),
+            };
         }
 
         public static string GetUntilOrEmpty(this string text, string stopAt = "-")

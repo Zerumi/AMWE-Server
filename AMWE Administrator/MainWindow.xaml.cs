@@ -79,7 +79,19 @@ namespace AMWE_Administrator
                 ClientHandlerConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error);
-                    await ClientHandlerConnection.StartAsync();
+                    try
+                    {
+                        await ClientHandlerConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
                 };
                 Task.Run(async () =>
                 {
@@ -90,6 +102,11 @@ namespace AMWE_Administrator
                     catch (Exception ex)
                     {
                         ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
                     }
                 });
                 #endregion
@@ -103,9 +120,21 @@ namespace AMWE_Administrator
                 ReportHandleConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error);
-                    await ReportHandleConnection.StartAsync();
+                    try
+                    {
+                        await ReportHandleConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
                 };
-                Task.Factory.StartNew(async () =>
+                Task.Run(async () =>
                 {
                     try
                     {
@@ -114,6 +143,11 @@ namespace AMWE_Administrator
                     catch (Exception ex)
                     {
                         ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
                     }
                 });
                 #endregion
@@ -126,9 +160,21 @@ namespace AMWE_Administrator
                 ChatSystemConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error);
-                    await ChatSystemConnection.StartAsync();
+                    try
+                    {
+                        await ChatSystemConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    { 
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
                 };
-                Task.Factory.StartNew(async () =>
+                Task.Run(async () =>
                 {
                     try
                     {
@@ -137,14 +183,22 @@ namespace AMWE_Administrator
                     catch (Exception ex)
                     {
                         ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
                     }
                 });
                 #endregion
 
-                notifyIcon1.Visible = true;
-                notifyIcon1.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
-                notifyIcon1.ContextMenuStrip.Items.Add("Exit", null, ExitItem_Click);
-                notifyIcon1.DoubleClick += NotifyIcon1_MouseDoubleClick;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    notifyIcon1.Visible = true;
+                    notifyIcon1.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+                    notifyIcon1.ContextMenuStrip.Items.Add("Exit", null, ExitItem_Click);
+                    notifyIcon1.DoubleClick += NotifyIcon1_MouseDoubleClick;
+                }));
 
                 InitializeComponent();
 
@@ -620,6 +674,66 @@ namespace AMWE_Administrator
             {
                 ExceptionHandler.RegisterNew(ex); 
             }
+        }
+
+        private async void mConnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (ClientHandlerConnection.State == HubConnectionState.Disconnected)
+            {
+                try
+                {
+                    await ClientHandlerConnection.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex);
+                    await Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                        mConnect.IsEnabled = true;
+                    }));
+                    return;
+                }
+            }
+            if (ReportHandleConnection.State == HubConnectionState.Disconnected)
+            {
+                try
+                {
+                    await ReportHandleConnection.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex);
+                    await Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                        mConnect.IsEnabled = true;
+                    }));
+                    return;
+                }
+            }
+            if (ChatSystemConnection.State == HubConnectionState.Disconnected)
+            {
+                try
+                {
+                    await ChatSystemConnection.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex);
+                    await Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                        mConnect.IsEnabled = true;
+                    }));
+                    return;
+                }
+            }
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                mConnect.Header = $"Подключено к {App.ServerAddress}";
+                mConnect.IsEnabled = false;
+            }));
         }
     }
 }
