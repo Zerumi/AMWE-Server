@@ -167,7 +167,7 @@ namespace AMWE_Administrator
 
                     default:
                         {
-                            MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать:{authresult}");
+                            MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать: {authresult}");
 
                             break;
                         }

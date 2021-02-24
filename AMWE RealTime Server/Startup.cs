@@ -23,9 +23,9 @@ namespace AMWE_RealTime_Server
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = new PathString("/Account/Login");
-                    options.AccessDeniedPath = new PathString("/Account/Login");
-                    options.LogoutPath = new PathString("/Account/Logout");
+                    options.LoginPath = new PathString("/cookie/login");
+                    options.AccessDeniedPath = new PathString("/cookie/login");
+                    options.LogoutPath = new PathString("/cookie/logout");
                 });
 
             //services.AddDbContext<VersionsContext>(options =>
@@ -64,6 +64,7 @@ namespace AMWE_RealTime_Server
                 //});
                 routes.MapHub<BotNetHub>("/botnet");
                 routes.MapHub<UserToAdminChatHub>("/chat");
+                routes.MapHub<DiagnoseHub>("/sandbox");
             });
             app.UseMvc();
         }

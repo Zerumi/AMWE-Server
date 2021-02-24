@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
         Title="AMWE Administrator by Zerumi" Height="450" Width="420" Closing="Main_Closing" Closed="Main_Closed">
     <Grid ShowGridLines="False" x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
@@ -31,6 +30,9 @@
             <MenuItem Header="Диагностика">
                 <MenuItem x:Name="mConnect" Header="Initializing..." IsEnabled="False" Click="mConnect_Click"/>
                 <MenuItem Header="Посмотреть статусы подключения" Click="MenuDiagnostics_CheckConnectionState"/>
+                <MenuItem Header="Информация об исключениях" Click="GetExceptions_Click"/>
+                <MenuItem Header="Диагностика сервера" Click="DiagnoseServer_Click"/>
+                <MenuItem x:Name="mLastConnectTime" Header="Подключение всё ещё устанавливается..." IsEnabled="False"/>
             </MenuItem>
             <MenuItem Header="Информация">
                 <MenuItem Header="О программе" Click="PrintInfo"/>

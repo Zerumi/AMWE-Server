@@ -27,9 +27,10 @@ namespace AMWE_Administrator
         readonly List<Notification> notifications = new List<Notification>();
         readonly List<Client> clients = new List<Client>();
         readonly List<Chat> chats = new List<Chat>();
+        readonly Stopwatch LastConnectStopwatch = new Stopwatch();
         bool isWorkdayStarted = false;
 
-        readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
+        public readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -40,7 +41,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
+        public readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -51,7 +52,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options => {
+        public readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -97,6 +98,7 @@ namespace AMWE_Administrator
                 {
                     try
                     {
+                        LastConnectStopwatch.Start();
                         await ClientHandlerConnection.StartAsync();
                     }
                     catch (Exception ex)
@@ -330,7 +332,9 @@ namespace AMWE_Administrator
         {
             try
             {
-                await Dispatcher.BeginInvoke(new Action(async() => { 
+                LastConnectStopwatch.Stop();
+                await Dispatcher.BeginInvoke(new Action(async() => {
+                    mLastConnectTime.Header = $"Последнее подключение длилось {LastConnectStopwatch.ElapsedMilliseconds} мс";
                     ClientList.Children.Clear();
                     clients.Clear();
                     foreach (var client in _clients)
@@ -561,7 +565,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.1.2021.1402\nAMWE RealTime server version 1.0.2020.1312\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.2.2021.2402\nAMWE RealTime server version 1.1.2021.2402\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
@@ -734,6 +738,26 @@ namespace AMWE_Administrator
                 mConnect.Header = $"Подключено к {App.ServerAddress}";
                 mConnect.IsEnabled = false;
             }));
+        }
+
+        private void GetExceptions_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DiagnosticExceptionWindow diagnostic1 = new DiagnosticExceptionWindow();
+                diagnostic1.Show();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
+        private void DiagnoseServer_Click(object sender, RoutedEventArgs e)
+        {
+            DiagnoseServer wserver = new DiagnoseServer();
+            wserver.Show();
+            wserver.Activate();
         }
     }
 }
