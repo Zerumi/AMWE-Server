@@ -6,8 +6,40 @@
 
 <h3>@ViewData["Title"]</h3>
 
-<main>
-    <br/>
-    <a href="https://github.com/Zerumi/AMWE-Server/releases/download/v.1.2.2021.2402/Release.zip">Скачать AMWE Administrator v.1.2</a>
-
-</main>
+<body>
+    <div class="Download">
+        <p><a href="~/Download/GUI.zip">Скачать AMWE Administrator v.1.2</a> (<a href="~/Download/GUI (x86).zip">Для x86</a>)</p>
+        <p>Для работы внутри сети требуется окружение с поддержкой SignalR. Готовый вариант серверного скрипта на ASP.NET Core 2.1 (который используется на внутренней сети AMWE) <a href="~/Download/Server.zip">доступен здесь</a></p>
+        <p>Клиент для внутренней сети <a href="~/Download/Release1.1.1.win7.patch.zip">доступен здесь</a></p>
+    </div>
+    <div class="Reqs">
+        <p><strong>Системные требования:</strong><br /></p>
+        <div class="Client_Reqs">
+            <p>
+                Для клиента:
+                <br />OS: Windows 7 SP1 и выше
+                <br />CPU: AMD Athlon 1300 1.1Ghz и выше
+                <br />RAM: 256МБ DDR1 и выше
+                <br />Постоянное подключение к интернету со скоростью не менее 10Mbit/s с поддержкой SSE (рекомендуется поддержка WebSockets)
+                <br />Установленный .NET 5.0. Доступен <a href="https://dotnet.microsoft.com/download/dotnet/5.0">на сайте Microsoft</a>.
+            </p>
+        </div>
+        <div class="AdministratorReqs">
+            <p>
+                Для администратора:
+                <br />OS: Windows 7 SP1 и выше (рекомендуется Windows 10 20H2 и выше)
+                <br />CPU: Intel Core 2 Duo 2.1Ghz и выше
+                <br />RAM: 512МБ DDR2 и выше
+                <br />Постоянное подключение к интернету со скоростью не менее 50Mbit/s с поддержкой WebSockets
+                <br />Установленный .NET 5.0. Доступен <a href="https://dotnet.microsoft.com/download/dotnet/5.0">на сайте Microsoft</a>.
+            </p>
+        </div>
+    </div>
+    <div class="Setup">
+        <p><strong>Установка:</strong><br /></p>
+        <p>
+            Распакуйте архив и откройте AMWE Administrator.exe / HTTP_WPF_Client-Project.exe<br />
+            Клиент автоматически подключится к серверу, для администратора существует авторизация по паролю. В поле адрес сервера введите адрес собственного сервера (например http://localhost:44371/) и пароль для доступа к админ. правам на сервере.
+        </p>
+    </div>
+</body>
