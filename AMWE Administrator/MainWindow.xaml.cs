@@ -565,7 +565,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.2.2021.2402\nAMWE RealTime server version 1.1.2021.2402\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.3.2021.0206\nAMWE RealTime server version 1.1.2021.2402\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
@@ -682,10 +682,17 @@ namespace AMWE_Administrator
 
         private async void mConnect_Click(object sender, RoutedEventArgs e)
         {
+            mDignose.GotFocus -= Diagnose_Click;
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                mConnect.Header = $"Переподключаемся к {App.ServerAddress}";
+                mConnect.IsEnabled = false;
+            }));
             if (ClientHandlerConnection.State == HubConnectionState.Disconnected)
             {
                 try
                 {
+                    LastConnectStopwatch.Restart();
                     await ClientHandlerConnection.StartAsync();
                 }
                 catch (Exception ex)
@@ -738,6 +745,7 @@ namespace AMWE_Administrator
                 mConnect.Header = $"Подключено к {App.ServerAddress}";
                 mConnect.IsEnabled = false;
             }));
+            mDignose.GotFocus += Diagnose_Click;
         }
 
         private void GetExceptions_Click(object sender, RoutedEventArgs e)
@@ -758,6 +766,28 @@ namespace AMWE_Administrator
             DiagnoseServer wserver = new DiagnoseServer();
             wserver.Show();
             wserver.Activate();
+        }
+
+        private async void Diagnose_Click(object sender, RoutedEventArgs e)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (ClientHandlerConnection.State == HubConnectionState.Disconnected || ReportHandleConnection.State == HubConnectionState.Disconnected || ChatSystemConnection.State == HubConnectionState.Disconnected)
+                {
+                    mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                    mConnect.IsEnabled = true;
+                }
+            }));
+        }
+
+        private void GoToAMWESite(object sender, RoutedEventArgs e)
+        {
+            var ps = new ProcessStartInfo("https://amwe.glitch.me/")
+            {
+                UseShellExecute = true,
+                Verb = "open"
+            };
+            Process.Start(ps);
         }
     }
 }

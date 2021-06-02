@@ -1,19 +1,12 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace AMWE_Administrator
 {
@@ -22,6 +15,8 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class DiagnoseServer : Window
     {
+        private bool CheckEnded = false;
+
         public async void WriteLine(string line)
         {
             await Dispatcher.BeginInvoke(new Action(() =>
@@ -49,12 +44,16 @@ namespace AMWE_Administrator
                 Ping pingSender = new Ping();
                 string host = uri.Host;
                 long ping = 0;
-                await Task.Run(() =>
+                await Task.Run(async() =>
                 {
                     PingReply reply = pingSender.Send(host);
                     if (reply.Status == IPStatus.Success)
                     {
                         ping = reply.RoundtripTime;
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            lPingMarker.Content = $"Ping: {ping}ms";
+                        }));
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Ping]: Address: {reply.Address}");
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Ping]: RoundTrip time: {ping}ms");
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Ping]: Time to live: {reply.Options.Ttl}");
@@ -80,33 +79,49 @@ namespace AMWE_Administrator
                         stopwatch.Stop();
                         double ConnectedAndDeliverTime = DateTime.Now.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
                         double delivery = ConnectedAndDeliverTime - x;
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            lTypeMarker.Content = $"Подключено! Получаем протокол...";
+                            lConnectionTimeMarker.Content = $"Время стабилизации: {stopwatch.ElapsedMilliseconds}ms";
+                            lDeliveryMarker.Content = $"Доставка ответа: {delivery}ms";
+                        }));
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Sandbox]: Connected");
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Sandbox]: Measured connection creation time: {stopwatch.ElapsedMilliseconds}ms");
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Sandbox]: Server response delivery time: {delivery}ms");
-                        string type = await sandboxHubConnection.InvokeAsync<string>("GetTransportType");
+                        string type = await sandboxHubConnection.InvokeAsync<string>("GetTransportType"); 
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            lTypeMarker.Content = $"Протокол: {type}";
+                        }));
                         WriteLine($"({DateTime.Now.ToLongTimeString()}) [Sandbox]: Connection estabilished with {type} protocol");
+                        // Diagnose end
                         await Dispatcher.BeginInvoke(new Action(() => {
-                            if ((delivery < 5538) && (type == "WebSockets"))
+                            ConnectionType connectionType = (ConnectionType)Enum.Parse(typeof(ConnectionType), type);
+                            double mark = 100000000 * (int)connectionType / (0.036 * ping * delivery * stopwatch.ElapsedMilliseconds);
+                            double roundmark = Math.Round(mark);
+                            lMarkMarker.Content = $"Оценка: {mark}";
+                            if ((delivery < 5538) && (connectionType == ConnectionType.WebSockets))
                             {
-                                lbStatus.Content = "Server status: OK";
+                                lbStatus.Content = $"Статус подключения: ОК ({roundmark})";
                             }
-                            else if (type == "ServerSentEvents")
+                            else if (connectionType == ConnectionType.ServerSentEvents)
                             {
-                                lbStatus.Content = "Server status: Something isn't ok";
+                                lbStatus.Content = $"Статус подключения: Совсем не всё в порядке ({roundmark})";
                                 MessageBox.Show("Check your internet connection configuration, because we can't estabilish WebSockets connection.");
                             }
                             else if (stopwatch.ElapsedMilliseconds - delivery < 14000)
                             {
-                                lbStatus.Content = "Server status: Slow configuration";
+                                lbStatus.Content = $"Статус подключения: Медленная конфигурация ({roundmark})";
                             }
                             else if (delivery < 7000 || ping > 400)
                             {
-                                lbStatus.Content = "Server status: Slow connection";
+                                lbStatus.Content = $"Статус подключения: Медленное соединение ({roundmark})";
                             }
                             else
                             {
                                 lbStatus.Content = "Server status: Bad";
                             }
+                            CheckEnded = true;
                         }));
                         await sandboxHubConnection.DisposeAsync();
                     }));
@@ -117,6 +132,15 @@ namespace AMWE_Administrator
             {
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) []: Диагностика остановлена из-за возникшего исключения {ex.Message}");
                 ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!CheckEnded)
+            {
+                MessageBox.Show("Дождитесь окончания проверки.");
+                e.Cancel = true;
             }
         }
     }

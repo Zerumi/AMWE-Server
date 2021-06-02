@@ -200,7 +200,7 @@ namespace AMWE_Administrator
                 sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
                 try
                 {
-                    var arr = item.Key.Split(',');
+                    var arr = item.Key.Split(", ");
                     foreach (var key in arr)
                     {
                         var rect = m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, key);

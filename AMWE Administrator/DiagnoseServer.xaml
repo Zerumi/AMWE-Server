@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Client->Server monitor" Height="350" Width="900" ResizeMode="CanMinimize">
+        Title="Client&lt;->Server monitor" Height="350" Width="900" ResizeMode="CanMinimize" Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="73*"/>
@@ -17,7 +17,11 @@
         <ScrollViewer Grid.Row="1">
             <TextBlock x:Name="sowtblOutput"/>
         </ScrollViewer>
-        <Label x:Name="lbStatus" Content="Server status: calculating..." FontSize="20" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="under development" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.Row="1"/>
+        <Label x:Name="lbStatus" Content="Статус подключения: подсчёт..." FontSize="20" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lPingMarker" Content="Ping: идёт подсчёт..." Grid.Column="1" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Grid.Row="1" Width="223"/>
+        <Label x:Name="lTypeMarker" Content="Подключение устанавливается..." Grid.Column="1" HorizontalAlignment="Center" Margin="0,41,0,0" Grid.Row="1" VerticalAlignment="Top" Width="223"/>
+        <Label x:Name="lDeliveryMarker" Content="Доставка ответа: идёт подсчёт..." Grid.Column="1" HorizontalAlignment="Center" Margin="0,72,0,0" Grid.Row="1" VerticalAlignment="Top" Width="223"/>
+        <Label x:Name="lConnectionTimeMarker" Content="Время стабилизации: идёт подсчёт..." Grid.Column="1" HorizontalAlignment="Center" Margin="0,103,0,0" Grid.Row="1" VerticalAlignment="Top" Width="223"/>
+        <Label x:Name="lMarkMarker" Content="Оценка: идёт подсчёт..." Grid.Column="1" HorizontalAlignment="Center" Margin="0,134,0,0" Grid.Row="1" VerticalAlignment="Top" Width="223"/>
     </Grid>
 </Window>

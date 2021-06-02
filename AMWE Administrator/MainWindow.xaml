@@ -27,7 +27,7 @@
                 <MenuItem Header="Сменить адрес" Click="MenuManage_ChangeServer_Click"/>
                 <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="MWorkday_Click"/>
             </MenuItem>
-            <MenuItem Header="Диагностика">
+            <MenuItem x:Name="mDignose" Header="Диагностика" GotFocus="Diagnose_Click">
                 <MenuItem x:Name="mConnect" Header="Initializing..." IsEnabled="False" Click="mConnect_Click"/>
                 <MenuItem Header="Посмотреть статусы подключения" Click="MenuDiagnostics_CheckConnectionState"/>
                 <MenuItem Header="Информация об исключениях" Click="GetExceptions_Click"/>
@@ -36,6 +36,7 @@
             </MenuItem>
             <MenuItem Header="Информация">
                 <MenuItem Header="О программе" Click="PrintInfo"/>
+                <MenuItem Header="Официальный сайт AMWE" Click="GoToAMWESite"/>
             </MenuItem>
         </Menu>
         <Label Content="Уведомления:" Grid.Column="1" HorizontalAlignment="Left" Margin="8.8,0,0,0" Grid.Row="2" VerticalAlignment="Top" Height="26" Width="87"/>
