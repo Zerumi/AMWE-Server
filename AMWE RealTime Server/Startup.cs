@@ -3,6 +3,7 @@
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System;
 using AMWE_RealTime_Server.Hubs;
+using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,8 +29,8 @@ namespace AMWE_RealTime_Server
                     options.LogoutPath = new PathString("/cookie/logout");
                 });
 
-            //services.AddDbContext<VersionsContext>(options =>
-            //    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
+            services.AddDbContext<VersionsContext>(options =>
+                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=VersionFiles;Trusted_Connection=True;MultipleActiveResultSets=true;Integrated Security=true"));
 
             services.AddMvc().SetCompatibilityVersion(Microsoft.AspNetCore.Mvc.CompatibilityVersion.Version_2_1);
             services.AddSignalR(options => {
@@ -59,9 +60,9 @@ namespace AMWE_RealTime_Server
                     options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
                     options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
                 });
-                //routes.MapHub<ServerHub>("/server", options => {
-                //    options.ApplicationMaxBufferSize = 52428800;
-                //});
+                routes.MapHub<ServerHub>("/server", options => {
+                    options.ApplicationMaxBufferSize = 52428800;
+                });
                 routes.MapHub<BotNetHub>("/botnet");
                 routes.MapHub<UserToAdminChatHub>("/chat");
                 routes.MapHub<DiagnoseHub>("/sandbox");

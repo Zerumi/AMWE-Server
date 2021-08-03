@@ -2,7 +2,6 @@
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System;
-using System.Windows;
 
 namespace m3md2
 {

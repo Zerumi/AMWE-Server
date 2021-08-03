@@ -25,6 +25,7 @@ namespace m3md2
             }
             return colors;
         }
+
         public static string[] GetColorNames()
         {
             return colorthemes.Select(x => x.Name).ToArray();

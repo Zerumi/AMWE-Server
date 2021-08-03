@@ -24,7 +24,6 @@ namespace AMWE_Administrator
         public static List<Report> reports = new List<Report>();
         public static DateTime ServerDateTime;
 
-        public static IEnumerable<string> ColorThemes = m3md2.ColorThemes.GetColorNames();
         public static Color[] colors = m3md2.ColorThemes.GetColors(ConfigurationRequest.GetValueByKey("ColorTheme"));
         public static SolidColorBrush MainColor = new SolidColorBrush(App.colors[(int)ColorIndex.Main]);
         public static SolidColorBrush SecondColor = new SolidColorBrush(App.colors[(int)ColorIndex.Second]);

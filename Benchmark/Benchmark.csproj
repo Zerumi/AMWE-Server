@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AMWE Administrator\AMWE Administrator.csproj" />
+    <ProjectReference Include="..\m3md2\m3md2.csproj" />
+    <ProjectReference Include="..\ReportHandler\ReportHandler.csproj" />
+  </ItemGroup>
+
+</Project>
