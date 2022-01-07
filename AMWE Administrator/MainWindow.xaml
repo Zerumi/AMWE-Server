@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="AMWE Administrator by Zerumi" Height="450" Width="420" Closing="Main_Closing" Closed="Main_Closed">
+        Title="AMWE Administrator by Zerumi" Height="450" Width="460" Closing="Main_Closing" Closed="Main_Closed">
     <Grid ShowGridLines="False" x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>

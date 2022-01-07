@@ -583,7 +583,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.3.2021.0206\nAMWE RealTime server version 1.1.2021.2402\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.0701\nAMWE RealTime server version 1.1.2021.2402\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
