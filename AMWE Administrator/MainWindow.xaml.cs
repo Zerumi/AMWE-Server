@@ -28,6 +28,7 @@ namespace AMWE_Administrator
         readonly List<Client> clients = new List<Client>();
         readonly List<Chat> chats = new List<Chat>();
         readonly Stopwatch LastConnectStopwatch = new Stopwatch();
+
         bool isWorkdayStarted = false;
 
         public readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
@@ -256,14 +257,17 @@ namespace AMWE_Administrator
             Environment.Exit(0);
         }
 
+        public static event Action<Report> OnNewReport;
+
         private async void CreateReport(Report report)
         {
             try
             {
+                OnNewReport?.Invoke(report);
                 if (report == null)
                 {
                     // cancel this report
-                    MessageBox.Show("(17.2) Получен пустой отчет");
+                    MessageBox.Show("(17.2) Получен пустой отчет. Мы даже не знаем, от кого он :/\nВозможно на API совершена атака.");
                     return;
                 }
 
@@ -334,8 +338,12 @@ namespace AMWE_Administrator
             {
                 LastConnectStopwatch.Stop();
                 await Dispatcher.BeginInvoke(new Action(async() => {
+                    lClientList.Content = $"Список пользователей ({_clients.Count}):";
                     mLastConnectTime.Header = $"Последнее подключение длилось {LastConnectStopwatch.ElapsedMilliseconds} мс";
                     ClientList.Children.Clear();
+                    var temp = mReports.Items[0];
+                    mReports.Items.Clear();
+                    mReports.Items.Add(temp);
                     clients.Clear();
                     foreach (var client in _clients)
                     {
@@ -363,7 +371,17 @@ namespace AMWE_Administrator
                     };
                     temptextblock.MouseEnter += TextBlock_GotMouseCapture;
                     clients.Add(client);
+                    lClientList.Content = $"Список пользователей ({clients.Count}):";
                     ClientList.Children.Add(temptextblock);
+
+                    MenuItem tempmenuitem = new MenuItem()
+                    {
+                        Name = temptextblock.Name,
+                        Header = temptextblock.Text,
+                        Foreground = App.FontColor
+                    };
+                    tempmenuitem.Click += rmUniversalUser_Click;
+                    mReports.Items.Add(tempmenuitem);
                 }));
             }
             catch (Exception ex)
@@ -788,6 +806,22 @@ namespace AMWE_Administrator
                 Verb = "open"
             };
             Process.Start(ps);
+        }
+
+        private void rmUniversalUser_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var id = uint.Parse((e.Source as FrameworkElement).Name.Remove(0, 2));
+                var client = clients.Find(x => x.Id == id);
+
+                UserReports userReports = new(client);
+                userReports.Show();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
         }
     }
 }

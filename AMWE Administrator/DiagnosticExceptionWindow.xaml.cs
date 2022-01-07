@@ -32,12 +32,12 @@ namespace AMWE_Administrator
 
         private void ExsLoaded(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < m3md2.StaticVariables.Diagnostics.ExceptionCount; i++)
+            for (int i = 0; i < m3md2.StaticVariables.ExceptionCount; i++)
             {
                 buttons.Add(new Button()
                 {
                     Name = "Button" + buttons.Count,
-                    Content = $"{m3md2.StaticVariables.Diagnostics.exceptions[buttons.Count].Message}"
+                    Content = $"{m3md2.StaticVariables.exceptions[buttons.Count].Message}"
                 });
                 buttons[i].Click += Ex_Click;
                 Exceptions.Children.Add(buttons[i]);
@@ -46,7 +46,7 @@ namespace AMWE_Administrator
 
         private void Ex_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(m3md2.StaticVariables.Diagnostics.exceptions[Convert.ToInt32((sender as FrameworkElement).Name.Replace("Button", ""))].ToString());
+            MessageBox.Show(m3md2.StaticVariables.exceptions[Convert.ToInt32((sender as FrameworkElement).Name.Replace("Button", ""))].ToString());
         }
     }
 }

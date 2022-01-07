@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 namespace m3md2
 {
     /// <summary>
-    /// Предоставляет систему обращения к AMWE API
+    /// Предоставляет систему обращения к API
     /// </summary>
     public static class ApiRequest
     {
@@ -31,7 +31,7 @@ namespace m3md2
             HttpResponseMessage response = null;
             try
             {
-                HttpClient client = new HttpClient
+                HttpClient client = new()
                 {
                     BaseAddress = new Uri(BaseAddress)
                 };
@@ -60,7 +60,7 @@ namespace m3md2
             HttpResponseMessage response = null;
             try
             {
-                HttpClient client = new HttpClient
+                HttpClient client = new()
                 {
                     BaseAddress = new Uri(BaseAddress)
                 };
@@ -87,7 +87,7 @@ namespace m3md2
             T product = default;
             try
             {
-                HttpClient client = new HttpClient
+                HttpClient client = new()
                 {
                     BaseAddress = new Uri(BaseAddress)
                 };
@@ -116,7 +116,7 @@ namespace m3md2
             HttpResponseMessage response = null;
             try
             {
-                HttpClient client = new HttpClient
+                HttpClient client = new()
                 {
                     BaseAddress = new Uri(BaseAddress)
                 };

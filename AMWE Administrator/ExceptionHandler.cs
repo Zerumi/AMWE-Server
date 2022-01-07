@@ -10,8 +10,8 @@ namespace AMWE_Administrator
     {
         private static void RegisterToM3MD2(Exception ex)
         {
-            m3md2.StaticVariables.Diagnostics.exceptions.Add(ex);
-            m3md2.StaticVariables.Diagnostics.ExceptionCount++;
+            m3md2.StaticVariables.exceptions.Add(ex);
+            m3md2.StaticVariables.ExceptionCount++;
         }
         public static void RegisterNew(Exception ex)
         {

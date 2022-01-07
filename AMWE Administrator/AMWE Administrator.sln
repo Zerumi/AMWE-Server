@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportHandler", "..\ReportH
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "m3md2", "..\m3md2\m3md2.csproj", "{7344A154-D7A8-460A-B45F-45A778C56D46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "..\Benchmark\Benchmark.csproj", "{7376F133-C337-4084-A0A6-7337B21B8201}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmark", "..\Benchmark\Benchmark.csproj", "{7376F133-C337-4084-A0A6-7337B21B8201}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E6C0DA4-EF44-4222-8630-5E37EDFE744E}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

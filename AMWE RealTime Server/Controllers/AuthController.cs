@@ -26,6 +26,7 @@ namespace AMWE_RealTime_Server.Controllers
 
         public AuthController(IHubContext<ClientHandlerHub> hubContext)
         {
+            StaticVariables.svControllers.Add(this);
             _hubContext = hubContext;
         }
 

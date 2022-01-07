@@ -28,9 +28,9 @@ namespace m3md2
             int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
             for (int i = 0; i < childrenCount; i++)
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
                 // If the child is not of the request child type child
-                if (!(child is T))
+                if (child is not T t)
                 {
                     // recursively drill down the tree
                     foundChild = FindChild<T>(child, childName);
@@ -44,7 +44,7 @@ namespace m3md2
                     if (child is FrameworkElement frameworkElement && frameworkElement.Name == childName)
                     {
                         // if the child's name is of the request name
-                        foundChild = (T)child;
+                        foundChild = t;
                         break;
                     }
                     continue;
@@ -52,7 +52,7 @@ namespace m3md2
                 else
                 {
                     // child element found.
-                    foundChild = (T)child;
+                    foundChild = t;
                     break;
                 }
             }
@@ -72,9 +72,9 @@ namespace m3md2
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
+                    if (child is not null and T t)
                     {
-                        yield return (T)child;
+                        yield return t;
                     }
 
                     foreach (T childOfChild in FindVisualChildren<T>(child))

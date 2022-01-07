@@ -63,7 +63,6 @@ namespace AMWE_RealTime_Server
                 routes.MapHub<ServerHub>("/server", options => {
                     options.ApplicationMaxBufferSize = 52428800;
                 });
-                routes.MapHub<BotNetHub>("/botnet");
                 routes.MapHub<UserToAdminChatHub>("/chat");
                 routes.MapHub<DiagnoseHub>("/sandbox");
             });

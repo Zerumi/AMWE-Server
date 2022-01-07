@@ -31,7 +31,7 @@ namespace m3md2
             return colorthemes.Select(x => x.Name).ToArray();
         }
 
-        static readonly List<ColorTheme> colorthemes = new List<ColorTheme>()
+        static readonly List<ColorTheme> colorthemes = new()
         {
             new ColorTheme
             {
