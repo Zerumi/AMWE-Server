@@ -67,7 +67,7 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 ID = ChatId++,
                 AdminConnectionID = Context.ConnectionId,
-                User = AuthController.GlobalUsersList.Find(x => x.Id == ClientID),
+                User = AuthController.GlobalClientsList.Find(x => x.Id == ClientID),
                 IsAccepted = false
             };
             chatStates.Add(chatState);

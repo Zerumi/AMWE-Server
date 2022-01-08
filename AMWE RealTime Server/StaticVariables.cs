@@ -8,6 +8,6 @@ namespace AMWE_RealTime_Server
 {
     public static class StaticVariables
     {
-        public static List<AuthController> svControllers { get; set; }
+        public static List<AuthController> svControllers = new List<AuthController>();
     }
 }

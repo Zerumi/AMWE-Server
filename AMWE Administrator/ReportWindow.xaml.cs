@@ -20,35 +20,37 @@ namespace AMWE_Administrator
 
         public ReportWindow(Report report)
         {
-            Report = report;
-            InitializeComponent();
-
-            Grid.Background = App.MainColor;
-            gKeyboard.Background = App.MainColor;
-
-            foreach(var obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
+            try
             {
-                obj.Stroke = App.FontColor;
-            }
+                Report = report;
+                InitializeComponent();
 
-            foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(gKeyboard))
-            {
-                obj.Foreground = App.FontColor;
-            }
+                Grid.Background = App.MainColor;
+                gKeyboard.Background = App.MainColor;
 
-            foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(Grid))
-            {
-                obj.Foreground = App.FontColor;
-            }
+                foreach (var obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
+                {
+                    obj.Stroke = App.FontColor;
+                }
 
-            ReportOutput.Foreground = App.FontColor;
-            ReportOutput.Background = App.SecondColor;
-            rOverallRating.Stroke = App.FontColor;
+                foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(gKeyboard))
+                {
+                    obj.Foreground = App.FontColor;
+                }
 
-            LinearGradientBrush ovbrush = new LinearGradientBrush()
-            {
-                StartPoint = new Point(1, 0),
-                GradientStops = new GradientStopCollection()
+                foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(Grid))
+                {
+                    obj.Foreground = App.FontColor;
+                }
+
+                ReportOutput.Foreground = App.FontColor;
+                ReportOutput.Background = App.SecondColor;
+                rOverallRating.Stroke = App.FontColor;
+
+                LinearGradientBrush ovbrush = new LinearGradientBrush()
+                {
+                    StartPoint = new Point(1, 0),
+                    GradientStops = new GradientStopCollection()
                 {
                     new GradientStop()
                     {
@@ -191,62 +193,67 @@ namespace AMWE_Administrator
                         Offset = 1
                     }
                 }
-            };
-            rOverallRating.Fill = ovbrush;
-            ReportHeader.Content = $"Отчет №{App.reports.IndexOf(report)} от {report.Client.Nameofpc} ({report.Client.Id}):";
-            string sKeyPressedInfo = string.Empty;
-            foreach (var item in report.KeyPressedInfo)
-            {
-                sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
-                try
+                };
+                rOverallRating.Fill = ovbrush;
+                ReportHeader.Content = $"Отчет №{App.reports.IndexOf(report)} от {report.Client.Nameofpc} ({report.Client.Id}):";
+                string sKeyPressedInfo = string.Empty;
+                foreach (var item in report.KeyPressedInfo)
                 {
-                    var arr = item.Key.Split(", ");
-                    foreach (var key in arr)
+                    sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
+                    try
                     {
-                        var rect = m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, key);
-                        byte alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / arr.Length / Report.pressingCount)));
-                        byte fillalpha = (rect.Fill as SolidColorBrush)?.Color.A?? 0;
-                        byte alpha2 = (byte)(0.9 * fillalpha);
-                        alpha += alpha2;
-                        alpha += (byte)(0.1 * (byte)(255 - alpha));
-                        rect.Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
+                        var arr = item.Key.Split(", ");
+                        foreach (var key in arr)
+                        {
+                            var rect = m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, key);
+                            byte alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / arr.Length / Report.pressingCount)));
+                            byte fillalpha = (rect.Fill as SolidColorBrush)?.Color.A ?? 0;
+                            byte alpha2 = (byte)(0.9 * fillalpha);
+                            alpha += alpha2;
+                            alpha += (byte)(0.1 * (byte)(255 - alpha));
+                            rect.Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // unregistred hotkey
                     }
                 }
-                catch (Exception)
+                string sOldProcesses = string.Empty;
+                foreach (var item in report.OldProcesses)
                 {
-                    // unregistred hotkey
+                    sOldProcesses += $"\n{item}";
                 }
-            }
-            string sOldProcesses = string.Empty;
-            foreach (var item in report.OldProcesses)
-            {
-                sOldProcesses += $"\n{item}";
-            }
-            string sLastProcesses = string.Empty;
-            foreach (var item in report.LastProcesses)
-            {
-                sLastProcesses += $"\n{item}";
-            }
+                string sLastProcesses = string.Empty;
+                foreach (var item in report.LastProcesses)
+                {
+                    sLastProcesses += $"\n{item}";
+                }
 
-            var added = report.LastProcesses.Except(report.OldProcesses).ToList();
-            var removed = report.OldProcesses.Except(report.LastProcesses).ToList();
+                var added = report.LastProcesses.Except(report.OldProcesses).ToList();
+                var removed = report.OldProcesses.Except(report.LastProcesses).ToList();
 
-            string sChangesProcesses = "";
-            foreach (var item in added)
-            {
-                sChangesProcesses += $"+ {item}\n";
+                string sChangesProcesses = "";
+                foreach (var item in added)
+                {
+                    sChangesProcesses += $"+ {item}\n";
+                }
+                foreach (var item in removed)
+                {
+                    sChangesProcesses += $"- {item}\n";
+                }
+
+                gpOverallInfo.Content = $"Количество измененных процессов: {report.ProcessChangedCount}";
+                tbLast.Text = sOldProcesses.Remove(0, 1);
+                tbCurrent.Text = sLastProcesses.Remove(0, 1);
+                tbChanges.Text = sChangesProcesses;
+
+                ReportOutput.Text = $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.isMouseCoordChanged ? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
             }
-            foreach (var item in removed)
+            catch (Exception ex)
             {
-                sChangesProcesses += $"- {item}\n";
+                ExceptionHandler.RegisterNew(ex);
             }
-
-            gpOverallInfo.Content = $"Количество измененных процессов: {report.ProcessChangedCount}";
-            tbLast.Text = sOldProcesses.Remove(0,1);
-            tbCurrent.Text = sLastProcesses.Remove(0,1);
-            tbChanges.Text = sChangesProcesses;
-
-            ReportOutput.Text = $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.isMouseCoordChanged? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
         }
     }
 }

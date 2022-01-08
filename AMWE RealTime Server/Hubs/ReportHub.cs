@@ -25,7 +25,7 @@ namespace AMWE_RealTime_Server.Hubs
         private readonly ILogger _logger;
         private readonly IHubContext<ClientHandlerHub> _hubContext;
 
-        private readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
+        private static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
 
         public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext)
         {
@@ -43,6 +43,9 @@ namespace AMWE_RealTime_Server.Hubs
             else if (Context.User.IsInRole(Role.GlobalUserRole))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
+                uint id = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3));
+                string nameofpc = Context.User.Identity.Name.Substring(Context.User.Identity.Name.IndexOf('/'));
+                connectedClients.Add(Context.ConnectionId, new Client() { Id = id, Nameofpc = nameofpc });
             }
             await Clients.Caller.SendAsync("SetWorkday", WorkdayValue);
             await base.OnConnectedAsync();
@@ -50,7 +53,7 @@ namespace AMWE_RealTime_Server.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            _logger.LogError($"От хаба был отключен клиент {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} по причине {exception.Message}");
+            _logger.LogError($"От хаба был отключен клиент {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} по причине {exception?.Message}");
             _logger.LogDebug($"Подробности: {exception}");
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
@@ -59,11 +62,11 @@ namespace AMWE_RealTime_Server.Hubs
             else if (Context.User.IsInRole(Role.GlobalUserRole))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
+                Client client;
+                connectedClients.TryGetValue(Context.ConnectionId, out client);
+                await StaticVariables.svControllers.FirstOrDefault()?.Logout(client.Id);
+                connectedClients.Remove(Context.ConnectionId);
             }
-            Client client;
-            connectedClients.TryGetValue(Context.ConnectionId, out client);
-            await StaticVariables.svControllers.FirstOrDefault()?.Logout(client.Id);
-            connectedClients.Remove(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
 
@@ -71,10 +74,6 @@ namespace AMWE_RealTime_Server.Hubs
         public async void SendReport(Report report)
         {
             _logger.LogInformation($"Поступил отчет от {report.Client.Id} / {report.Client.Nameofpc} // Оценка: {report.OverallRating}");
-            if (!connectedClients.TryGetValue(Context.ConnectionId, out _))
-            {
-                connectedClients.Add(Context.ConnectionId, report.Client);
-            }
             await Clients.Group(Role.GlobalAdminGroup).SendAsync("CreateReport", report);
         }
 
@@ -90,8 +89,8 @@ namespace AMWE_RealTime_Server.Hubs
         public async void ShutdownAllConnections()
         {
             await Clients.Group(Role.GlobalUserGroup).SendAsync("ShutdownHubConnection");
-            var a = AuthController.GlobalUsersList.Count;
-            var b = AuthController.GlobalUsersList.Select(x => x.Id).ToArray();
+            var a = AuthController.GlobalClientsList.Count;
+            var b = AuthController.GlobalClientsList.Select(x => x.Id).ToArray();
             for (uint i = 0; i < a; i++)
             {
                 await StaticVariables.svControllers.FirstOrDefault()?.Logout(b[i]);

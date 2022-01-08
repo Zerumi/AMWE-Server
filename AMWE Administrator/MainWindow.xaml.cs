@@ -22,12 +22,14 @@ namespace AMWE_Administrator
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         readonly List<Notification> notifications = new List<Notification>();
-        readonly List<Client> clients = new List<Client>();
+        readonly List<Client> сurrentclients = new List<Client>();
+        private readonly List<Client> allclients = new List<Client>();
         readonly List<Chat> chats = new List<Chat>();
         readonly Stopwatch LastConnectStopwatch = new Stopwatch();
+        readonly List<TextBlock> tbpClientList = new List<TextBlock>();
 
         bool isWorkdayStarted = false;
 
@@ -282,7 +284,15 @@ namespace AMWE_Administrator
                     textBlock.MouseLeave += Notification_LostMouseCapture;
                     textBlock.MouseDown += ReportNotification_MouseDown;
 
-                    WinHelper.FindChild<TextBlock>(ClientList, $"ID{report.Client.Id}").Foreground = report.OverallRating > 0.5? App.RedColor : App.GreenColor;
+                    var tb = WinHelper.FindChild<TextBlock>(ClientList, $"ID{report.Client.Id}");
+                    if (tb != null)
+                    {
+                        tb.Foreground = report.OverallRating > 0.5 ? App.RedColor : App.GreenColor;
+                    } // optimize for disconnected users
+                    else
+                    {
+                        _ = MessageBox.Show("(17.3) Получен отчет от удаленного из сети пользователя.\nВозможно на API совершена атака.");
+                    }
 
                     App.reports.Add(report);
 
@@ -344,7 +354,8 @@ namespace AMWE_Administrator
                     var temp = mReports.Items[0];
                     mReports.Items.Clear();
                     mReports.Items.Add(temp);
-                    clients.Clear();
+                    сurrentclients.Clear();
+                    allclients.Clear();
                     foreach (var client in _clients)
                     {
                         await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
@@ -370,9 +381,11 @@ namespace AMWE_Administrator
                         Foreground = App.FontColor
                     };
                     temptextblock.MouseEnter += TextBlock_GotMouseCapture;
-                    clients.Add(client);
-                    lClientList.Content = $"Список пользователей ({clients.Count}):";
+                    сurrentclients.Add(client);
+                    allclients.Add(client);
+                    lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
                     ClientList.Children.Add(temptextblock);
+                    tbpClientList.Add(temptextblock);
 
                     MenuItem tempmenuitem = new MenuItem()
                     {
@@ -394,14 +407,18 @@ namespace AMWE_Administrator
         {
             try
             {
-                await Dispatcher.BeginInvoke((Action)(() =>
+                if (client != null)
                 {
-                    clients.Remove(client);
-                    ClientList.Children.Remove(new TextBlock()
+                    await Dispatcher.BeginInvoke((Action)(() =>
                     {
-                        Text = $"ID {client.Id} - {client.Nameofpc}",
-                    });
-                }));
+                        var a = сurrentclients.Find(x => x.Id == client.Id);
+                        сurrentclients.Remove(a);
+                        lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
+                        var temptextblock = tbpClientList.Find(x => x.Text == $"ID {client.Id} - {client.Nameofpc}");
+                        ClientList.Children.Remove(temptextblock);
+                        tbpClientList.Remove(temptextblock);
+                    }));
+                }
             }
             catch (Exception ex)
             {
@@ -436,7 +453,7 @@ namespace AMWE_Administrator
             try
             {
                 var id = uint.Parse((e.Source as Button).Content.ToString().GetUntilOrEmpty(")").Remove(0,1));
-                var client = clients.Find(x => x.Id == id);
+                var client = сurrentclients.Find(x => x.Id == id);
                 await Dispatcher.BeginInvoke((Action)(async() => {
                     Chat chat = new Chat(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
                     chats.Add(chat);
@@ -583,7 +600,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.0701\nAMWE RealTime server version 1.1.2021.2402\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.0701 beta 5\nAMWE RealTime server version 1.2.2022.0801\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
@@ -813,7 +830,7 @@ namespace AMWE_Administrator
             try
             {
                 var id = uint.Parse((e.Source as FrameworkElement).Name.Remove(0, 2));
-                var client = clients.Find(x => x.Id == id);
+                var client = allclients.Find(x => x.Id == id);
 
                 UserReports userReports = new(client);
                 userReports.Show();
@@ -822,6 +839,11 @@ namespace AMWE_Administrator
             {
                 ExceptionHandler.RegisterNew(ex);
             }
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

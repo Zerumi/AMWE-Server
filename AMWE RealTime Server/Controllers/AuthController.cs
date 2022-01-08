@@ -3,6 +3,7 @@
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AMWE_RealTime_Server.Hubs;
@@ -31,7 +32,9 @@ namespace AMWE_RealTime_Server.Controllers
         }
 
         public static uint GlobalClientId = 0;
-        public static List<Client> GlobalUsersList = new List<Client>();
+
+        public static List<Client> GlobalClientsList = new List<Client>();
+        public static Dictionary<uint, ClaimsPrincipal> GlobalUsersList = new Dictionary<uint, ClaimsPrincipal>();
 
         [HttpPost]
         [AllowAnonymous]
@@ -46,13 +49,15 @@ namespace AMWE_RealTime_Server.Controllers
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+                ClaimsPrincipal user = new ClaimsPrincipal(id);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, user);
                 var client = new Client
                 {
                     Id = GlobalClientId,
                     Nameofpc = authdata[0]
                 };
-                GlobalUsersList.Add(client);
+                GlobalUsersList.Add(client.Id, user);
+                GlobalClientsList.Add(client);
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", client);
                 GlobalClientId++;
                 return client;
@@ -92,10 +97,13 @@ namespace AMWE_RealTime_Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Logout(uint id)
         {
-            var a = GlobalUsersList.Find(x => x.Id == id);
-            (HttpContext.User.Identity as ClaimsIdentity).RemoveClaim(new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole));
-            await _hubContext.Clients.Group(Role.GlobalAdminGroup).SendAsync("OnUserLeft", a);
-            GlobalUsersList.Remove(a);
+            var a = GlobalClientsList.Find(x => x.Id == id);
+            if (a != null)
+            {
+                await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
+                GlobalClientsList.Remove(a);
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
             return NoContent();
         }
 

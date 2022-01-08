@@ -36,17 +36,25 @@ namespace AMWE_RealTime_Server
             services.AddSignalR(options => {
                 options.EnableDetailedErrors = true;
             });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            var cookiePolicyOptions = new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = SameSiteMode.Strict,
+            };
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
             app.UseAuthentication();
+
+            app.UseCookiePolicy(cookiePolicyOptions);
 
             app.UseWebSockets();
             app.UseSignalR(routes =>

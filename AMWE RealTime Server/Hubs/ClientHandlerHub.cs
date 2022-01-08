@@ -14,7 +14,7 @@ namespace AMWE_RealTime_Server.Hubs
     {
         public override async Task OnConnectedAsync()
         {
-            await Clients.Caller.SendAsync("GetAllClients", AuthController.GlobalUsersList);
+            await Clients.Caller.SendAsync("GetAllClients", AuthController.GlobalClientsList);
             await base.OnConnectedAsync();
         }
 
