@@ -265,7 +265,6 @@ namespace AMWE_Administrator
         {
             try
             {
-                OnNewReport?.Invoke(report);
                 if (report == null)
                 {
                     // cancel this report
@@ -304,6 +303,7 @@ namespace AMWE_Administrator
 
                     await Task.Run(() => AddNotification(notification));
                 }));
+                OnNewReport?.Invoke(report);
             }
             catch (Exception ex)
             {
@@ -403,12 +403,15 @@ namespace AMWE_Administrator
             }
         }
 
+        public static event Action<Client> OnUserDisconnected;
+
         private async void DeleteClient(Client client)
         {
             try
             {
                 if (client != null)
                 {
+                    OnUserDisconnected?.Invoke(client);
                     await Dispatcher.BeginInvoke((Action)(() =>
                     {
                         var a = сurrentclients.Find(x => x.Id == client.Id);
@@ -431,7 +434,8 @@ namespace AMWE_Administrator
             try
             {
                 (e.Source as UIElement).Visibility = Visibility.Collapsed;
-                int id = ClientList.Children.IndexOf(e.Source as UIElement);
+                int eid = ClientList.Children.IndexOf(e.Source as UIElement);
+                int id = Convert.ToInt32((e.Source as TextBlock).Text.GetUntilOrEmpty(" -").Substring(3));
                 Button button = new Button()
                 {
                     Content = $"({id}) Начать чат",
@@ -439,7 +443,7 @@ namespace AMWE_Administrator
                 };
                 button.Click += ManageUser;
                 button.MouseLeave += TextBlock_LostMouseCapture;
-                ClientList.Children.Insert(id, button);
+                ClientList.Children.Insert(eid, button);
                 e.Handled = true;
             }
             catch (Exception ex)
@@ -832,7 +836,7 @@ namespace AMWE_Administrator
                 var id = uint.Parse((e.Source as FrameworkElement).Name.Remove(0, 2));
                 var client = allclients.Find(x => x.Id == id);
 
-                UserReports userReports = new(client);
+                UserReports userReports = new(client, !(сurrentclients.IndexOf(client) == -1));
                 userReports.Show();
             }
             catch (Exception ex)
@@ -843,7 +847,7 @@ namespace AMWE_Administrator
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            GC.SuppressFinalize(this);
         }
     }
 }

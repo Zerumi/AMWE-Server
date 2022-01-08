@@ -24,14 +24,13 @@ namespace AMWE_Administrator
         private UserReports UserWindow;
         private Client user;
 
-        public ReportLineChartDrawer(UserReports window)
+        public ReportLineChartDrawer(UserReports window, List<Report> userReports)
         {
             UserWindow = window;
             user = UserWindow.UserInWindow;
 
             holders = new List<Holder>();
 
-            List<Report> userReports = App.reports.FindAll(x => x.Client.Id == user.Id); // long time parsing??
             values = new();
 
             for (int i = 0; i < userReports.Count; i++)

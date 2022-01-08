@@ -5,20 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
-        Title="UserReports" Height="550" Width="700">
+        Title="Сводка по сотруднику" Height="550" Width="700">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="47*"/>
-            <RowDefinition Height="131*"/>
+            <RowDefinition Height="160"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="12*"/>
             <ColumnDefinition Width="23*"/>
         </Grid.ColumnDefinitions>
         <Canvas x:Name="chartCanvas"
-                Background="White" ClipToBounds="True" Grid.Column="1" Margin="0,10,0,0" Height="116" VerticalAlignment="Top"/>
-        <Grid x:Name="gScreenViewer" Grid.Row="1" Grid.Column="1" Margin="10">
-            
+                Background="White" ClipToBounds="True" Grid.Column="1" Margin="0,41,10,0" Height="116" VerticalAlignment="Top"/>
+        <Grid x:Name="gScreenViewer" Grid.Row="1" Grid.Column="1" Margin="10,10,10,10">
+            <Image x:Name="iScreen" Margin="10,50,10,60" Source="D:\Zerumi\image.png"/>
+            <Button x:Name="bScreen" Content="Снимок экрана" Margin="0,0,170,10" HorizontalAlignment="Right" Width="120" Height="27" VerticalAlignment="Bottom" Click="bScreen_Click"/>
+            <Button x:Name="bSaveScr" Content="Сохр." Margin="0,0,110,10" HorizontalAlignment="Right" Width="50" Height="27" VerticalAlignment="Bottom"/>
+            <Label x:Name="lGetScreen" Content="Получить снимок экрана компьютера для самостоятельного анализа:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="420"/>
         </Grid>
+        <Label x:Name="lGraph" Content="Графическое представление коэффициента эффективности сотрудника:" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Margin="0,10,0,0" Width="407"/>
+        <Label x:Name="lRepCount" Content="Количество отчетов: 0" HorizontalAlignment="Center" Margin="0,41,0,0" VerticalAlignment="Top" Width="220"/>
+        <Label x:Name="lAvgMark" Content="Средняя оценка: 0.47" HorizontalAlignment="Center" Margin="0,72,0,0" VerticalAlignment="Top" Width="220"/>
+        <Label x:Name="lUserInfo" Content="ID 10000 / Zerumi (сейчас не в сети)" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="220"/>
+        <Label x:Name="lOnlineStatus" Content="В сети уже 9999 часов (с 12:12)" HorizontalAlignment="Center" Margin="0,103,0,0" VerticalAlignment="Top" Width="220"/>
+        <Label x:Name="lReportReview" Content="Отчеты:" HorizontalAlignment="Left" Grid.Row="1" VerticalAlignment="Top" Width="220"/>
+        <ScrollViewer Grid.Row="1" Margin="0,31,0,0" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="spReports"/>
+        </ScrollViewer>
     </Grid>
 </Window>
