@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler;
 
 namespace AMWE_Administrator
@@ -68,11 +70,40 @@ namespace AMWE_Administrator
 
                 MainWindow.OnNewReport += MainWindow_OnNewReport;
                 MainWindow.OnUserDisconnected += MainWindow_OnUserDisconnected;
+                MainWindow.OnNewScreen += UpdateScreen;
             }
             catch (Exception ex)
             {
                 ExceptionHandler.RegisterNew(ex);
             }
+        }
+
+        private void UpdateScreen(Screen screen, Client client)
+        {
+            if (UserInWindow.Id == client.Id)
+            {
+                Dispatcher.BeginInvoke(new Action(() => {
+                    iScreen.Source = LoadImage(screen.bytes);
+                }));
+            }
+        }
+
+        private static BitmapImage LoadImage(byte[] imageData)
+        {
+            if (imageData == null || imageData.Length == 0) return null;
+            var image = new BitmapImage();
+            using (var mem = new MemoryStream(imageData))
+            {
+                mem.Position = 0;
+                image.BeginInit();
+                image.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = null;
+                image.StreamSource = mem;
+                image.EndInit();
+            }
+            image.Freeze();
+            return image;
         }
 
         private async void MainWindow_OnUserDisconnected(Client obj)
@@ -122,7 +153,7 @@ namespace AMWE_Administrator
                     lUserInfo.Content = $"ID {UserInWindow.Id} / {UserInWindow.Nameofpc}";
                     lRepCount.Content = $"Количество отчетов: {userReports.Count}";
 
-                    double avgmark = userReports.Select(x => x.OverallRating).Average();
+                    double avgmark = userReports.Select(x => x.OverallRating).Average(); // collection might be empty!
                     lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
 
                     if (IsUserConnected)
@@ -142,9 +173,9 @@ namespace AMWE_Administrator
             }));
         }
 
-        private void bScreen_Click(object sender, RoutedEventArgs e)
+        private async void bScreen_Click(object sender, RoutedEventArgs e)
         {
-            // request screen from hub
+            await (App.Current.Windows[0] as MainWindow).ChatSystemConnection.InvokeAsync("RequestScreen", UserInWindow);
         }
     }
 }

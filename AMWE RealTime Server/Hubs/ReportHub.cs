@@ -25,7 +25,9 @@ namespace AMWE_RealTime_Server.Hubs
         private readonly ILogger _logger;
         private readonly IHubContext<ClientHandlerHub> _hubContext;
 
-        private static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
+        public static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
+
+        private static readonly Dictionary<string, string> screenTransfer = new Dictionary<string, string>();
 
         public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext)
         {
@@ -95,6 +97,22 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 await StaticVariables.svControllers.FirstOrDefault()?.Logout(b[i]);
             }
+        }
+
+        [Authorize(Roles=Role.GlobalAdminRole)]
+        public async void RequestScreen(uint id)
+        {
+            var foundid = connectedClients.FirstOrDefault(x => x.Value.Id == id).Key;
+            screenTransfer.Add(foundid, Context.ConnectionId);
+            await Clients.User(foundid).SendAsync("RequestScreen");
+        }
+
+        [Authorize(Roles=Role.GlobalUserRole)]
+        public async void TransferScreen(Screen screen)
+        {
+            screenTransfer.TryGetValue(Context.ConnectionId, out string AdmId);
+            connectedClients.TryGetValue(Context.ConnectionId, out Client client);
+            await Clients.User(AdmId).SendAsync("NewScreen", screen, client);
         }
 
         public bool GetWorkdayValue()

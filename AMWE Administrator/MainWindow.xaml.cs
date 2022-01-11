@@ -71,6 +71,8 @@ namespace AMWE_Administrator
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
         };
 
+        public static event Action<Screen, Client> OnNewScreen;
+
         public MainWindow()
         {
             try
@@ -162,6 +164,7 @@ namespace AMWE_Administrator
                 ChatSystemConnection.On<uint, string, string, DateTime>("ReceiveMessage", RecieveMessage);
                 ChatSystemConnection.On<uint>("AcceptChatID", AcceptChat);
                 ChatSystemConnection.On<uint>("CloseDeleteChat", DeleteChat);
+                ChatSystemConnection.On<Screen, Client>("NewScreen", (s, c) => OnNewScreen?.Invoke(s, c));
                 ChatSystemConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error);

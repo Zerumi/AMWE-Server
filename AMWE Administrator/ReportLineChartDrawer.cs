@@ -50,9 +50,9 @@ namespace AMWE_Administrator
         {
             try
             {
-                double xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / (values.Count + 1));
                 if (UserWindow.ActualWidth > 0 && UserWindow.ActualHeight > 0)
                 {
+                    double xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / values.Count);
                     UserWindow.chartCanvas.Children.Clear();
                     holders.Clear();
 
@@ -63,16 +63,16 @@ namespace AMWE_Administrator
                         Y1 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
                         X2 = UserWindow.chartCanvas.ActualWidth - xAxisStart,
                         Y2 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
-                        Stroke = Brushes.LightGray,
+                        Stroke = Brushes.Black,
                         StrokeThickness = 1,
                     };
                     yAxisLine = new Line()
                     {
                         X1 = xAxisStart,
-                        Y1 = yAxisStart - 50,
+                        Y1 = yAxisStart - 5,
                         X2 = xAxisStart,
                         Y2 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
-                        Stroke = Brushes.LightGray,
+                        Stroke = Brushes.Black,
                         StrokeThickness = 1,
                     };
 
@@ -89,7 +89,7 @@ namespace AMWE_Administrator
                         var line = new Line()
                         {
                             X1 = xPoint,
-                            Y1 = yAxisStart - 50,
+                            Y1 = yAxisStart - 5,
                             X2 = xPoint,
                             Y2 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
                             Stroke = Brushes.LightGray,
@@ -178,8 +178,8 @@ namespace AMWE_Administrator
                         };
 
                         UserWindow.chartCanvas.Children.Add(oEllipse);
-                        Canvas.SetLeft(oEllipse, holder.Point.X);
-                        Canvas.SetTop(oEllipse, holder.Point.Y);
+                        //Canvas.SetLeft(oEllipse, holder.Point.X);
+                        //Canvas.SetTop(oEllipse, holder.Point.Y);
                     }
 
                     // polyline
