@@ -37,9 +37,10 @@ namespace AMWE_Administrator
             {
                 Uri uri = new Uri(App.ServerAddress);
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Welcome]: Diagnostic connection to AMWE Server located on {uri.AbsoluteUri}...");
-                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ClientListener Hub is {(App.Current.Windows[0] as MainWindow).ClientHandlerConnection.State}");
-                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ReportListener Hub is {(App.Current.Windows[0] as MainWindow).ReportHandleConnection.State}");
-                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ChatSystem Hub is {(App.Current.Windows[0] as MainWindow).ChatSystemConnection.State}");
+                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ClientListener Hub is {MainWindow.ClientHandlerConnection.State}");
+                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ReportListener Hub is {MainWindow.ReportHandleConnection.State}");
+                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ChatSystem Hub is {MainWindow.ChatSystemConnection.State}");
+                WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ScreenTransfer Hub is {MainWindow.ScreenSystemConnection.State}");
                 // ping calculate
                 Ping pingSender = new Ping();
                 string host = uri.Host;

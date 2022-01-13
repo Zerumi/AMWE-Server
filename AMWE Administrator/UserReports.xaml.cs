@@ -1,17 +1,16 @@
-﻿using System;
+﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
+// You can use & improve this code by keeping this comments
+// (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using m3md2;
 using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler;
 
@@ -25,6 +24,7 @@ namespace AMWE_Administrator
         // signalr hub to get screen
 
         public Client UserInWindow;
+        ClientState clientState;
         ReportLineChartDrawer ReportDrawer;
         List<Report> userReports;
         bool IsUserConnected;
@@ -34,6 +34,8 @@ namespace AMWE_Administrator
             try
             {
                 InitializeComponent();
+
+                clientState = MainWindow.clientStates.Find(x => x.Client == client);
 
                 this.IsUserConnected = IsUserConnected;
                 UserInWindow = client;
@@ -47,12 +49,24 @@ namespace AMWE_Administrator
 
                 if (IsUserConnected)
                 {
-                    lOnlineStatus.Content = "В сети уже {} часов (с {})"; // calculate from server time
+                    DateTime a = default;
+                    Task.Run(async () =>
+                    {
+                        a = (await ApiRequest.GetProductAsync<DateTime>("/time")).ToLocalTime();
+                    }).Wait();
+                    Timer timer = new Timer()
+                    {
+                        Interval = TimeSpan.FromHours(1).TotalMilliseconds,
+                        AutoReset = true
+                    };
+                    timer.Elapsed += UpdateTimestamp;
+                    var b = a.Subtract(clientState.LastLoginDateTime);
+                    lOnlineStatus.Content = $"В сети уже {b.Hours} часов (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
                 }
                 else
                 {
                     lUserInfo.Content += " (Не в сети)";
-                    lOnlineStatus.Content = "Был в сети с {} по {}"; // add connect & disconnect time (server utc only!)
+                    lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}"; // add connect & disconnect time (server utc only!)
                 }
 
                 foreach (var report in userReports)
@@ -71,6 +85,22 @@ namespace AMWE_Administrator
                 MainWindow.OnNewReport += MainWindow_OnNewReport;
                 MainWindow.OnUserDisconnected += MainWindow_OnUserDisconnected;
                 MainWindow.OnNewScreen += UpdateScreen;
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
+        private async void UpdateTimestamp(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                var a = e.SignalTime.Subtract(clientState.LastLoginDateTime);
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    lOnlineStatus.Content = $"В сети уже {a.Hours} часов (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
+                }));
             }
             catch (Exception ex)
             {
@@ -115,8 +145,8 @@ namespace AMWE_Administrator
                     await Dispatcher.BeginInvoke(new Action(() =>
                     {
                         lUserInfo.Content += " (Не в сети)";
-                        lOnlineStatus.Content = "Был в сети с {} по {}"; // add connect & disconnect time (server utc only!)
-                }));
+                        lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}"; // add connect & disconnect time (server utc only!)
+                    }));
                 }
             }
             catch (Exception ex)
@@ -150,21 +180,10 @@ namespace AMWE_Administrator
 
                     spReports.Children.Add(tempbutton);
 
-                    lUserInfo.Content = $"ID {UserInWindow.Id} / {UserInWindow.Nameofpc}";
                     lRepCount.Content = $"Количество отчетов: {userReports.Count}";
 
                     double avgmark = userReports.Select(x => x.OverallRating).Average(); // collection might be empty!
                     lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
-
-                    if (IsUserConnected)
-                    {
-                        lOnlineStatus.Content = "В сети уже {} часов (с {})"; // calculate from server time
-                    }
-                    else
-                    {
-                        lUserInfo.Content += " (Не в сети)";
-                        lOnlineStatus.Content = "Был в сети с {} по {}"; // add connect & disconnect time (server utc only!)
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -175,7 +194,7 @@ namespace AMWE_Administrator
 
         private async void bScreen_Click(object sender, RoutedEventArgs e)
         {
-            await (App.Current.Windows[0] as MainWindow).ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.ScreenImage);
+            await MainWindow.ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.ScreenImage);
         }
     }
 }

@@ -24,16 +24,17 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class MainWindow : Window, IDisposable
     {
-        readonly List<Notification> notifications = new List<Notification>();
-        readonly List<Client> сurrentclients = new List<Client>();
-        private readonly List<Client> allclients = new List<Client>();
-        readonly List<Chat> chats = new List<Chat>();
-        readonly Stopwatch LastConnectStopwatch = new Stopwatch();
-        readonly List<TextBlock> tbpClientList = new List<TextBlock>();
+        public static readonly List<ClientState> clientStates = new List<ClientState>();
+        static readonly List<Notification> notifications = new List<Notification>();
+        static readonly List<Client> сurrentclients = new List<Client>();
+        static readonly List<Client> allclients = new List<Client>();
+        static readonly List<Chat> chats = new List<Chat>();
+        static readonly Stopwatch LastConnectStopwatch = new Stopwatch();
+        static readonly List<TextBlock> tbpClientList = new List<TextBlock>();
 
         bool isWorkdayStarted = false;
 
-        public readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
+        public static readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -44,7 +45,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        public readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
+        public static readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -55,7 +56,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        public readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options => {
+        public static readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -66,7 +67,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        public readonly HubConnection ScreenSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}screen", options => {
+        public static readonly HubConnection ScreenSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}screen", options => {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -77,7 +78,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        private readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new System.Windows.Forms.NotifyIcon()
+        private static readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new System.Windows.Forms.NotifyIcon()
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
         };
@@ -92,9 +93,9 @@ namespace AMWE_Administrator
             {
                 #region Configure ClientListener Connection
                 ClientHandlerConnection.ServerTimeout = TimeSpan.FromDays(2);
-                ClientHandlerConnection.On<List<Client>>("GetAllClients", UpdateClients);
-                ClientHandlerConnection.On<Client>("OnUserAuth", AddClient);
-                ClientHandlerConnection.On<Client>("OnUserLeft", DeleteClient);
+                ClientHandlerConnection.On<List<ClientState>>("GetAllClients", UpdateClients);
+                ClientHandlerConnection.On<ClientState>("OnUserAuth", AddClient);
+                ClientHandlerConnection.On<ClientState>("OnUserLeft", DeleteClient);
                 ClientHandlerConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -396,13 +397,12 @@ namespace AMWE_Administrator
 #nullable disable
 
         [STAThread]
-        private async void UpdateClients(List<Client> _clients)
+        private async void UpdateClients(List<ClientState> _clientStates)
         {
             try
             {
                 LastConnectStopwatch.Stop();
                 await Dispatcher.BeginInvoke(new Action(async() => {
-                    lClientList.Content = $"Список пользователей ({_clients.Count}):";
                     mLastConnectTime.Header = $"Последнее подключение длилось {LastConnectStopwatch.ElapsedMilliseconds} мс";
                     ClientList.Children.Clear();
                     var temp = mReports.Items[0];
@@ -410,7 +410,7 @@ namespace AMWE_Administrator
                     mReports.Items.Add(temp);
                     сurrentclients.Clear();
                     allclients.Clear();
-                    foreach (var client in _clients)
+                    foreach (var client in _clientStates)
                     {
                         await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
                     }
@@ -422,12 +422,13 @@ namespace AMWE_Administrator
             }
         }
 
-        private async void AddClient(Client client)
+        private async void AddClient(ClientState clientState)
         {
             try
             {
                 await Dispatcher.BeginInvoke((Action)(() =>
                 {
+                    var client = clientState.Client;
                     TextBlock temptextblock = new TextBlock()
                     {
                         Name = $"ID{client.Id}",
@@ -437,6 +438,7 @@ namespace AMWE_Administrator
                     temptextblock.MouseEnter += TextBlock_GotMouseCapture;
                     сurrentclients.Add(client);
                     allclients.Add(client);
+                    clientStates.Add(clientState);
                     lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
                     ClientList.Children.Add(temptextblock);
                     tbpClientList.Add(temptextblock);
@@ -459,10 +461,11 @@ namespace AMWE_Administrator
 
         public static event Action<Client> OnUserDisconnected;
 
-        private async void DeleteClient(Client client)
+        private async void DeleteClient(ClientState clientState)
         {
             try
             {
+                var client = clientState.Client;
                 if (client != null)
                 {
                     OnUserDisconnected?.Invoke(client);
@@ -659,7 +662,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.0701 beta 5\nAMWE RealTime server version 1.2.2022.0801\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.1401 beta 7\nAMWE RealTime server version 1.3.2022.1401\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {

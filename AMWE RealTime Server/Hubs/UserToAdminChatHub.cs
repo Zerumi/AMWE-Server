@@ -98,15 +98,15 @@ namespace AMWE_RealTime_Server.Hubs
             var chat = chatStates.Find(x => x.ID == ChatID);
             string user;
             bool check;
-            try
+            if (Context.ConnectionId == chat.AdminConnectionID)
+            {
+                check = true;
+                user = Context.User.Identity.Name;
+            }
+            else
             {
                 check = uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3)) == chat.User.Id;
                 user = chat.User.Nameofpc;
-            }
-            catch (Exception)
-            {
-                check = Context.ConnectionId == chat.AdminConnectionID;
-                user = Context.User.Identity.Name;
             }
             if (chat.IsAccepted && check)
             {
@@ -119,19 +119,15 @@ namespace AMWE_RealTime_Server.Hubs
             _logger.LogInformation($"Вызван CloseChat от {Context.User.Identity.Name}");
             var chat = chatStates.Find(x => x.ID == ChatID);
             bool check;
-            try
-            {
+            if (Context.ConnectionId == chat.AdminConnectionID)
+                check = true;
+            else
                 check = uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3)) == chat.User.Id;
-            }
-            catch (Exception)
-            {
-                check = Context.ConnectionId == chat.AdminConnectionID;
-            } // optimize
             if (check)
             {
                 _logger.LogInformation($"CloseDeleteChat вызыван у чата {ChatID}");
                 await Clients.Group($"Chat {ChatID}").SendAsync("CloseDeleteChat", ChatID);
-                chatStates.Remove(chat);
+                _ = chatStates.Remove(chat);
             }
         }
     }

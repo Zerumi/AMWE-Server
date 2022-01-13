@@ -1,9 +1,9 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AMWE_RealTime_Server.Hubs;
@@ -34,6 +34,7 @@ namespace AMWE_RealTime_Server.Controllers
         public static uint GlobalClientId = 0;
 
         public static List<Client> GlobalClientsList = new List<Client>();
+        public static List<ClientState> GlobalClientStatesList = new List<ClientState>();
         public static Dictionary<uint, ClaimsPrincipal> GlobalUsersList = new Dictionary<uint, ClaimsPrincipal>();
 
         [HttpPost]
@@ -51,14 +52,20 @@ namespace AMWE_RealTime_Server.Controllers
                     ClaimsIdentity.DefaultRoleClaimType);
                 ClaimsPrincipal user = new ClaimsPrincipal(id);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, user);
-                var client = new Client
+                Client client = new Client()
                 {
                     Id = GlobalClientId,
                     Nameofpc = authdata[0]
                 };
+                ClientState clientState = new ClientState()
+                {
+                    Client = client,
+                    LastLoginDateTime = DateTime.Now
+                };
                 GlobalUsersList.Add(client.Id, user);
                 GlobalClientsList.Add(client);
-                await _hubContext.Clients.All.SendAsync("OnUserAuth", client);
+                GlobalClientStatesList.Add(clientState);
+                await _hubContext.Clients.All.SendAsync("OnUserAuth", clientState);
                 GlobalClientId++;
                 return client;
             }
@@ -97,11 +104,12 @@ namespace AMWE_RealTime_Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Logout(uint id)
         {
-            var a = GlobalClientsList.Find(x => x.Id == id);
+            ClientState a = GlobalClientStatesList.Find(x => x.Client.Id == id);
             if (a != null)
             {
+                a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
-                GlobalClientsList.Remove(a);
+                GlobalClientsList.Remove(a.Client);
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
             return NoContent();

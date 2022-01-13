@@ -78,10 +78,10 @@ namespace AMWE_RealTime_Server.Hubs
             uint cid = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3));
             var AdmIds = screenTransfer.FindAll(x => x.cid == cid && x.type == type);
             _logger.LogInformation($"Клиент {cid} ответил на запрос {type} у одного или нескольких администраторов ({AdmIds.Count})");
-            foreach (var a in AdmIds)
+            foreach (ScreenState a in AdmIds)
             {
-                await Clients.Client(a.adm).SendAsync("NewScreen", screen, ReportHub.connectedClients.FirstOrDefault(x => x.Value.Id == cid).Value);
-                screenTransfer.Remove(a);
+                await Clients.Client(a.adm).SendAsync("NewScreen", screen, ReportHub.connectedClients.FirstOrDefault(x => x.Value.Id == cid).Value, type);
+                _ = screenTransfer.Remove(a);
             }
         }
 
