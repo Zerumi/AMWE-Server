@@ -66,12 +66,25 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
+        public readonly HubConnection ScreenSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}screen", options => {
+            options.UseDefaultCredentials = true;
+            if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
+            {
+                options.Transports = HttpTransportType.WebSockets;
+                options.SkipNegotiation = true;
+            }
+            options.Headers.Add("User-Agent", "Mozilla/5.0");
+            options.Cookies.Add(App.AuthCookie);
+        }).Build();
+
         private readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new System.Windows.Forms.NotifyIcon()
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
         };
 
         public static event Action<Screen, Client> OnNewScreen;
+
+        public static event Action<Screen, Client> OnNewWebcam;
 
         public MainWindow()
         {
@@ -84,7 +97,7 @@ namespace AMWE_Administrator
                 ClientHandlerConnection.On<Client>("OnUserLeft", DeleteClient);
                 ClientHandlerConnection.Closed += async (error) =>
                 {
-                    ExceptionHandler.RegisterNew(error);
+                    ExceptionHandler.RegisterNew(error, false);
                     try
                     {
                         await ClientHandlerConnection.StartAsync();
@@ -126,7 +139,7 @@ namespace AMWE_Administrator
                 }));
                 ReportHandleConnection.Closed += async (error) =>
                 {
-                    ExceptionHandler.RegisterNew(error);
+                    ExceptionHandler.RegisterNew(error, false);
                     try
                     {
                         await ReportHandleConnection.StartAsync();
@@ -164,10 +177,9 @@ namespace AMWE_Administrator
                 ChatSystemConnection.On<uint, string, string, DateTime>("ReceiveMessage", RecieveMessage);
                 ChatSystemConnection.On<uint>("AcceptChatID", AcceptChat);
                 ChatSystemConnection.On<uint>("CloseDeleteChat", DeleteChat);
-                ChatSystemConnection.On<Screen, Client>("NewScreen", (s, c) => OnNewScreen?.Invoke(s, c));
                 ChatSystemConnection.Closed += async (error) =>
                 {
-                    ExceptionHandler.RegisterNew(error);
+                    ExceptionHandler.RegisterNew(error, false);
                     try
                     {
                         await ChatSystemConnection.StartAsync();
@@ -187,6 +199,44 @@ namespace AMWE_Administrator
                     try
                     {
                         await ChatSystemConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
+                });
+                #endregion
+
+                #region Configure ScreenSystem Connection
+                ScreenSystemConnection.ServerTimeout = TimeSpan.FromDays(2);
+                ScreenSystemConnection.On<Screen, Client, ScreenType>("NewScreen", rmNewScreen);
+                ScreenSystemConnection.Closed += async (error) =>
+                {
+                    ExceptionHandler.RegisterNew(error, false);
+                    try
+                    {
+                        await ScreenSystemConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
+                };
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await ScreenSystemConnection.StartAsync();
                     }
                     catch (Exception ex)
                     {
@@ -259,6 +309,7 @@ namespace AMWE_Administrator
 
         private void ExitItem_Click(object sender, EventArgs e)
         {
+            notifyIcon1.Dispose();
             Environment.Exit(0);
         }
 
@@ -546,11 +597,12 @@ namespace AMWE_Administrator
         {
             try
             {
-                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nChat System: {ChatSystemConnection.State} [{await ChatSystemConnection.InvokeAsync<string>("GetTransportType")}]");
+                _ = MessageBox.Show($"Client Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nChat System: {ChatSystemConnection.State} [{await ChatSystemConnection.InvokeAsync<string>("GetTransportType")}]\nScreen Transfer: {ScreenSystemConnection.State} [{await ScreenSystemConnection.InvokeAsync<string>("GetTransportType")}]");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nChat System: {ChatSystemConnection.State}");
+                ExceptionHandler.RegisterNew(ex, false);
+                _ = MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nChat System: {ChatSystemConnection.State}\n Screen Transfer: {ScreenSystemConnection.State}");
             }
         }
 
@@ -656,7 +708,7 @@ namespace AMWE_Administrator
                     {
                         textBlock = new TextBlock()
                         {
-                            Text = $"({DateTime.Now.ToShortTimeString()}) Всем клиентам сейчас сообщено что собирать и отправлять отчеты бесполезно и не нужно. Запустите рабочий день, чтобы начать сбор отчетов.",
+                            Text = $"({DateTime.Now.ToShortTimeString()}) Всем клиентам сейчас сообщено что собирать и отправлять отчеты не нужно. Запустите рабочий день, чтобы начать сбор отчетов.",
                             Foreground = App.FontColor
                         };
                         textBlock.MouseEnter += Notification_GotMouseCapture;
@@ -845,6 +897,22 @@ namespace AMWE_Administrator
             catch (Exception ex)
             {
                 ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
+        private void rmNewScreen(Screen screen, Client client, ScreenType type)
+        {
+            switch (type)
+            {
+                case ScreenType.ScreenImage:
+                    OnNewScreen?.Invoke(screen, client);
+                    break;
+                case ScreenType.WebcamImage:
+                    OnNewWebcam?.Invoke(screen, client);
+                    break;
+                default:
+                    _ = MessageBox.Show("(17.6) С сервера получено неизвестное значение типа изображения.");
+                    break;
             }
         }
 

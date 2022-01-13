@@ -64,6 +64,12 @@ namespace AMWE_RealTime_Server
                     options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
                     options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
                 });
+                routes.MapHub<ScreenHub>("/screen", options =>
+                {
+                    options.ApplicationMaxBufferSize = 52428800;
+                    options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
+                    options.LongPolling.PollTimeout = TimeSpan.FromDays(1);
+                });
                 routes.MapHub<ClientHandlerHub>("/listen/clients", options => {
                     options.WebSockets.CloseTimeout = TimeSpan.FromDays(1);
                     options.LongPolling.PollTimeout = TimeSpan.FromDays(1);

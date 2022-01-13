@@ -175,7 +175,7 @@ namespace AMWE_Administrator
 
         private async void bScreen_Click(object sender, RoutedEventArgs e)
         {
-            await (App.Current.Windows[0] as MainWindow).ChatSystemConnection.InvokeAsync("RequestScreen", UserInWindow);
+            await (App.Current.Windows[0] as MainWindow).ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.ScreenImage);
         }
     }
 }

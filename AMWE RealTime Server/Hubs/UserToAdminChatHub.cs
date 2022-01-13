@@ -19,8 +19,6 @@ namespace AMWE_RealTime_Server.Hubs
     {
         private readonly ILogger _logger;
 
-        private static readonly Dictionary<uint, string> screenTransfer = new Dictionary<uint, string>();
-
         public UserToAdminChatHub(ILogger<UserToAdminChatHub> logger)
         {
             _logger = logger;
@@ -128,37 +126,13 @@ namespace AMWE_RealTime_Server.Hubs
             catch (Exception)
             {
                 check = Context.ConnectionId == chat.AdminConnectionID;
-            }
+            } // optimize
             if (check)
             {
                 _logger.LogInformation($"CloseDeleteChat вызыван у чата {ChatID}");
                 await Clients.Group($"Chat {ChatID}").SendAsync("CloseDeleteChat", ChatID);
                 chatStates.Remove(chat);
             }
-        }
-
-        [Authorize(Roles = Role.GlobalAdminRole)]
-        public async void RequestScreen(Client client)
-        {
-            try
-            {
-                screenTransfer.Add(client.Id, Context.ConnectionId);
-                await Clients.Group($"ID {client.Id}/" + client.Nameofpc).SendAsync("RequestScreen");
-                _logger.LogInformation($"Отправился запрос на скриншот");
-
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        [Authorize(Roles = Role.GlobalUserRole)]
-        public async void TransferScreen(Screen screen)
-        {
-            uint cid = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3));
-            screenTransfer.TryGetValue(cid, out string AdmId);
-            await Clients.User(AdmId).SendAsync("NewScreen", screen, ReportHub.connectedClients.FirstOrDefault(x => x.Value.Id == cid).Value);
         }
     }
 
