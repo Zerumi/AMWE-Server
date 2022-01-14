@@ -20,3 +20,6 @@ dotnet_diagnostic.CA1305.severity = none
 
 # IDE0011: Добавить фигурные скобки
 dotnet_diagnostic.IDE0011.severity = none
+
+# CA1051: Не объявляйте видимые поля экземпляров
+dotnet_diagnostic.CA1051.severity = none

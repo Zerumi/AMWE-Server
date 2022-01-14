@@ -438,6 +438,7 @@ namespace AMWE_Administrator
                 {
                     Client client = clientState.Client;
                     clientStates.Add(clientState);
+                    allclients.Add(client);
                     TextBlock temptextblock = new()
                     {
                         Name = $"ID{client.Id}",
@@ -448,7 +449,6 @@ namespace AMWE_Administrator
                     {
                         temptextblock.MouseEnter += TextBlock_GotMouseCapture;
                         сurrentclients.Add(client);
-                        allclients.Add(client);
                         lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
                         _ = ClientList.Children.Add(temptextblock);
                         tbpClientList.Add(temptextblock);

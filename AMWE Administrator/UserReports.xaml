@@ -18,7 +18,7 @@
         <Canvas x:Name="chartCanvas"
                 Background="White" ClipToBounds="True" Grid.Column="1" Margin="0,41,10,0" Height="116" VerticalAlignment="Top"/>
         <Grid x:Name="gScreenViewer" Grid.Row="1" Grid.Column="1" Margin="10,10,10,10">
-            <Image x:Name="iScreen" Margin="10,50,10,60" Source="D:\Zerumi\image.png"/>
+            <Image x:Name="iScreen" Margin="10,50,10,60"/>
             <Button x:Name="bScreen" Content="Снимок экрана" Margin="0,0,170,10" HorizontalAlignment="Right" Width="120" Height="27" VerticalAlignment="Bottom" Click="BScreen_Click"/>
             <Button x:Name="bSaveScr" Content="Сохр." Margin="0,0,110,10" HorizontalAlignment="Right" Width="50" Height="27" VerticalAlignment="Bottom"/>
             <Label x:Name="lGetScreen" Content="Получить снимок экрана компьютера для самостоятельного анализа:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="420"/>

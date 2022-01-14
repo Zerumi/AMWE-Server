@@ -60,6 +60,7 @@ namespace AMWE_RealTime_Server.Controllers
                 ClientState clientState = new ClientState()
                 {
                     Client = client,
+                    IsOnline = true,
                     LastLoginDateTime = DateTime.Now
                 };
                 GlobalUsersList.Add(client.Id, user);
@@ -107,6 +108,7 @@ namespace AMWE_RealTime_Server.Controllers
             ClientState a = GlobalClientStatesList.Find(x => x.Client.Id == id);
             if (a != null)
             {
+                a.IsOnline = false;
                 a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
                 GlobalClientsList.Remove(GlobalClientsList.Find(x => x.Id == a.Client.Id));

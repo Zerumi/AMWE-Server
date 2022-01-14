@@ -50,8 +50,14 @@ namespace AMWE_Administrator
 
                 UserInWindow = client;
                 userReports = App.reports.FindAll(x => x.Client.Id == UserInWindow.Id); // long time parsing??
-                ReportDrawer = new(this, userReports);
-                double avgmark = userReports.Select(x => x.OverallRating).Average();
+
+                double avgmark = 0;
+
+                if (userReports.Count != 0)
+                {
+                    ReportDrawer = new(this, userReports);
+                    avgmark = userReports.Select(x => x.OverallRating).Average();
+                }
 
                 lUserInfo.Content = $"ID {UserInWindow.Id} / {UserInWindow.Nameofpc}";
                 lRepCount.Content = $"Количество отчетов: {userReports.Count}";
@@ -77,6 +83,7 @@ namespace AMWE_Administrator
                 {
                     lUserInfo.Content += " (Не в сети)";
                     lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}"; // add connect & disconnect time (server utc only!)
+                    bScreen.IsEnabled = false;
                 }
 
                 foreach (Report report in userReports)
@@ -157,6 +164,7 @@ namespace AMWE_Administrator
                     {
                         lUserInfo.Content += " (Не в сети)";
                         lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}"; // add connect & disconnect time (server utc only!)
+                        bScreen.IsEnabled = false;
                     }));
                 }
             }

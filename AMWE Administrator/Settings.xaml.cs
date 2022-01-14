@@ -33,7 +33,7 @@ namespace AMWE_Administrator
     {
         public MyList<bool> BitArray { get; set; }
 
-        public int Colorindex { get; set; }
+        public int Colorindex;
 
         public Settings()
         {
