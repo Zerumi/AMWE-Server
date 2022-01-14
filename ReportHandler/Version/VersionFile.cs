@@ -8,7 +8,7 @@ namespace ReportHandler.Version
     {
         public int ID { get; set; }
         public int VersionID { get; set; }
-        public string filename { get; set; }
-        public byte[] filebytes { get; set; }
+        public string Filename { get; set; }
+        public byte[] Filebytes { get; set; }
     }
 }

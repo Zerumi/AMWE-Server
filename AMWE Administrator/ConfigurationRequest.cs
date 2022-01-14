@@ -11,9 +11,9 @@ namespace AMWE_Administrator
     {
         public static void WriteValueByKey(string key, string value)
         {
-            var appSettings = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            Configuration appSettings = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-            var item = Array.Find(appSettings.AppSettings.Settings.OfType<KeyValueConfigurationElement>().ToArray(), x => x.Key == key);
+            KeyValueConfigurationElement item = Array.Find(appSettings.AppSettings.Settings.OfType<KeyValueConfigurationElement>().ToArray(), x => x.Key == key);
             item.Value = value;
             appSettings.Save(ConfigurationSaveMode.Minimal);
             ConfigurationManager.RefreshSection("appSettings");

@@ -25,7 +25,7 @@
                             <RowDefinition Height="25"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <CheckBox x:Name="cbAllowSocketsOnly" Content="Разрешать соединение только через WebSockets" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Checked="cbAllowSocketsOnly_Checked" Unchecked="cbAllowSocketsOnly_Checked"/>
+                        <CheckBox x:Name="cbAllowSocketsOnly" Content="Разрешать соединение только через WebSockets" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Checked="CbAllowSocketsOnly_Checked" Unchecked="CbAllowSocketsOnly_Checked"/>
                         <CheckBox x:Name="cbExpect100Continue" Content="Игнорировать ожидание" Grid.Row="1" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
                     </Grid>
                 </TabItem.Content>
@@ -43,7 +43,7 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label Content="Цветовая тема" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="comboxColorTheme" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Center" SelectionChanged="comboxColorTheme_SelectionChanged"/>
+                        <ComboBox x:Name="comboxColorTheme" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Center" SelectionChanged="ComboxColorTheme_SelectionChanged"/>
                     </Grid>
                 </TabItem.Content>
             </TabItem>

@@ -15,7 +15,8 @@ namespace AMWE_RealTime_Server.Models
         public int ProcessRating { get; set; }
 
         public ICollection<KeyPressedInfo> KeyPressedInfo { get; set; }
-        public bool isMouseCoordChanged { get; set; }
+        public int PressingCount { get; set; }
+        public bool IsMouseCoordChanged { get; set; }
 
         public int ProcessChangedCount { get; set; }
         public ICollection<string> OldProcesses { get; set; }

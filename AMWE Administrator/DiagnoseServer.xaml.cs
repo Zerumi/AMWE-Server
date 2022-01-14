@@ -15,7 +15,7 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class DiagnoseServer : Window
     {
-        private bool CheckEnded = false;
+        private bool CheckEnded;
 
         public async void WriteLine(string line)
         {
@@ -31,21 +31,21 @@ namespace AMWE_Administrator
             Diagnose();
         }
 
-        async void Diagnose()
+        private async void Diagnose()
         {
             try
             {
-                Uri uri = new Uri(App.ServerAddress);
+                Uri uri = new(App.ServerAddress);
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Welcome]: Diagnostic connection to AMWE Server located on {uri.AbsoluteUri}...");
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ClientListener Hub is {MainWindow.ClientHandlerConnection.State}");
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ReportListener Hub is {MainWindow.ReportHandleConnection.State}");
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ChatSystem Hub is {MainWindow.ChatSystemConnection.State}");
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Stable Hubs]: Connection state for ScreenTransfer Hub is {MainWindow.ScreenSystemConnection.State}");
                 // ping calculate
-                Ping pingSender = new Ping();
+                Ping pingSender = new();
                 string host = uri.Host;
                 long ping = 0;
-                await Task.Run(async() =>
+                await Task.Run(async () =>
                 {
                     PingReply reply = pingSender.Send(host);
                     if (reply.Status == IPStatus.Success)
@@ -69,10 +69,11 @@ namespace AMWE_Administrator
                 // connect to sandbox hub
                 await Task.Run(async () =>
                 {
-                    Stopwatch stopwatch = new Stopwatch();
+                    Stopwatch stopwatch = new();
                     WriteLine($"({DateTime.Now.ToLongTimeString()}) [Sandbox]: Starting connection building to Sandbox Hub...");
                     stopwatch.Start();
-                    HubConnection sandboxHubConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}sandbox", options => {
+                    HubConnection sandboxHubConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}sandbox", options =>
+                    {
                         options.Cookies.Add(App.AuthCookie);
                     }).Build();
                     _ = sandboxHubConnection.On("Connected", new Action<double>(async (x) =>
@@ -95,42 +96,42 @@ namespace AMWE_Administrator
                               lTypeMarker.Content = $"Протокол: {type}";
                           }));
                           WriteLine($"({DateTime.Now.ToLongTimeString()}) [Sandbox]: Connection estabilished with {type} protocol");
-                        // Diagnose end
-                        await Dispatcher.BeginInvoke(new Action(() =>
-                          {
-                              ConnectionType connectionType = (ConnectionType)Enum.Parse(typeof(ConnectionType), type);
-                              double mark = 100000000 * (int)connectionType / (0.036 * ping * delivery * stopwatch.ElapsedMilliseconds);
-                              double roundmark = Math.Round(mark);
-                              lMarkMarker.Content = $"Оценка: {mark}";
-                              if ((delivery < 5538) && (connectionType == ConnectionType.WebSockets))
-                              {
-                                  lbStatus.Content = $"Статус подключения: ОК ({roundmark})";
-                              }
-                              else if (connectionType == ConnectionType.ServerSentEvents)
-                              {
-                                  lbStatus.Content = $"Статус подключения: Совсем не всё в порядке ({roundmark})";
-                                  MessageBox.Show("Check your internet connection configuration, because we can't estabilish WebSockets connection.");
-                              }
-                              else if (stopwatch.ElapsedMilliseconds - delivery < 14000)
-                              {
-                                  lbStatus.Content = $"Статус подключения: Медленная конфигурация ({roundmark})";
-                              }
-                              else if (delivery < 7000 || ping > 400)
-                              {
-                                  lbStatus.Content = $"Статус подключения: Медленное соединение ({roundmark})";
-                              }
-                              else
-                              {
-                                  lbStatus.Content = "Server status: Bad";
-                              }
-                              CheckEnded = true;
-                          }));
+                          // Diagnose end
+                          await Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                ConnectionType connectionType = (ConnectionType)Enum.Parse(typeof(ConnectionType), type);
+                                double mark = 100000000 * (int)connectionType / (0.036 * ping * delivery * stopwatch.ElapsedMilliseconds);
+                                double roundmark = Math.Round(mark);
+                                lMarkMarker.Content = $"Оценка: {mark}";
+                                if ((delivery < 5538) && (connectionType == ConnectionType.WebSockets))
+                                {
+                                    lbStatus.Content = $"Статус подключения: ОК ({roundmark})";
+                                }
+                                else if (connectionType == ConnectionType.ServerSentEvents)
+                                {
+                                    lbStatus.Content = $"Статус подключения: Совсем не всё в порядке ({roundmark})";
+                                    _ = MessageBox.Show("Check your internet connection configuration, because we can't estabilish WebSockets connection.");
+                                }
+                                else if (stopwatch.ElapsedMilliseconds - delivery < 14000)
+                                {
+                                    lbStatus.Content = $"Статус подключения: Медленная конфигурация ({roundmark})";
+                                }
+                                else if (delivery < 7000 || ping > 400)
+                                {
+                                    lbStatus.Content = $"Статус подключения: Медленное соединение ({roundmark})";
+                                }
+                                else
+                                {
+                                    lbStatus.Content = "Server status: Bad";
+                                }
+                                CheckEnded = true;
+                            }));
                           await sandboxHubConnection.DisposeAsync();
                       }));
                     await sandboxHubConnection.StartAsync();
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 WriteLine($"({DateTime.Now.ToLongTimeString()}) [Error]: Диагностика остановлена из-за возникшего исключения {ex.Message}");
                 ExceptionHandler.RegisterNew(ex);
@@ -142,7 +143,7 @@ namespace AMWE_Administrator
         {
             if (!CheckEnded)
             {
-                MessageBox.Show("Дождитесь окончания проверки.");
+                _ = MessageBox.Show("Дождитесь окончания проверки.");
                 e.Cancel = true;
             }
         }

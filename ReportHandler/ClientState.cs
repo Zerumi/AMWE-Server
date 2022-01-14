@@ -8,6 +8,7 @@ namespace ReportHandler
     public class ClientState
     {
         public Client Client { get; set; }
+        public bool IsOnline { get; set; }
         public DateTime LastLoginDateTime { get; set; }
         public DateTime LastLogoutDateTime { get; set; }
     }

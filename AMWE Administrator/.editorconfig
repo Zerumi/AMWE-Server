@@ -2,3 +2,21 @@
 
 # CS0108: Член скрывает унаследованный член: отсутствует новое ключевое слово
 dotnet_diagnostic.CS0108.severity = none
+
+# CA5379: Не используйте слабый алгоритм функции формирования ключа.
+dotnet_diagnostic.CA5379.severity = none
+
+# IDE0011: Добавить фигурные скобки
+csharp_prefer_braces = false
+
+# IDE0045: Преобразовать в условное выражение
+dotnet_style_prefer_conditional_expression_over_assignment = false
+
+# CA1707: Идентификаторы не должны содержать символы подчеркивания
+dotnet_diagnostic.CA1707.severity = none
+
+# CA1305: Укажите IFormatProvider
+dotnet_diagnostic.CA1305.severity = none
+
+# IDE0011: Добавить фигурные скобки
+dotnet_diagnostic.IDE0011.severity = none

@@ -30,13 +30,13 @@ namespace AMWE_Administrator
             object returnproduct = default;
             try
             {
-                CookieContainer cookies = new CookieContainer();
-                HttpClientHandler handler = new HttpClientHandler
+                CookieContainer cookies = new();
+                HttpClientHandler handler = new()
                 {
                     CookieContainer = cookies
                 };
 
-                HttpClient client = new HttpClient(handler)
+                HttpClient client = new(handler)
                 {
                     BaseAddress = new Uri(App.ServerAddress)
                 };
@@ -44,13 +44,13 @@ namespace AMWE_Administrator
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36");
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(authdata);
                 HttpResponseMessage response = client.PostAsync($"auth", new StringContent(json, Encoding.UTF8, "application/json")).GetAwaiter().GetResult();
-                response.EnsureSuccessStatusCode();
+                _ = response.EnsureSuccessStatusCode();
                 returnproduct = response.Content.ReadAsAsync<object>().GetAwaiter().GetResult();
                 try
                 {
-                    Uri uri = new Uri($"{App.ServerAddress}auth");
+                    Uri uri = new($"{App.ServerAddress}auth");
                     IEnumerable<Cookie> responseCookies = cookies.GetCookies(uri).Cast<Cookie>();
-                    CookieCollection collection = new CookieCollection();
+                    CookieCollection collection = new();
                     responseCookies.ToList().ForEach(x =>
                     {
                         collection.Add(x);
@@ -72,14 +72,7 @@ namespace AMWE_Administrator
 
         public string ResponseText
         {
-            get
-            {
-                if (cbShow.IsChecked.GetValueOrDefault())
-                {
-                    return sResponseTextBox.Text;
-                }
-                return ResponseTextBox.Password;
-            }
+            get => cbShow.IsChecked.GetValueOrDefault() ? sResponseTextBox.Text : ResponseTextBox.Password;
             set
             {
                 if (cbShow.IsChecked.GetValueOrDefault())
@@ -92,8 +85,8 @@ namespace AMWE_Administrator
 
         public string ServerText
         {
-            get { return ServerTextBox.Text; }
-            set { ServerTextBox.Text = value; }
+            get => ServerTextBox.Text;
+            set => ServerTextBox.Text = value;
         }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
@@ -123,10 +116,10 @@ namespace AMWE_Administrator
                 App.ServerDateTime = (await m3md2.ApiRequest.GetProductAsync<DateTime>("time")).ToLocalTime();
                 AuthButton.Content = "Проверка...";
                 object authresult = default;
-                var nocryptpass = ResponseText;
-                await Task.Run(() => 
+                string nocryptpass = ResponseText;
+                await Task.Run(() =>
                 {
-                    authresult = AuthUser(new string[] { App.Username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString()}, out App.AuthCookie);
+                    authresult = AuthUser(new string[] { App.Username, Encryption.Encrypt(nocryptpass), Assembly.GetExecutingAssembly().GetName().Version.ToString(), Assembly.LoadFrom("ReportHandler.dll").GetName().Version.ToString(), Assembly.LoadFrom("m3md2.dll").GetName().Version.ToString() }, out App.AuthCookie);
                 });
                 AuthButton.Content = "Загрузка...";
                 if (authresult is List<VersionFile>)
@@ -135,29 +128,29 @@ namespace AMWE_Administrator
                 }
                 switch (authresult)
                 {
-                    case bool _:
+                    case bool:
                         {
                             if ((bool)authresult)
                             {
                                 ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                                MainWindow mainWindow = new MainWindow();
+                                MainWindow mainWindow = new();
                                 mainWindow.Show();
                                 Application.Current.MainWindow.Close();
                             }
                             else
                             {
-                                MessageBox.Show("Неправильный пароль");
+                                _ = MessageBox.Show("Неправильный пароль");
                             }
 
                             break;
                         }
 
-                    case string _:
+                    case string:
                         {
                             if ((string)authresult == "Developer")
                             {
                                 ConfigurationRequest.WriteValueByKey("MainUri", ServerText);
-                                DeveloperControlPanel controlPanel = new DeveloperControlPanel();
+                                DeveloperControlPanel controlPanel = new();
                                 controlPanel.Show();
                                 Application.Current.MainWindow.Close();
                             }
@@ -167,7 +160,7 @@ namespace AMWE_Administrator
 
                     default:
                         {
-                            MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать: {authresult}");
+                            _ = MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать: {authresult}");
 
                             break;
                         }
@@ -193,7 +186,7 @@ namespace AMWE_Administrator
                 ResponseTextBox.Visibility = Visibility.Collapsed;
                 sResponseTextBox.Visibility = Visibility.Visible;
                 sResponseTextBox.Text = ResponseTextBox.Password;
-                sResponseTextBox.Focus();
+                _ = sResponseTextBox.Focus();
             }
             catch (Exception ex)
             {
@@ -208,7 +201,7 @@ namespace AMWE_Administrator
                 sResponseTextBox.Visibility = Visibility.Collapsed;
                 ResponseTextBox.Visibility = Visibility.Visible;
                 ResponseTextBox.Password = sResponseTextBox.Text;
-                ResponseTextBox.Focus();
+                _ = ResponseTextBox.Focus();
             }
             catch (Exception ex)
             {
@@ -220,7 +213,7 @@ namespace AMWE_Administrator
         {
             UsernameTextBox.Text = Environment.UserName;
             ServerText = ConfigurationRequest.GetValueByKey("MainUri");
-            ResponseTextBox.Focus();
+            _ = ResponseTextBox.Focus();
         }
     }
 }

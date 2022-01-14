@@ -21,13 +21,10 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class UserReports : Window
     {
-        // signalr hub to get screen
-
-        public Client UserInWindow;
-        ClientState clientState;
-        ReportLineChartDrawer ReportDrawer;
-        List<Report> userReports;
-        bool IsUserConnected;
+        public Client UserInWindow { get; set; }
+        private readonly ClientState clientState;
+        private readonly ReportLineChartDrawer ReportDrawer;
+        private readonly List<Report> userReports;
 
         public UserReports(Client client, bool IsUserConnected)
         {
@@ -35,9 +32,22 @@ namespace AMWE_Administrator
             {
                 InitializeComponent();
 
+                Grid.Background = App.MainColor;
+                gScreenViewer.Background = App.MainColor;
+                chartCanvas.Background = App.MainColor;
+
+                foreach (Label obj in WinHelper.FindVisualChildren<Label>(gScreenViewer))
+                {
+                    obj.Foreground = App.FontColor;
+                }
+
+                foreach (Label obj in WinHelper.FindVisualChildren<Label>(Grid))
+                {
+                    obj.Foreground = App.FontColor;
+                }
+
                 clientState = MainWindow.clientStates.Find(x => x.Client == client);
 
-                this.IsUserConnected = IsUserConnected;
                 UserInWindow = client;
                 userReports = App.reports.FindAll(x => x.Client.Id == UserInWindow.Id); // long time parsing??
                 ReportDrawer = new(this, userReports);
@@ -54,13 +64,13 @@ namespace AMWE_Administrator
                     {
                         a = (await ApiRequest.GetProductAsync<DateTime>("/time")).ToLocalTime();
                     }).Wait();
-                    Timer timer = new Timer()
+                    Timer timer = new()
                     {
                         Interval = TimeSpan.FromHours(1).TotalMilliseconds,
                         AutoReset = true
                     };
                     timer.Elapsed += UpdateTimestamp;
-                    var b = a.Subtract(clientState.LastLoginDateTime);
+                    TimeSpan b = a.Subtract(clientState.LastLoginDateTime);
                     lOnlineStatus.Content = $"В сети уже {b.Hours} часов (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
                 }
                 else
@@ -69,17 +79,17 @@ namespace AMWE_Administrator
                     lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}"; // add connect & disconnect time (server utc only!)
                 }
 
-                foreach (var report in userReports)
+                foreach (Report report in userReports)
                 {
-                    var a = App.reports.IndexOf(report);
-                    Button tempbutton = new Button()
+                    int a = App.reports.IndexOf(report);
+                    Button tempbutton = new()
                     {
                         Content = $"Отчет {a} ()" // report timestamp (server utc only!)
                     };
 
                     tempbutton.Click += Reportbutton_Click;
 
-                    spReports.Children.Add(tempbutton);
+                    _ = spReports.Children.Add(tempbutton);
                 }
 
                 MainWindow.OnNewReport += MainWindow_OnNewReport;
@@ -96,7 +106,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                var a = e.SignalTime.Subtract(clientState.LastLoginDateTime);
+                TimeSpan a = e.SignalTime.Subtract(clientState.LastLoginDateTime);
                 await Dispatcher.BeginInvoke(new Action(() =>
                 {
                     lOnlineStatus.Content = $"В сети уже {a.Hours} часов (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
@@ -112,8 +122,9 @@ namespace AMWE_Administrator
         {
             if (UserInWindow.Id == client.Id)
             {
-                Dispatcher.BeginInvoke(new Action(() => {
-                    iScreen.Source = LoadImage(screen.bytes);
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    iScreen.Source = LoadImage(screen.Bytes);
                 }));
             }
         }
@@ -121,8 +132,8 @@ namespace AMWE_Administrator
         private static BitmapImage LoadImage(byte[] imageData)
         {
             if (imageData == null || imageData.Length == 0) return null;
-            var image = new BitmapImage();
-            using (var mem = new MemoryStream(imageData))
+            BitmapImage image = new();
+            using (MemoryStream mem = new(imageData))
             {
                 mem.Position = 0;
                 image.BeginInit();
@@ -157,7 +168,7 @@ namespace AMWE_Administrator
 
         private void Reportbutton_Click(object sender, RoutedEventArgs e)
         {
-            ReportWindow reportWindow = new ReportWindow(userReports[spReports.Children.IndexOf(e.Source as UIElement)]);
+            ReportWindow reportWindow = new(userReports[spReports.Children.IndexOf(e.Source as UIElement)]);
             reportWindow.Show();
         }
 
@@ -168,17 +179,17 @@ namespace AMWE_Administrator
                 try
                 {
                     userReports.Add(obj);
-                    ReportDrawer.values.Add(new Value(ReportDrawer.values.Count, obj.OverallRating * 100));
+                    ReportDrawer.Values.Add(new Value(ReportDrawer.Values.Count, obj.OverallRating * 100));
 
-                    var a = App.reports.IndexOf(obj);
-                    Button tempbutton = new Button()
+                    int a = App.reports.IndexOf(obj);
+                    Button tempbutton = new()
                     {
                         Content = $"Отчет {a} ()" // report timestamp (server utc only!)
                     };
 
                     tempbutton.Click += Reportbutton_Click;
 
-                    spReports.Children.Add(tempbutton);
+                    _ = spReports.Children.Add(tempbutton);
 
                     lRepCount.Content = $"Количество отчетов: {userReports.Count}";
 
@@ -192,7 +203,7 @@ namespace AMWE_Administrator
             }));
         }
 
-        private async void bScreen_Click(object sender, RoutedEventArgs e)
+        private async void BScreen_Click(object sender, RoutedEventArgs e)
         {
             await MainWindow.ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.ScreenImage);
         }

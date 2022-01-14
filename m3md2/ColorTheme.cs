@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace m3md2
 {
-    class ColorTheme
+    internal class ColorTheme
     {
         public string Name { get; set; }
         public Color[] Colors { get; set; }

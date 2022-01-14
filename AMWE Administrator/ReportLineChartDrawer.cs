@@ -1,5 +1,5 @@
 ﻿// LineChart Draw code taken from: https://github.com/kareemsulthan07/Charts/blob/master/LineChart/MainWindow.xaml.cs
-// Code modified for AMWE working
+// Code modified for AMWE working, optimized for c# 9
 using ReportHandler;
 using System;
 using System.Collections.Generic;
@@ -14,33 +14,31 @@ namespace AMWE_Administrator
     public partial class ReportLineChartDrawer
     {
         private Line xAxisLine, yAxisLine;
-        private double xAxisStart = 40, yAxisStart = 10, interval = 10;
+        private readonly double xAxisStart = 40, yAxisStart = 10, interval = 10;
         private Polyline chartPolyline;
 
         private Point origin;
-        private List<Holder> holders;
-        public m3md2.UpgList<Value> values;
+        private readonly List<Holder> holders;
+        public m3md2.UpgList<Value> Values { get; set; }
 
-        private UserReports UserWindow;
-        private Client user;
+        private readonly UserReports UserWindow;
 
         public ReportLineChartDrawer(UserReports window, List<Report> userReports)
         {
             UserWindow = window;
-            user = UserWindow.UserInWindow;
 
             holders = new List<Holder>();
 
-            values = new();
+            Values = new();
 
             for (int i = 0; i < userReports.Count; i++)
             {
-                values.Add(new Value(i, userReports[i].OverallRating * 100));
+                Values.Add(new Value(i, userReports[i].OverallRating * 100));
             }
 
             Paint();
 
-            values.OnAdd += (sender, e) => Paint();
+            Values.OnAdd += (sender, e) => Paint();
             UserWindow.StateChanged += (sender, e) => Paint();
             UserWindow.SizeChanged += (sender, e) => Paint();
         }
@@ -52,7 +50,7 @@ namespace AMWE_Administrator
             {
                 if (UserWindow.ActualWidth > 0 && UserWindow.ActualHeight > 0)
                 {
-                    double xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / values.Count);
+                    double xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / Values.Count);
                     UserWindow.chartCanvas.Children.Clear();
                     holders.Clear();
 
@@ -76,17 +74,17 @@ namespace AMWE_Administrator
                         StrokeThickness = 1,
                     };
 
-                    UserWindow.chartCanvas.Children.Add(xAxisLine);
-                    UserWindow.chartCanvas.Children.Add(yAxisLine);
+                    _ = UserWindow.chartCanvas.Children.Add(xAxisLine);
+                    _ = UserWindow.chartCanvas.Children.Add(yAxisLine);
 
                     origin = new Point(xAxisLine.X1, yAxisLine.Y2);
 
                     // y axis lines
-                    var xValue = xAxisStart;
+                    double xValue = xAxisStart;
                     double xPoint = origin.X + xinterval;
                     while (xPoint < xAxisLine.X2)
                     {
-                        var line = new Line()
+                        Line line = new()
                         {
                             X1 = xPoint,
                             Y1 = yAxisStart - 5,
@@ -97,24 +95,24 @@ namespace AMWE_Administrator
                             Opacity = 1,
                         };
 
-                        UserWindow.chartCanvas.Children.Add(line);
+                        _ = UserWindow.chartCanvas.Children.Add(line);
 
                         xPoint += xinterval;
                         xValue += xinterval;
                     }
 
 
-                    var yTextBlock0 = new TextBlock() { Text = $"{0}" };
-                    UserWindow.chartCanvas.Children.Add(yTextBlock0);
+                    TextBlock yTextBlock0 = new() { Text = $"{0}" };
+                    _ = UserWindow.chartCanvas.Children.Add(yTextBlock0);
                     Canvas.SetLeft(yTextBlock0, origin.X - 20);
                     Canvas.SetTop(yTextBlock0, origin.Y - 10);
 
                     // x axis lines
-                    var yValue = yAxisStart;
+                    double yValue = yAxisStart;
                     double yPoint = origin.Y - interval;
                     while (yPoint > yAxisLine.Y1)
                     {
-                        var line = new Line()
+                        Line line = new()
                         {
                             X1 = xAxisStart,
                             Y1 = yPoint,
@@ -125,12 +123,12 @@ namespace AMWE_Administrator
                             Opacity = 1,
                         };
 
-                        UserWindow.chartCanvas.Children.Add(line);
+                        _ = UserWindow.chartCanvas.Children.Add(line);
 
                         if (yValue / 100 <= 1)
                         {
-                            var textBlock = new TextBlock() { Text = $"{yValue / 100}" };
-                            UserWindow.chartCanvas.Children.Add(textBlock);
+                            TextBlock textBlock = new() { Text = $"{yValue / 100}" };
+                            _ = UserWindow.chartCanvas.Children.Add(textBlock);
                             Canvas.SetLeft(textBlock, line.X1 - 30);
                             Canvas.SetTop(textBlock, yPoint - 10);
                         }
@@ -147,7 +145,7 @@ namespace AMWE_Administrator
                     {
                         while (yPoint > yAxisLine.Y1)
                         {
-                            var holder = new Holder()
+                            Holder holder = new()
                             {
                                 X = x,
                                 Y = y,
@@ -167,9 +165,9 @@ namespace AMWE_Administrator
                     }
 
                     // showing where are the connections points
-                    foreach (var holder in holders)
+                    foreach (Holder holder in holders)
                     {
-                        Ellipse oEllipse = new Ellipse()
+                        Ellipse oEllipse = new()
                         {
                             Fill = Brushes.Red,
                             Width = 1,
@@ -177,7 +175,7 @@ namespace AMWE_Administrator
                             Opacity = 0,
                         };
 
-                        UserWindow.chartCanvas.Children.Add(oEllipse);
+                        _ = UserWindow.chartCanvas.Children.Add(oEllipse);
                         //Canvas.SetLeft(oEllipse, holder.Point.X);
                         //Canvas.SetTop(oEllipse, holder.Point.Y);
                     }
@@ -188,12 +186,12 @@ namespace AMWE_Administrator
                         Stroke = new SolidColorBrush(Color.FromRgb(68, 114, 196)),
                         StrokeThickness = 1,
                     };
-                    UserWindow.chartCanvas.Children.Add(chartPolyline);
+                    _ = UserWindow.chartCanvas.Children.Add(chartPolyline);
 
                     // add connection points to polyline
-                    foreach (var value in values)
+                    foreach (Value value in Values)
                     {
-                        var holder = holders.FirstOrDefault(h => h.X == value.X * xinterval && h.Y == value.Y);
+                        Holder holder = holders.FirstOrDefault(h => h.X == value.X * xinterval && h.Y == value.Y);
                         if (holder != null)
                             chartPolyline.Points.Add(holder.Point);
                     }

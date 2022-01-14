@@ -20,7 +20,7 @@ namespace m3md2
             Color[] colors = colorthemes.Find(x => x.Name == name).Colors;
             if (colors == default)
             {
-                MessageBox.Show("Тема " + name + " не была найдена. Вероятно она была удалена из программы. Последняя удаленная тема: Pinkerity");
+                _ = MessageBox.Show("Тема " + name + " не была найдена. Вероятно она была удалена из программы. Последняя удаленная тема: Pinkerity");
                 colors = new Color[] { Color.FromRgb(255, 255, 255), Color.FromRgb(255, 255, 255), Color.FromRgb(255, 255, 255), Color.FromRgb(255, 255, 255) };
             }
             return colors;
@@ -31,7 +31,7 @@ namespace m3md2
             return colorthemes.Select(x => x.Name).ToArray();
         }
 
-        static readonly List<ColorTheme> colorthemes = new()
+        private static readonly List<ColorTheme> colorthemes = new()
         {
             new ColorTheme
             {

@@ -24,17 +24,18 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class MainWindow : Window, IDisposable
     {
-        public static readonly List<ClientState> clientStates = new List<ClientState>();
-        static readonly List<Notification> notifications = new List<Notification>();
-        static readonly List<Client> сurrentclients = new List<Client>();
-        static readonly List<Client> allclients = new List<Client>();
-        static readonly List<Chat> chats = new List<Chat>();
-        static readonly Stopwatch LastConnectStopwatch = new Stopwatch();
-        static readonly List<TextBlock> tbpClientList = new List<TextBlock>();
+        public static readonly List<ClientState> clientStates = new();
+        private static readonly List<Notification> notifications = new();
+        private static readonly List<Client> сurrentclients = new();
+        private static readonly List<Client> allclients = new();
+        private static readonly List<Chat> chats = new();
+        private static readonly Stopwatch LastConnectStopwatch = new();
+        private static readonly List<TextBlock> tbpClientList = new();
 
-        bool isWorkdayStarted = false;
+        private bool isWorkdayStarted;
 
-        public static readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options => {
+        public static readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options =>
+        {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -45,7 +46,8 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        public static readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options => {
+        public static readonly HubConnection ReportHandleConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}report", options =>
+        {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -56,7 +58,8 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        public static readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options => {
+        public static readonly HubConnection ChatSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}chat", options =>
+        {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -67,7 +70,8 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        public static readonly HubConnection ScreenSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}screen", options => {
+        public static readonly HubConnection ScreenSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}screen", options =>
+        {
             options.UseDefaultCredentials = true;
             if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
@@ -78,7 +82,7 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
-        private static readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new System.Windows.Forms.NotifyIcon()
+        private static readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new()
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
         };
@@ -93,9 +97,9 @@ namespace AMWE_Administrator
             {
                 #region Configure ClientListener Connection
                 ClientHandlerConnection.ServerTimeout = TimeSpan.FromDays(2);
-                ClientHandlerConnection.On<List<ClientState>>("GetAllClients", UpdateClients);
-                ClientHandlerConnection.On<ClientState>("OnUserAuth", AddClient);
-                ClientHandlerConnection.On<ClientState>("OnUserLeft", DeleteClient);
+                _ = ClientHandlerConnection.On<List<ClientState>>("GetAllClients", UpdateClients);
+                _ = ClientHandlerConnection.On<ClientState>("OnUserAuth", AddClient);
+                _ = ClientHandlerConnection.On<ClientState>("OnUserLeft", DeleteClient);
                 ClientHandlerConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -113,29 +117,30 @@ namespace AMWE_Administrator
                         }));
                     }
                 };
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        LastConnectStopwatch.Start();
-                        await ClientHandlerConnection.StartAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        ExceptionHandler.RegisterNew(ex);
-                        await Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
-                            mConnect.IsEnabled = true;
-                        }));
-                    }
-                });
+                _ = Task.Run(async () =>
+                  {
+                      try
+                      {
+                          LastConnectStopwatch.Start();
+                          await ClientHandlerConnection.StartAsync();
+                      }
+                      catch (Exception ex)
+                      {
+                          ExceptionHandler.RegisterNew(ex);
+                          await Dispatcher.BeginInvoke(new Action(() =>
+                          {
+                              mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                              mConnect.IsEnabled = true;
+                          }));
+                      }
+                  });
                 #endregion
 
                 #region Configure ReportHandler Connection
                 ReportHandleConnection.ServerTimeout = TimeSpan.FromDays(2);
-                ReportHandleConnection.On<Report>("CreateReport", CreateReport);
-                ReportHandleConnection.On("SetWorkday", new Action<bool>(async(x) => {
+                _ = ReportHandleConnection.On<Report>("CreateReport", CreateReport);
+                _ = ReportHandleConnection.On("SetWorkday", new Action<bool>(async (x) =>
+                {
                     await Task.Run(() => ChangeWorkdayValue(x));
                 }));
                 ReportHandleConnection.Closed += async (error) =>
@@ -155,29 +160,29 @@ namespace AMWE_Administrator
                         }));
                     }
                 };
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await ReportHandleConnection.StartAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        ExceptionHandler.RegisterNew(ex);
-                        await Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
-                            mConnect.IsEnabled = true;
-                        }));
-                    }
-                });
+                _ = Task.Run(async () =>
+                  {
+                      try
+                      {
+                          await ReportHandleConnection.StartAsync();
+                      }
+                      catch (Exception ex)
+                      {
+                          ExceptionHandler.RegisterNew(ex);
+                          await Dispatcher.BeginInvoke(new Action(() =>
+                          {
+                              mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                              mConnect.IsEnabled = true;
+                          }));
+                      }
+                  });
                 #endregion
 
                 #region Configure ChatSystem Connection
                 ChatSystemConnection.ServerTimeout = TimeSpan.FromDays(2);
-                ChatSystemConnection.On<uint, string, string, DateTime>("ReceiveMessage", RecieveMessage);
-                ChatSystemConnection.On<uint>("AcceptChatID", AcceptChat);
-                ChatSystemConnection.On<uint>("CloseDeleteChat", DeleteChat);
+                _ = ChatSystemConnection.On<uint, string, string, DateTime>("ReceiveMessage", RecieveMessage);
+                _ = ChatSystemConnection.On<uint>("AcceptChatID", AcceptChat);
+                _ = ChatSystemConnection.On<uint>("CloseDeleteChat", DeleteChat);
                 ChatSystemConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -186,7 +191,7 @@ namespace AMWE_Administrator
                         await ChatSystemConnection.StartAsync();
                     }
                     catch (Exception ex)
-                    { 
+                    {
                         ExceptionHandler.RegisterNew(ex);
                         await Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -195,27 +200,27 @@ namespace AMWE_Administrator
                         }));
                     }
                 };
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await ChatSystemConnection.StartAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        ExceptionHandler.RegisterNew(ex);
-                        await Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
-                            mConnect.IsEnabled = true;
-                        }));
-                    }
-                });
+                _ = Task.Run(async () =>
+                  {
+                      try
+                      {
+                          await ChatSystemConnection.StartAsync();
+                      }
+                      catch (Exception ex)
+                      {
+                          ExceptionHandler.RegisterNew(ex);
+                          await Dispatcher.BeginInvoke(new Action(() =>
+                          {
+                              mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                              mConnect.IsEnabled = true;
+                          }));
+                      }
+                  });
                 #endregion
 
                 #region Configure ScreenSystem Connection
                 ScreenSystemConnection.ServerTimeout = TimeSpan.FromDays(2);
-                ScreenSystemConnection.On<Screen, Client, ScreenType>("NewScreen", rmNewScreen);
+                _ = ScreenSystemConnection.On<Screen, Client, ScreenType>("NewScreen", RmNewScreen);
                 ScreenSystemConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -233,37 +238,37 @@ namespace AMWE_Administrator
                         }));
                     }
                 };
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await ScreenSystemConnection.StartAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        ExceptionHandler.RegisterNew(ex);
-                        await Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
-                            mConnect.IsEnabled = true;
-                        }));
-                    }
-                });
+                _ = Task.Run(async () =>
+                  {
+                      try
+                      {
+                          await ScreenSystemConnection.StartAsync();
+                      }
+                      catch (Exception ex)
+                      {
+                          ExceptionHandler.RegisterNew(ex);
+                          await Dispatcher.BeginInvoke(new Action(() =>
+                          {
+                              mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                              mConnect.IsEnabled = true;
+                          }));
+                      }
+                  });
                 #endregion
 
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    notifyIcon1.Visible = true;
-                    notifyIcon1.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
-                    notifyIcon1.ContextMenuStrip.Items.Add("Exit", null, ExitItem_Click);
-                    notifyIcon1.DoubleClick += NotifyIcon1_MouseDoubleClick;
-                }));
+                _ = Dispatcher.BeginInvoke(new Action(() =>
+                  {
+                      notifyIcon1.Visible = true;
+                      notifyIcon1.ContextMenuStrip = new System.Windows.Forms.ContextMenuStrip();
+                      _ = notifyIcon1.ContextMenuStrip.Items.Add("Exit", null, ExitItem_Click);
+                      notifyIcon1.DoubleClick += NotifyIcon1_MouseDoubleClick;
+                  }));
 
                 InitializeComponent();
 
                 mConnect.Header = $"Подключено к {App.ServerAddress}";
 
-                foreach (var obj in WinHelper.FindVisualChildren<Label>(Grid))
+                foreach (Label obj in WinHelper.FindVisualChildren<Label>(Grid))
                 {
                     obj.Foreground = App.FontColor;
                 }
@@ -280,24 +285,25 @@ namespace AMWE_Administrator
 
         private async void DeleteChat(uint id)
         {
-            var chat = chats.Find(x => x.ChatID == id);
-            await Dispatcher.BeginInvoke((Action)(() => { chat.chatClosed = true; chat.Close(); }));
-            MessageBox.Show($"Чат {id} был закрыт и удален, так как одна из сторон закрыла соединение. Вы можете заново открыть чат (пользователь: ID {chat.Client.Id} / {chat.Client.Nameofpc})");
-            chats.Remove(chat);
+            Chat chat = chats.Find(x => x.ChatID == id);
+            await Dispatcher.BeginInvoke((Action)(() => { chat.ChatClosed = true; chat.Close(); }));
+            _ = MessageBox.Show($"Чат {id} был закрыт и удален, так как одна из сторон закрыла соединение. Вы можете заново открыть чат (пользователь: ID {chat.Client.Id} / {chat.Client.Nameofpc})");
+            _ = chats.Remove(chat);
         }
 
         private void RecieveMessage(uint id, string message, string user, DateTime timestamp)
         {
-            var chat = chats.Find(x => x.ChatID == id);
-            chat.Dispatcher.BeginInvoke((Action)(() => chat.AddMessage(timestamp, user, message)));
+            Chat chat = chats.Find(x => x.ChatID == id);
+            _ = chat.Dispatcher.BeginInvoke((Action)(() => chat.AddMessage(timestamp, user, message)));
         }
 
         private void AcceptChat(uint id)
         {
-            var chat = chats.Find(x => x.ChatID == id);
-            chat.Dispatcher.BeginInvoke((Action)(() => {
+            Chat chat = chats.Find(x => x.ChatID == id);
+            _ = chat.Dispatcher.BeginInvoke((Action)(() =>
+            {
                 chat.Show();
-                chat.Activate();
+                _ = chat.Activate();
             }));
             RemoveNotification(notifications.Find(x => x.Name == $"ChatWait{chat.Client.Id}"));
         }
@@ -305,7 +311,7 @@ namespace AMWE_Administrator
         private void NotifyIcon1_MouseDoubleClick(object sender, EventArgs e)
         {
             App.Current.Windows[0].Show();
-            App.Current.Windows[0].Activate();
+            _ = App.Current.Windows[0].Activate();
         }
 
         private void ExitItem_Click(object sender, EventArgs e)
@@ -323,13 +329,13 @@ namespace AMWE_Administrator
                 if (report == null)
                 {
                     // cancel this report
-                    MessageBox.Show("(17.2) Получен пустой отчет. Мы даже не знаем, от кого он :/\nВозможно на API совершена атака.");
+                    _ = MessageBox.Show("(17.2) Получен пустой отчет. Мы даже не знаем, от кого он :/\nВозможно на API совершена атака.");
                     return;
                 }
 
-                await Dispatcher.BeginInvoke((Action)(async() =>
+                await Dispatcher.BeginInvoke((Action)(async () =>
                 {
-                    TextBlock textBlock = new TextBlock()
+                    TextBlock textBlock = new()
                     {
                         Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})",
                         Foreground = App.FontColor
@@ -338,7 +344,7 @@ namespace AMWE_Administrator
                     textBlock.MouseLeave += Notification_LostMouseCapture;
                     textBlock.MouseDown += ReportNotification_MouseDown;
 
-                    var tb = WinHelper.FindChild<TextBlock>(ClientList, $"ID{report.Client.Id}");
+                    TextBlock tb = WinHelper.FindChild<TextBlock>(ClientList, $"ID{report.Client.Id}");
                     if (tb != null)
                     {
                         tb.Foreground = report.OverallRating > 0.5 ? App.RedColor : App.GreenColor;
@@ -386,7 +392,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                notifications.Remove(notification);
+                _ = notifications.Remove(notification);
                 await Dispatcher.BeginInvoke(new ThreadStart(() => spNotifications.Children.Remove(notification?.NotifyBlock)));
             }
             catch (Exception ex)
@@ -402,15 +408,17 @@ namespace AMWE_Administrator
             try
             {
                 LastConnectStopwatch.Stop();
-                await Dispatcher.BeginInvoke(new Action(async() => {
+                await Dispatcher.BeginInvoke(new Action(async () =>
+                {
                     mLastConnectTime.Header = $"Последнее подключение длилось {LastConnectStopwatch.ElapsedMilliseconds} мс";
                     ClientList.Children.Clear();
-                    var temp = mReports.Items[0];
+                    object temp = mReports.Items[0];
                     mReports.Items.Clear();
-                    mReports.Items.Add(temp);
+                    _ = mReports.Items.Add(temp);
                     сurrentclients.Clear();
                     allclients.Clear();
-                    foreach (var client in _clientStates)
+                    lClientList.Content = $"Список пользователей (0):";
+                    foreach (ClientState client in _clientStates)
                     {
                         await ClientList.Dispatcher.BeginInvoke(new Action(() => AddClient(client)));
                     }
@@ -428,29 +436,32 @@ namespace AMWE_Administrator
             {
                 await Dispatcher.BeginInvoke((Action)(() =>
                 {
-                    var client = clientState.Client;
-                    TextBlock temptextblock = new TextBlock()
+                    Client client = clientState.Client;
+                    clientStates.Add(clientState);
+                    TextBlock temptextblock = new()
                     {
                         Name = $"ID{client.Id}",
                         Text = $"ID {client.Id} - {client.Nameofpc}",
                         Foreground = App.FontColor
                     };
-                    temptextblock.MouseEnter += TextBlock_GotMouseCapture;
-                    сurrentclients.Add(client);
-                    allclients.Add(client);
-                    clientStates.Add(clientState);
-                    lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
-                    ClientList.Children.Add(temptextblock);
-                    tbpClientList.Add(temptextblock);
-
-                    MenuItem tempmenuitem = new MenuItem()
+                    if (clientState.IsOnline)
+                    {
+                        temptextblock.MouseEnter += TextBlock_GotMouseCapture;
+                        сurrentclients.Add(client);
+                        allclients.Add(client);
+                        lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
+                        _ = ClientList.Children.Add(temptextblock);
+                        tbpClientList.Add(temptextblock);
+                    }
+                    MenuItem tempmenuitem = new()
                     {
                         Name = temptextblock.Name,
                         Header = temptextblock.Text,
                         Foreground = App.FontColor
                     };
-                    tempmenuitem.Click += rmUniversalUser_Click;
-                    mReports.Items.Add(tempmenuitem);
+                    tempmenuitem.Click += RmUniversalUser_Click;
+                    _ = mReports.Items.Add(tempmenuitem); // save reports on server
+                    // get reports from server, save reports on HDD in spec folder, new *.amwereport
                 }));
             }
             catch (Exception ex)
@@ -465,18 +476,20 @@ namespace AMWE_Administrator
         {
             try
             {
-                var client = clientState.Client;
+                Client client = clientState.Client;
                 if (client != null)
                 {
+                    ClientState oldState = clientStates.Find(x => x.Client.Id == client.Id);
+                    oldState.LastLogoutDateTime = clientState.LastLogoutDateTime;
                     OnUserDisconnected?.Invoke(client);
                     await Dispatcher.BeginInvoke((Action)(() =>
                     {
-                        var a = сurrentclients.Find(x => x.Id == client.Id);
-                        сurrentclients.Remove(a);
+                        Client a = сurrentclients.Find(x => x.Id == client.Id);
+                        _ = сurrentclients.Remove(a);
                         lClientList.Content = $"Список пользователей ({сurrentclients.Count}):";
-                        var temptextblock = tbpClientList.Find(x => x.Text == $"ID {client.Id} - {client.Nameofpc}");
+                        TextBlock temptextblock = tbpClientList.Find(x => x.Text == $"ID {client.Id} - {client.Nameofpc}");
                         ClientList.Children.Remove(temptextblock);
-                        tbpClientList.Remove(temptextblock);
+                        _ = tbpClientList.Remove(temptextblock);
                     }));
                 }
             }
@@ -492,8 +505,8 @@ namespace AMWE_Administrator
             {
                 (e.Source as UIElement).Visibility = Visibility.Collapsed;
                 int eid = ClientList.Children.IndexOf(e.Source as UIElement);
-                int id = Convert.ToInt32((e.Source as TextBlock).Text.GetUntilOrEmpty(" -").Substring(3));
-                Button button = new Button()
+                int id = Convert.ToInt32((e.Source as TextBlock).Text.GetUntilOrEmpty(" -")[3..]);
+                Button button = new()
                 {
                     Content = $"({id}) Начать чат",
                     Margin = (e.Source as FrameworkElement).Margin
@@ -513,12 +526,13 @@ namespace AMWE_Administrator
         {
             try
             {
-                var id = uint.Parse((e.Source as Button).Content.ToString().GetUntilOrEmpty(")").Remove(0,1));
-                var client = сurrentclients.Find(x => x.Id == id);
-                await Dispatcher.BeginInvoke((Action)(async() => {
-                    Chat chat = new Chat(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
+                uint id = uint.Parse((e.Source as Button).Content.ToString().GetUntilOrEmpty(")").Remove(0, 1));
+                Client client = сurrentclients.Find(x => x.Id == id);
+                await Dispatcher.BeginInvoke((Action)(async () =>
+                {
+                    Chat chat = new(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
                     chats.Add(chat);
-                    TextBlock textBlock = new TextBlock()
+                    TextBlock textBlock = new()
                     {
                         Text = $"({DateTime.Now.ToShortTimeString()}) Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
                         Foreground = App.FontColor
@@ -581,14 +595,15 @@ namespace AMWE_Administrator
         {
             try
             {
-                ReportNotification notification = notifications.Find(x => x.NotifyBlock == e.Source as TextBlock) as ReportNotification;
+                ReportNotification notification = notifications.Find(x => x.NotifyBlock == (e.Source as TextBlock)) as ReportNotification;
 
-                Dispatcher.BeginInvoke(new Action(delegate {
-                    ReportWindow reportWindow = new ReportWindow(App.reports[notification.NotifyReportIndex]);
+                _ = Dispatcher.BeginInvoke(new Action(delegate
+                {
+                    ReportWindow reportWindow = new(App.reports[notification.NotifyReportIndex]);
                     reportWindow.Show();
-                    reportWindow.Activate();
+                    _ = reportWindow.Activate();
                 }), System.Windows.Threading.DispatcherPriority.ContextIdle, null);
-                
+
             }
             catch (Exception ex)
             {
@@ -613,9 +628,9 @@ namespace AMWE_Administrator
         {
             try
             {
-                Settings settings = new Settings();
+                Settings settings = new();
                 settings.Show();
-                settings.Activate();
+                _ = settings.Activate();
             }
             catch (Exception ex)
             {
@@ -627,7 +642,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory);
+                _ = Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory);
             }
             catch (Exception ex)
             {
@@ -676,7 +691,7 @@ namespace AMWE_Administrator
             {
                 if (bool.Parse(ConfigurationRequest.GetValueByKey("MinimizeToTray")))
                 {
-                    Array.ForEach(App.Current.Windows.OfType<Window>().ToArray(), (x) => x.Hide());
+                    Array.ForEach(Application.Current.Windows.OfType<Window>().ToArray(), (x) => x.Hide());
                     e.Cancel = true;
                 }
             }
@@ -707,7 +722,7 @@ namespace AMWE_Administrator
                 if (!isWorkdayStarted)
                 {
                     TextBlock textBlock;
-                    await Dispatcher.BeginInvoke((Action)(async() =>
+                    await Dispatcher.BeginInvoke((Action)(async () =>
                     {
                         textBlock = new TextBlock()
                         {
@@ -773,11 +788,11 @@ namespace AMWE_Administrator
             }
             catch (Exception ex)
             {
-                ExceptionHandler.RegisterNew(ex); 
+                ExceptionHandler.RegisterNew(ex);
             }
         }
 
-        private async void mConnect_Click(object sender, RoutedEventArgs e)
+        private async void MConnect_Click(object sender, RoutedEventArgs e)
         {
             mDignose.GotFocus -= Diagnose_Click;
             await Dispatcher.BeginInvoke(new Action(() =>
@@ -849,7 +864,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                DiagnosticExceptionWindow diagnostic1 = new DiagnosticExceptionWindow();
+                DiagnosticExceptionWindow diagnostic1 = new();
                 diagnostic1.Show();
             }
             catch (Exception ex)
@@ -860,9 +875,9 @@ namespace AMWE_Administrator
 
         private void DiagnoseServer_Click(object sender, RoutedEventArgs e)
         {
-            DiagnoseServer wserver = new DiagnoseServer();
+            DiagnoseServer wserver = new();
             wserver.Show();
-            wserver.Activate();
+            _ = wserver.Activate();
         }
 
         private async void Diagnose_Click(object sender, RoutedEventArgs e)
@@ -879,20 +894,20 @@ namespace AMWE_Administrator
 
         private void GoToAMWESite(object sender, RoutedEventArgs e)
         {
-            var ps = new ProcessStartInfo("https://amwe.glitch.me/")
+            ProcessStartInfo ps = new("https://amwe.glitch.me/")
             {
                 UseShellExecute = true,
                 Verb = "open"
             };
-            Process.Start(ps);
+            _ = Process.Start(ps);
         }
 
-        private void rmUniversalUser_Click(object sender, RoutedEventArgs e)
+        private void RmUniversalUser_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var id = uint.Parse((e.Source as FrameworkElement).Name.Remove(0, 2));
-                var client = allclients.Find(x => x.Id == id);
+                uint id = uint.Parse((e.Source as FrameworkElement).Name.Remove(0, 2));
+                Client client = allclients.Find(x => x.Id == id);
 
                 UserReports userReports = new(client, !(сurrentclients.IndexOf(client) == -1));
                 userReports.Show();
@@ -903,7 +918,7 @@ namespace AMWE_Administrator
             }
         }
 
-        private void rmNewScreen(Screen screen, Client client, ScreenType type)
+        private void RmNewScreen(Screen screen, Client client, ScreenType type)
         {
             switch (type)
             {

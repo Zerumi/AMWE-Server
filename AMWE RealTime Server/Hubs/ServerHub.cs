@@ -3,8 +3,6 @@
 //(or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,7 +15,7 @@ namespace AMWE_RealTime_Server.Hubs
     [Authorize]
     public class ServerHub : Hub
     {
-        VersionsContext context;
+        readonly VersionsContext context;
 
         public ServerHub(VersionsContext _context)
         {
@@ -29,20 +27,20 @@ namespace AMWE_RealTime_Server.Hubs
         {
             try
             {
-                if (context.Versions.FirstOrDefault(x => x.version == vers) != default && context.Versions.FirstOrDefault(x => x.version == vers).Type == type)
+                if (context.Versions.FirstOrDefault(x => x.VersionNumber == vers) != default && context.Versions.FirstOrDefault(x => x.VersionNumber == vers).Type == type)
                 {
                     if (!overwriteversion)
                     {
                         return 0;
                     }
-                    context.Versions.Include(x => x.versionfiles).FirstOrDefault(x => x.version == vers).versionfiles.Clear();
-                    context.Versions.Remove(context.Versions.FirstOrDefault(x => x.version == vers));
+                    context.Versions.Include(x => x.Versionfiles).FirstOrDefault(x => x.VersionNumber == vers).Versionfiles.Clear();
+                    context.Versions.Remove(context.Versions.FirstOrDefault(x => x.VersionNumber == vers));
                 }
                 context.Versions.Add(new Models.Version()
                 {
                     Type = type,
-                    version = vers,
-                    versionfiles = version
+                    VersionNumber = vers,
+                    Versionfiles = version
                 });
                 return await context.SaveChangesAsync();
             }
@@ -54,7 +52,7 @@ namespace AMWE_RealTime_Server.Hubs
 
         public bool CheckConflict(string type, string version)
         {
-            return Array.FindAll(context.Versions.ToArray(), x => x.Type == type).Select(x => x.version).Contains(version);
+            return Array.FindAll(context.Versions.ToArray(), x => x.Type == type).Select(x => x.VersionNumber).Contains(version);
         }
     }
 }

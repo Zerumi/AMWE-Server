@@ -1,18 +1,10 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace AMWE_Administrator
 {
@@ -21,10 +13,10 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class Chat : Window
     {
-        readonly HubConnection hubConnection;
-        public uint ChatID;
-        public Client Client;
-        public bool chatClosed;
+        private readonly HubConnection hubConnection;
+        public uint ChatID { get; set; }
+        public Client Client { get; set; }
+        public bool ChatClosed { get; set; }
 
         public Chat(HubConnection chatHubConnection, uint _ChatID, Client client)
         {
@@ -47,7 +39,7 @@ namespace AMWE_Administrator
 
         private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!chatClosed)
+            if (!ChatClosed)
             {
                 await hubConnection.InvokeAsync("CloseChat", ChatID);
             }
@@ -69,7 +61,8 @@ namespace AMWE_Administrator
         private async Task Send()
         {
             await hubConnection.InvokeAsync("SendMessageToChat", ChatID, tbMessage.Text);
-            await Dispatcher.BeginInvoke((Action)(() => {
+            await Dispatcher.BeginInvoke((Action)(() =>
+            {
                 tbMessage.Text = string.Empty;
             }));
         }

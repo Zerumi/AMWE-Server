@@ -5,7 +5,7 @@ namespace AMWE_Administrator
 {
     public class Screen
     {
-        public uint id { get; set; }
-        public byte[] bytes { get; set; }
+        public uint Id { get; set; }
+        public byte[] Bytes { get; set; }
     }
 }

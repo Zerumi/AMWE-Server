@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace AMWE_Administrator
 {
-    static class ExceptionHandler
+    internal static class ExceptionHandler
     {
         private static void RegisterToM3MD2(Exception ex)
         {
@@ -15,14 +15,14 @@ namespace AMWE_Administrator
         }
         public static void RegisterNew(Exception ex)
         {
-            MessageBox.Show(ex.ToString());
+            _ = MessageBox.Show(ex.ToString());
             RegisterToM3MD2(ex);
         }
         public static void RegisterNew(Exception ex, bool iswithmessage)
         {
             if (iswithmessage)
             {
-                MessageBox.Show(ex.ToString());
+                _ = MessageBox.Show(ex.ToString());
             }
             RegisterToM3MD2(ex);
         }

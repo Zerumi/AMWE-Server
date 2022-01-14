@@ -3,7 +3,9 @@
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using ReportHandler;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -16,29 +18,30 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class ReportWindow : Window
     {
-        private Report Report { get; set; }
+        private string sKeyPressedInfo;
+        private string sLastProcesses;
+        private string sOldProcesses;
 
         public ReportWindow(Report report)
         {
             try
             {
-                Report = report;
                 InitializeComponent();
 
                 Grid.Background = App.MainColor;
                 gKeyboard.Background = App.MainColor;
 
-                foreach (var obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
+                foreach (Rectangle obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
                 {
                     obj.Stroke = App.FontColor;
                 }
 
-                foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(gKeyboard))
+                foreach (Label obj in m3md2.WinHelper.FindVisualChildren<Label>(gKeyboard))
                 {
                     obj.Foreground = App.FontColor;
                 }
 
-                foreach (var obj in m3md2.WinHelper.FindVisualChildren<Label>(Grid))
+                foreach (Label obj in m3md2.WinHelper.FindVisualChildren<Label>(Grid))
                 {
                     obj.Foreground = App.FontColor;
                 }
@@ -46,12 +49,50 @@ namespace AMWE_Administrator
                 ReportOutput.Foreground = App.FontColor;
                 ReportOutput.Background = App.SecondColor;
                 rOverallRating.Stroke = App.FontColor;
+                ReportOutput.Text = string.Empty;
 
-                LinearGradientBrush ovbrush = new LinearGradientBrush()
+                _ = Task.Run(new Action(async () =>
                 {
-                    StartPoint = new Point(1, 0),
-                    GradientStops = new GradientStopCollection()
+                    await LoadReportAsync(report);
+                }));
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
+        private async Task LoadReportAsync(Report report)
+        {
+            try
+            {
+                await Task.Run(async () =>
                 {
+                    await LoadKeyboardOutput(report);
+                    await LoadProcessesOutput(report);
+                });
+                await Task.Run(async () =>
+                {
+                    await LoadReportOutput(report);
+                });
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
+            }
+        }
+
+        private async Task LoadReportOutput(Report report)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    LinearGradientBrush ovbrush = new()
+                    {
+                        StartPoint = new Point(1, 0),
+                        GradientStops = new GradientStopCollection()
+                    {
                     new GradientStop()
                     {
                         Color = report.OverallRating >= 1 ? (Color)ColorConverter.ConvertFromString("#C0ff0000") : Colors.White,
@@ -192,68 +233,106 @@ namespace AMWE_Administrator
                         Color = report.OverallRating >= 0.1 ? (Color)ColorConverter.ConvertFromString("#C020ff00") : Colors.White,
                         Offset = 1
                     }
+                    }
+                    };
+                    rOverallRating.Fill = ovbrush;
+                    ReportHeader.Content = $"Отчет №{App.reports.IndexOf(report)} от {report.Client.Nameofpc} ({report.Client.Id}):";
+                    ReportOutput.Text += $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.IsMouseCoordChanged ? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
                 }
-                };
-                rOverallRating.Fill = ovbrush;
-                ReportHeader.Content = $"Отчет №{App.reports.IndexOf(report)} от {report.Client.Nameofpc} ({report.Client.Id}):";
-                string sKeyPressedInfo = string.Empty;
-                foreach (var item in report.KeyPressedInfo)
+                catch (Exception ex)
                 {
-                    sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
-                    try
+                    ExceptionHandler.RegisterNew(ex, false);
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                      {
+                          ReportOutput.Text += $"\nВо время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}";
+                      }));
+                }
+            }));
+        }
+
+        private async Task LoadKeyboardOutput(Report report)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    foreach (KeyPressedInfo item in report.KeyPressedInfo)
                     {
-                        var arr = item.Key.Split(", ");
-                        foreach (var key in arr)
+                        sKeyPressedInfo += $"\n{item.Key} - {item.PressedCount}";
+                        try
                         {
-                            var rect = m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, key);
-                            byte alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / arr.Length / Report.pressingCount)));
-                            byte fillalpha = (rect.Fill as SolidColorBrush)?.Color.A ?? 0;
-                            byte alpha2 = (byte)(0.9 * fillalpha);
-                            alpha += alpha2;
-                            alpha += (byte)(0.1 * (byte)(255 - alpha));
-                            rect.Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
+                            string[] arr = item.Key.Split(", ");
+                            foreach (string key in arr)
+                            {
+                                Rectangle rect = m3md2.WinHelper.FindChild<Rectangle>(gKeyboard, key);
+                                byte alpha = (byte)Math.Ceiling((double)(255 * (double)((double)item.PressedCount / arr.Length / report.PressingCount)));
+                                byte fillalpha = (rect.Fill as SolidColorBrush)?.Color.A ?? 0;
+                                byte alpha2 = (byte)(0.9 * fillalpha);
+                                alpha += alpha2;
+                                alpha += (byte)(0.1 * (byte)(255 - alpha));
+                                rect.Fill = new SolidColorBrush(Color.FromArgb(alpha, 0, 255, 0));
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // unregistred hotkey
                         }
                     }
-                    catch (Exception)
-                    {
-                        // unregistred hotkey
-                    }
                 }
-                string sOldProcesses = string.Empty;
-                foreach (var item in report.OldProcesses)
+                catch (Exception ex)
                 {
-                    sOldProcesses += $"\n{item}";
+                    ExceptionHandler.RegisterNew(ex, false);
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                      {
+                          ReportOutput.Text += $"\nВо время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n";
+                      }));
                 }
-                string sLastProcesses = string.Empty;
-                foreach (var item in report.LastProcesses)
-                {
-                    sLastProcesses += $"\n{item}";
-                }
+            }));
+        }
 
-                var added = report.LastProcesses.Except(report.OldProcesses).ToList();
-                var removed = report.OldProcesses.Except(report.LastProcesses).ToList();
-
-                string sChangesProcesses = "";
-                foreach (var item in added)
-                {
-                    sChangesProcesses += $"+ {item}\n";
-                }
-                foreach (var item in removed)
-                {
-                    sChangesProcesses += $"- {item}\n";
-                }
-
-                gpOverallInfo.Content = $"Количество измененных процессов: {report.ProcessChangedCount}";
-                tbLast.Text = sOldProcesses.Remove(0, 1);
-                tbCurrent.Text = sLastProcesses.Remove(0, 1);
-                tbChanges.Text = sChangesProcesses;
-
-                ReportOutput.Text = $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.isMouseCoordChanged ? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
-            }
-            catch (Exception ex)
+        private async Task LoadProcessesOutput(Report report)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
             {
-                ExceptionHandler.RegisterNew(ex);
-            }
+                try
+                {
+                    foreach (string item in report.OldProcesses)
+                    {
+                        sOldProcesses += $"\n{item}";
+                    }
+                    foreach (string item in report.LastProcesses)
+                    {
+                        sLastProcesses += $"\n{item}";
+                    }
+
+                    List<string> added = report.LastProcesses.Except(report.OldProcesses).ToList();
+                    List<string> removed = report.OldProcesses.Except(report.LastProcesses).ToList();
+
+                    string sChangesProcesses = "";
+                    foreach (string item in added)
+                    {
+                        sChangesProcesses += $"+ {item}\n";
+                    }
+                    foreach (string item in removed)
+                    {
+                        sChangesProcesses += $"- {item}\n";
+                    }
+
+                    gpOverallInfo.Content = $"Количество измененных процессов: {report.ProcessChangedCount}";
+                    tbLast.Text = sOldProcesses.Remove(0, 1);
+                    tbCurrent.Text = sLastProcesses.Remove(0, 1);
+                    tbChanges.Text = sChangesProcesses;
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex, false);
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                      {
+                          ReportOutput.Text += $"\nВо время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n";
+                      }));
+
+                }
+            }));
         }
     }
 }

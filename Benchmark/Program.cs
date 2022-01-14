@@ -2,11 +2,11 @@
 
 namespace Benchmark
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main()
         {
-            BenchmarkRunner.Run<AuthBenchmark>();
+            _ = BenchmarkRunner.Run<AuthBenchmark>();
         }
     }
 }

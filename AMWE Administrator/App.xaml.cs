@@ -21,16 +21,16 @@ namespace AMWE_Administrator
         public static Cookie AuthCookie;
         public static string ServerAddress { get; set; }
         public static string Username { get; set; }
-        public static List<Report> reports = new List<Report>();
+        public static List<Report> reports = new();
         public static DateTime ServerDateTime;
 
-        public static Color[] colors = m3md2.ColorThemes.GetColors(ConfigurationRequest.GetValueByKey("ColorTheme"));
-        public static SolidColorBrush MainColor = new SolidColorBrush(App.colors[(int)ColorIndex.Main]);
-        public static SolidColorBrush SecondColor = new SolidColorBrush(App.colors[(int)ColorIndex.Second]);
-        public static SolidColorBrush FontColor = new SolidColorBrush(App.colors[(int)ColorIndex.Font]);
-        public static SolidColorBrush ExtraColor = new SolidColorBrush(App.colors[(int)ColorIndex.Extra]);
-        public static SolidColorBrush GreenColor = new SolidColorBrush(App.colors[(int)ColorIndex.Green]);
-        public static SolidColorBrush RedColor = new SolidColorBrush(App.colors[(int)ColorIndex.Red]);
+        public static Color[] colors = ColorThemes.GetColors(ConfigurationRequest.GetValueByKey("ColorTheme"));
+        public static SolidColorBrush MainColor = new(colors[(int)ColorIndex.Main]);
+        public static SolidColorBrush SecondColor = new(colors[(int)ColorIndex.Second]);
+        public static SolidColorBrush FontColor = new(colors[(int)ColorIndex.Font]);
+        public static SolidColorBrush ExtraColor = new(colors[(int)ColorIndex.Extra]);
+        public static SolidColorBrush GreenColor = new(colors[(int)ColorIndex.Green]);
+        public static SolidColorBrush RedColor = new(colors[(int)ColorIndex.Red]);
 #pragma warning restore CA2211 // Поля, не являющиеся константами, не должны быть видимыми
 
         private void Application_Startup(object sender, StartupEventArgs e)

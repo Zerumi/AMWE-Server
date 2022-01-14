@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace m3md2
 {
@@ -19,7 +16,7 @@ namespace m3md2
 
         public new void Remove(T item)
         {
-            base.Remove(item);
+            _ = base.Remove(item);
             OnRemove?.Invoke(this, null);
         }
     }

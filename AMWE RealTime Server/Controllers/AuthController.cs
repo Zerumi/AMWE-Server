@@ -109,7 +109,7 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
-                GlobalClientsList.Remove(a.Client);
+                GlobalClientsList.Remove(GlobalClientsList.Find(x => x.Id == a.Client.Id));
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
             return NoContent();
@@ -119,23 +119,23 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 new VerifyVersion()
                 {
-                    version = "0.6.0.0",
-                    isNotSupported = false,
-                    isLatest = true,
-                    isUpdateNeeded = false,
-                    rephandler = new List<string> {"1.0.0.0"},
-                    m3md2 = new List<string> {"1.4.1.0"},
-                    m3md2_startup = new List<string> {"1.3.1.0"}
+                    Version = "0.6.0.0",
+                    IsNotSupported = false,
+                    IsLatest = true,
+                    IsUpdateNeeded = false,
+                    Rephandler = new List<string> {"1.0.0.0"},
+                    M3md2 = new List<string> {"1.4.1.0"},
+                    M3md2_startup = new List<string> {"1.3.1.0"}
                 },
                 new VerifyVersion()
                 {
-                    version = "1.0.0.0",
-                    isNotSupported = true,
-                    isLatest = false,
-                    isUpdateNeeded = false,
-                    rephandler = new List<string> {"1.0.0.0"},
-                    m3md2 = new List<string> {"1.4.1.0"},
-                    m3md2_startup = new List<string> {"1.3.1.0"}
+                    Version = "1.0.0.0",
+                    IsNotSupported = true,
+                    IsLatest = false,
+                    IsUpdateNeeded = false,
+                    Rephandler = new List<string> {"1.0.0.0"},
+                    M3md2 = new List<string> {"1.4.1.0"},
+                    M3md2_startup = new List<string> {"1.3.1.0"}
                 }
             };
 
@@ -144,13 +144,13 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 new VerifyVersion()
                 {
-                    version = "1.0.0.0",
-                    isNotSupported = false,
-                    isLatest = false,
-                    isUpdateNeeded = false,
-                    rephandler = new List<string> {"2.1.0.0"},
-                    m3md2 = new List<string> {"1.4.1.0"},
-                    m3md2_startup = new List<string> {"1.3.1.0"}
+                    Version = "1.0.0.0",
+                    IsNotSupported = false,
+                    IsLatest = false,
+                    IsUpdateNeeded = false,
+                    Rephandler = new List<string> {"2.1.0.0"},
+                    M3md2 = new List<string> {"1.4.1.0"},
+                    M3md2_startup = new List<string> {"1.3.1.0"}
                 }
             };
     }

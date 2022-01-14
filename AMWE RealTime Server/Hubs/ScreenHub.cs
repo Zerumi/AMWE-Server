@@ -58,9 +58,9 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 screenTransfer.Add(new ScreenState()
                 {
-                    cid = client.Id,
-                    adm = Context.ConnectionId,
-                    type = screenType
+                    Cid = client.Id,
+                    Adm = Context.ConnectionId,
+                    Type = screenType
                 });
                 await Clients.Group($"ID {client.Id}/" + client.Nameofpc).SendAsync("RequestScreen", screenType);
                 _logger.LogInformation($"Отправился запрос на скриншот {screenType} у {client.Id} / {client.Nameofpc}");
@@ -76,11 +76,11 @@ namespace AMWE_RealTime_Server.Hubs
         public async void TransferScreen(Screen screen, ScreenType type)
         {
             uint cid = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3));
-            var AdmIds = screenTransfer.FindAll(x => x.cid == cid && x.type == type);
+            var AdmIds = screenTransfer.FindAll(x => x.Cid == cid && x.Type == type);
             _logger.LogInformation($"Клиент {cid} ответил на запрос {type} у одного или нескольких администраторов ({AdmIds.Count})");
             foreach (ScreenState a in AdmIds)
             {
-                await Clients.Client(a.adm).SendAsync("NewScreen", screen, ReportHub.connectedClients.FirstOrDefault(x => x.Value.Id == cid).Value, type);
+                await Clients.Client(a.Adm).SendAsync("NewScreen", screen, ReportHub.connectedClients.FirstOrDefault(x => x.Value.Id == cid).Value, type);
                 _ = screenTransfer.Remove(a);
             }
         }

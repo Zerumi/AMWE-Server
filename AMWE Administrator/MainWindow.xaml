@@ -31,7 +31,7 @@
                 <MenuItem x:Name="rmUniversalUser" Header="Список пользователей:" IsEnabled="False"/>
             </MenuItem>
             <MenuItem x:Name="mDignose" Header="Диагностика" GotFocus="Diagnose_Click">
-                <MenuItem x:Name="mConnect" Header="Initializing..." IsEnabled="False" Click="mConnect_Click"/>
+                <MenuItem x:Name="mConnect" Header="Initializing..." IsEnabled="False" Click="MConnect_Click"/>
                 <MenuItem Header="Посмотреть статусы подключения" Click="MenuDiagnostics_CheckConnectionState"/>
                 <MenuItem Header="Информация об исключениях" Click="GetExceptions_Click"/>
                 <MenuItem Header="Диагностика сервера" Click="DiagnoseServer_Click"/>

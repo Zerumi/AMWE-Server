@@ -23,7 +23,7 @@ namespace AMWE_Administrator
         public new void Remove(T item)
         {
             OnRemove?.Invoke(this, null);
-            base.Remove(item);
+            _ = base.Remove(item);
         }
     }
     /// <summary>
@@ -31,9 +31,9 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class Settings : Window
     {
-        public MyList<bool> bitArray = new MyList<bool>();
+        public MyList<bool> BitArray { get; set; }
 
-        public int Colorindex;
+        public int Colorindex { get; set; }
 
         public Settings()
         {
@@ -42,8 +42,8 @@ namespace AMWE_Administrator
             Colorindex = Array.IndexOf(comboxColorTheme.ItemsSource.OfType<string>().ToArray(), Array.Find(comboxColorTheme.ItemsSource.OfType<string>().ToArray(), x => x == ConfigurationRequest.GetValueByKey("ColorTheme")));
             comboxColorTheme.SelectedIndex = Colorindex;
 
-            bitArray.OnAdd += BitArray_OnAdd;
-            bitArray.OnRemove += BitArray_OnRemove;
+            BitArray.OnAdd += BitArray_OnAdd;
+            BitArray.OnRemove += BitArray_OnRemove;
 
             cbAllowSocketsOnly.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly"));
 
@@ -59,37 +59,37 @@ namespace AMWE_Administrator
 
         private void BitArray_OnRemove(object sender, EventArgs e)
         {
-            if (bitArray.Count - 1 == 0)
+            if (BitArray.Count - 1 == 0)
             {
                 lbRestartRequired.Visibility = Visibility.Hidden;
             }
         }
 
-        private void cbAllowSocketsOnly_Checked(object sender, RoutedEventArgs e)
+        private void CbAllowSocketsOnly_Checked(object sender, RoutedEventArgs e)
         {
             if (cbAllowSocketsOnly.IsChecked.GetValueOrDefault(true) != bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
             {
-                bitArray.Add(true);
+                BitArray.Add(true);
             }
             else
             {
-                bitArray.Remove(true);
+                BitArray.Remove(true);
             }
         }
 
-        bool isColorChanged = false;
+        private bool isColorChanged;
 
-        private void comboxColorTheme_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void ComboxColorTheme_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (comboxColorTheme.SelectedIndex != Colorindex && !isColorChanged)
             {
                 isColorChanged = true;
-                bitArray.Add(true);
+                BitArray.Add(true);
             }
             else if (comboxColorTheme.SelectedIndex == Colorindex)
             {
                 isColorChanged = false;
-                bitArray.Remove(true);
+                BitArray.Remove(true);
             }
         }
 
@@ -97,7 +97,7 @@ namespace AMWE_Administrator
         {
             ConfigurationRequest.WriteValueByKey("WebSocketsOnly", Convert.ToString(cbAllowSocketsOnly.IsChecked.GetValueOrDefault(true)));
 
-            var e100c = !cbExpect100Continue.IsChecked.GetValueOrDefault(false);
+            bool e100c = !cbExpect100Continue.IsChecked.GetValueOrDefault(false);
             ConfigurationRequest.WriteValueByKey("Expect100Continue", Convert.ToString(e100c));
             ServicePointManager.Expect100Continue = e100c;
 

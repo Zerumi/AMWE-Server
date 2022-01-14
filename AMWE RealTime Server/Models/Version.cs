@@ -9,8 +9,8 @@ namespace AMWE_RealTime_Server.Models
     {
         public int ID { get; set; }
         public string Type { get; set; }
-        public string version { get; set; }
+        public string VersionNumber { get; set; }
 
-        public virtual ICollection<VersionFile> versionfiles { get; set; }
+        public virtual ICollection<VersionFile> Versionfiles { get; set; }
     }
 }

@@ -5,7 +5,6 @@ using AMWE_RealTime_Server.Controllers;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,7 +12,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using HubCallerContextDict = System.Collections.Concurrent.ConcurrentDictionary<string, Microsoft.AspNetCore.SignalR.HubCallerContext>;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -64,8 +62,7 @@ namespace AMWE_RealTime_Server.Hubs
             else if (Context.User.IsInRole(Role.GlobalUserRole))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
-                Client client;
-                connectedClients.TryGetValue(Context.ConnectionId, out client);
+                connectedClients.TryGetValue(Context.ConnectionId, out Client client);
                 await StaticVariables.svControllers.FirstOrDefault()?.Logout(client.Id);
                 connectedClients.Remove(Context.ConnectionId);
             }

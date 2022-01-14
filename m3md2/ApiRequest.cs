@@ -38,7 +38,7 @@ namespace m3md2
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36");
                 string json = JsonConvert.SerializeObject(product);
                 response = await client.PostAsync($"{apilist}", new StringContent(json, Encoding.UTF8, "application/json"));
-                response.EnsureSuccessStatusCode();
+                _ = response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
             {
@@ -67,7 +67,7 @@ namespace m3md2
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36");
                 string json = JsonConvert.SerializeObject(product);
                 response = await client.PostAsync($"{apilist}", new StringContent(json, Encoding.UTF8, "application/json"));
-                response.EnsureSuccessStatusCode();
+                _ = response.EnsureSuccessStatusCode();
                 returnproduct = await response.Content.ReadAsAsync<T1>();
             }
             catch (Exception ex)
@@ -129,7 +129,7 @@ namespace m3md2
             }
             return response?.StatusCode ?? default;
         }
-        
+
         public delegate void ApiExHandler(Exception ex);
 
         public static event ApiExHandler OnRequestFailed;

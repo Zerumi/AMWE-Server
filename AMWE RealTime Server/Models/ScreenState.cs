@@ -5,8 +5,8 @@ namespace AMWE_RealTime_Server.Models
 {
     public class ScreenState
     {
-        public uint cid { get; set; }
-        public string adm { get; set; }
-        public ScreenType type { get; set; }
+        public uint Cid { get; set; }
+        public string Adm { get; set; }
+        public ScreenType Type { get; set; }
     }
 }

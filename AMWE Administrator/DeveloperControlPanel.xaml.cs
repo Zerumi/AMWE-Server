@@ -19,15 +19,15 @@ namespace AMWE_Administrator
     /// </summary>
     public partial class DeveloperControlPanel : Window
     {
-        readonly string[] FilesPath;
-        readonly HubConnection connection;
+        private readonly string[] FilesPath;
+        private readonly HubConnection connection;
 
         public DeveloperControlPanel()
         {
             InitializeComponent();
 
             string FilesInDir = string.Empty;
-            FilesPath = Directory.GetFiles(Directory.GetCurrentDirectory()).Select(System.IO.Path.GetFileName).ToArray();
+            FilesPath = Directory.GetFiles(Directory.GetCurrentDirectory()).Select(Path.GetFileName).ToArray();
             Array.ForEach(FilesPath, x => FilesInDir += $"\n{x}");
             tb_FilesInDir.Text = $"Current files in {Directory.GetCurrentDirectory()}: {FilesInDir}";
 
@@ -60,38 +60,34 @@ namespace AMWE_Administrator
                 return Task.CompletedTask;
             };
 
-            connection.StartAsync();
+            _ = connection.StartAsync();
             serverStatus.Content = $"Server status for {connection.ConnectionId}: {connection.State}";
-            Task.Run(async() => {
+            _ = Task.Run(async () =>
+            {
                 await Task.Run(() =>
                 {
                     while (true)
                     {
-                        serverStatus.Dispatcher.BeginInvoke(new Action(() => Content = $"Server status for {connection.ConnectionId}: {connection.State}"));
+                        _ = serverStatus.Dispatcher.BeginInvoke(new Action(() => Content = $"Server status for {connection.ConnectionId}: {connection.State}"));
                         Thread.Sleep(3000);
                     }
                 });
             });
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            List<VersionFile> version = new List<VersionFile>();
+            List<VersionFile> version = new();
             for (int i = 0; i < FilesPath.Length; i++)
             {
-                version.Add(new VersionFile() { filename = FilesPath[i], filebytes = File.ReadAllBytes(FilesPath[i]) });
+                version.Add(new VersionFile() { Filename = FilesPath[i], Filebytes = File.ReadAllBytes(FilesPath[i]) });
             }
             bool overwritesave = false;
             if (await connection.InvokeAsync<bool>("CheckConflict", "admin", Assembly.GetExecutingAssembly().GetName().Version.ToString()))
             {
                 overwritesave = MessageBox.Show("Обнаружен конфликт версий. Версия с таким же кодом уже загружена на сервере. Вы хотите перезаписать версию?", "Конфликт версий", MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes;
             }
-            MessageBox.Show(Convert.ToString(await connection.InvokeAsync<object>("NewLatestVersion", "admin", Assembly.GetExecutingAssembly().GetName().Version.ToString(), version, overwritesave)));
+            _ = MessageBox.Show(Convert.ToString(await connection.InvokeAsync<object>("NewLatestVersion", "admin", Assembly.GetExecutingAssembly().GetName().Version.ToString(), version, overwritesave)));
         }
 
         private void Moverect_Drop(object sender, DragEventArgs e)

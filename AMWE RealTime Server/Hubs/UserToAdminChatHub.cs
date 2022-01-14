@@ -24,7 +24,7 @@ namespace AMWE_RealTime_Server.Hubs
             _logger = logger;
         }
 
-        private static List<ChatState> chatStates = new List<ChatState>();
+        private static readonly List<ChatState> chatStates = new List<ChatState>();
 
         public override async Task OnConnectedAsync()
         {
