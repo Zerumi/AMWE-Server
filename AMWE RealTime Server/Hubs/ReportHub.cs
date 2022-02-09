@@ -5,7 +5,6 @@ using AMWE_RealTime_Server.Controllers;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,7 +12,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using HubCallerContextDict = System.Collections.Concurrent.ConcurrentDictionary<string, Microsoft.AspNetCore.SignalR.HubCallerContext>;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -70,6 +68,8 @@ namespace AMWE_RealTime_Server.Hubs
         [Authorize(Roles = Role.GlobalUserRole)]
         public async void SendReport(Report report)
         {
+            report.Server = new Uri($"{Context.GetHttpContext().Request.Scheme}://{Context.GetHttpContext().Request.Host}{Context.GetHttpContext().Request.Path}{Context.GetHttpContext().Request.QueryString}");
+            report.Timestamp = DateTime.UtcNow;
             _logger.LogInformation($"Поступил отчет от {report.Client.Id} / {report.Client.Nameofpc} // Оценка: {report.OverallRating}");
             await Clients.Group(Role.GlobalAdminGroup).SendAsync("CreateReport", report);
         }

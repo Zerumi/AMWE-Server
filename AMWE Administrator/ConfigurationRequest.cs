@@ -18,9 +18,16 @@ namespace AMWE_Administrator
             appSettings.Save(ConfigurationSaveMode.Minimal);
             ConfigurationManager.RefreshSection("appSettings");
         }
+
         public static string GetValueByKey(string key)
         {
             return ConfigurationManager.AppSettings.Get(key);
+        }
+
+        public static T LoadConfigurationFromText<T>(string path, T InitializeObject = default)
+        {
+            throw new NotImplementedException();
+            //return InitializeObject;
         }
     }
 }

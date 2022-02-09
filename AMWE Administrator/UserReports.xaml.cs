@@ -25,6 +25,7 @@ namespace AMWE_Administrator
         private readonly ClientState clientState;
         private readonly ReportLineChartDrawer ReportDrawer;
         private readonly List<Report> userReports;
+        private readonly Timer timer;
 
         public UserReports(Client client, bool IsUserConnected)
         {
@@ -53,12 +54,14 @@ namespace AMWE_Administrator
 
                 double avgmark = 0;
 
+                ReportDrawer = new(this, userReports);
+
                 if (userReports.Count != 0)
                 {
-                    ReportDrawer = new(this, userReports);
                     avgmark = userReports.Select(x => x.OverallRating).Average();
                 }
 
+                Title = $"Сводка по сотруднику {UserInWindow.Nameofpc} (ID: {UserInWindow.Id})";
                 lUserInfo.Content = $"ID {UserInWindow.Id} / {UserInWindow.Nameofpc}";
                 lRepCount.Content = $"Количество отчетов: {userReports.Count}";
                 lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
@@ -70,14 +73,15 @@ namespace AMWE_Administrator
                     {
                         a = (await ApiRequest.GetProductAsync<DateTime>("/time")).ToLocalTime();
                     }).Wait();
-                    Timer timer = new()
+                    timer = new()
                     {
-                        Interval = TimeSpan.FromHours(1).TotalMilliseconds,
+                        Interval = TimeSpan.FromMinutes(clientState.LastLoginDateTime.AddHours(a.Subtract(clientState.LastLoginDateTime).Hours + 1).Subtract(a).Minutes + 1).TotalMilliseconds,
                         AutoReset = true
                     };
                     timer.Elapsed += UpdateTimestamp;
+                    timer.Start();
                     TimeSpan b = a.Subtract(clientState.LastLoginDateTime);
-                    lOnlineStatus.Content = $"В сети уже {b.Hours} часов (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
+                    lOnlineStatus.Content = $"В сети уже {b.Hours} {Parser.GetDeclension(b.Hours, "час", "часа", "часов")} (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
                 }
                 else
                 {
@@ -91,7 +95,7 @@ namespace AMWE_Administrator
                     int a = App.reports.IndexOf(report);
                     Button tempbutton = new()
                     {
-                        Content = $"Отчет {a} ()" // report timestamp (server utc only!)
+                        Content = $"Отчет {a} ({report.Timestamp.ToLocalTime().ToLongTimeString()}) ({report.OverallRating})" // report timestamp (server utc only!)
                     };
 
                     tempbutton.Click += Reportbutton_Click;
@@ -116,8 +120,13 @@ namespace AMWE_Administrator
                 TimeSpan a = e.SignalTime.Subtract(clientState.LastLoginDateTime);
                 await Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    lOnlineStatus.Content = $"В сети уже {a.Hours} часов (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
+                    lOnlineStatus.Content = $"В сети уже {a.Hours} {Parser.GetDeclension(a.Hours,"час", "часа", "часов")} (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
                 }));
+                (sender as Timer).Interval = TimeSpan.FromMinutes(clientState.LastLoginDateTime.AddHours(e.SignalTime.Subtract(clientState.LastLoginDateTime).Hours + 1).Subtract(e.SignalTime).Minutes + 1).TotalMilliseconds;
+                // Calculate next hour: 
+                // window opened: 01/01/1970 09:47:22
+                // client logged: 01/01/1970 09:10:00
+                // next hour: 01/01/1970 10:10:00
             }
             catch (Exception ex)
             {
@@ -162,9 +171,11 @@ namespace AMWE_Administrator
                 {
                     await Dispatcher.BeginInvoke(new Action(() =>
                     {
+                        timer?.Stop();
                         lUserInfo.Content += " (Не в сети)";
-                        lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}"; // add connect & disconnect time (server utc only!)
+                        lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}";
                         bScreen.IsEnabled = false;
+                        // save screen button now opens explorer / ! \
                     }));
                 }
             }
@@ -192,7 +203,7 @@ namespace AMWE_Administrator
                     int a = App.reports.IndexOf(obj);
                     Button tempbutton = new()
                     {
-                        Content = $"Отчет {a} ()" // report timestamp (server utc only!)
+                        Content = $"Отчет {a} ({obj.Timestamp.ToLocalTime().ToLongTimeString()}) ({obj.OverallRating})" // report timestamp (server utc only!)
                     };
 
                     tempbutton.Click += Reportbutton_Click;
@@ -201,7 +212,7 @@ namespace AMWE_Administrator
 
                     lRepCount.Content = $"Количество отчетов: {userReports.Count}";
 
-                    double avgmark = userReports.Select(x => x.OverallRating).Average(); // collection might be empty!
+                    double avgmark = userReports.Select(x => x.OverallRating).Average();
                     lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
                 }
                 catch (Exception ex)
@@ -214,6 +225,14 @@ namespace AMWE_Administrator
         private async void BScreen_Click(object sender, RoutedEventArgs e)
         {
             await MainWindow.ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.ScreenImage);
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            MainWindow.OnNewReport -= MainWindow_OnNewReport;
+            MainWindow.OnUserDisconnected -= MainWindow_OnUserDisconnected;
+            MainWindow.OnNewScreen -= UpdateScreen;
+            GC.Collect();
         }
     }
 }

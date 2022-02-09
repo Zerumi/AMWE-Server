@@ -26,6 +26,7 @@
                 <MenuItem Header="Открыть в проводнике" Click="MenuManage_OpenAtExplorer_Click"/>
                 <MenuItem Header="Сменить адрес" Click="MenuManage_ChangeServer_Click"/>
                 <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="MWorkday_Click"/>
+                <MenuItem Header="Выйти" Click="ExitMenu_Click"/>
             </MenuItem>
             <MenuItem x:Name="mReports" Header="Отчеты">
                 <MenuItem x:Name="rmUniversalUser" Header="Список пользователей:" IsEnabled="False"/>

@@ -50,7 +50,11 @@ namespace AMWE_Administrator
             {
                 if (UserWindow.ActualWidth > 0 && UserWindow.ActualHeight > 0)
                 {
-                    double xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / Values.Count);
+                    double xinterval;
+                    if (Values.Count == 0)
+                        xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / (Values.Count + 1));
+                    else
+                        xinterval = Convert.ToInt32((UserWindow.chartCanvas.ActualWidth - xAxisStart) / Values.Count);
                     UserWindow.chartCanvas.Children.Clear();
                     holders.Clear();
 

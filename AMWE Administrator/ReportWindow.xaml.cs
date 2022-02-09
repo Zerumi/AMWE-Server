@@ -244,7 +244,7 @@ namespace AMWE_Administrator
                     ExceptionHandler.RegisterNew(ex, false);
                     _ = Dispatcher.BeginInvoke(new Action(() =>
                       {
-                          ReportOutput.Text += $"\nВо время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}";
+                          ReportOutput.Text += $"Во время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n\n";
                       }));
                 }
             }));
@@ -284,7 +284,7 @@ namespace AMWE_Administrator
                     ExceptionHandler.RegisterNew(ex, false);
                     _ = Dispatcher.BeginInvoke(new Action(() =>
                       {
-                          ReportOutput.Text += $"\nВо время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n";
+                          ReportOutput.Text += $"Во время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n\n";
                       }));
                 }
             }));
@@ -328,9 +328,8 @@ namespace AMWE_Administrator
                     ExceptionHandler.RegisterNew(ex, false);
                     _ = Dispatcher.BeginInvoke(new Action(() =>
                       {
-                          ReportOutput.Text += $"\nВо время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n";
+                          ReportOutput.Text += $"Во время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n\n";
                       }));
-
                 }
             }));
         }

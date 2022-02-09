@@ -2,43 +2,26 @@
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Windows;
+using m3md2;
 
 namespace AMWE_Administrator
 {
-    public class MyList<T> : List<T>
-    {
-        public event EventHandler OnAdd;
-        public event EventHandler OnRemove;
-
-        public new void Add(T item) // "new" to avoid compiler-warnings, because we're hiding a method from base-class
-        {
-            OnAdd?.Invoke(this, null);
-            base.Add(item);
-        }
-
-        public new void Remove(T item)
-        {
-            OnRemove?.Invoke(this, null);
-            _ = base.Remove(item);
-        }
-    }
     /// <summary>
     /// Логика взаимодействия для Settings.xaml
     /// </summary>
     public partial class Settings : Window
     {
-        public MyList<bool> BitArray { get; set; }
+        public UpgList<bool> BitArray = new();
 
         public int Colorindex;
 
         public Settings()
         {
             InitializeComponent();
-            comboxColorTheme.ItemsSource = m3md2.ColorThemes.GetColorNames();
+            comboxColorTheme.ItemsSource = ColorThemes.GetColorNames();
             Colorindex = Array.IndexOf(comboxColorTheme.ItemsSource.OfType<string>().ToArray(), Array.Find(comboxColorTheme.ItemsSource.OfType<string>().ToArray(), x => x == ConfigurationRequest.GetValueByKey("ColorTheme")));
             comboxColorTheme.SelectedIndex = Colorindex;
 
@@ -50,6 +33,12 @@ namespace AMWE_Administrator
             cbExpect100Continue.IsChecked = !bool.Parse(ConfigurationRequest.GetValueByKey("Expect100Continue"));
 
             cbMinimizeToTray.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("MinimizeToTray"));
+
+            cbCheckReports.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckReports"));
+
+            cbCheckApps.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckApps"));
+
+            cbCheckSites.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckSites"));
         }
 
         private void BitArray_OnAdd(object sender, EventArgs e)
@@ -113,6 +102,46 @@ namespace AMWE_Administrator
             }
 
             Close();
+        }
+
+        private void BAddSite_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BAddApp_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void CbCheckReports_Checked(object sender, RoutedEventArgs e)
+        {
+            gCheckReports.IsEnabled = true;
+        }
+
+        private void CbCheckReports_Unchecked(object sender, RoutedEventArgs e)
+        {
+            gCheckReports.IsEnabled = false;
+        }
+
+        private void CbCheckApps_Checked(object sender, RoutedEventArgs e)
+        {
+            lbAppsToCheck.IsEnabled = true;
+        }
+
+        private void CbCheckApps_Unchecked(object sender, RoutedEventArgs e)
+        {
+            lbAppsToCheck.IsEnabled = false;
+        }
+
+        private void CbCheckSites_Checked(object sender, RoutedEventArgs e)
+        {
+            lbSitesToCheck.IsEnabled = true;
+        }
+
+        private void CbCheckSites_Unchecked(object sender, RoutedEventArgs e)
+        {
+            lbSitesToCheck.IsEnabled = false;
         }
     }
 }

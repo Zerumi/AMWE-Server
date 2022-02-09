@@ -15,7 +15,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="3">Соединение</TextBlock>
+                        <TextBlock Margin="3">Данные</TextBlock>
                     </StackPanel>
                 </TabItem.Header>
                 <TabItem.Content>
@@ -23,10 +23,14 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="25"/>
                             <RowDefinition Height="25"/>
+                            <RowDefinition Height="40"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <CheckBox x:Name="cbAllowSocketsOnly" Content="Разрешать соединение только через WebSockets" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Checked="CbAllowSocketsOnly_Checked" Unchecked="CbAllowSocketsOnly_Checked"/>
-                        <CheckBox x:Name="cbExpect100Continue" Content="Игнорировать ожидание" Grid.Row="1" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
+                        <CheckBox x:Name="cbExpect100Continue" Content="Игнорировать ожидание (HTTP 100)" Grid.Row="1" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
+                        <TextBox x:Name="tbGlobalSeparator" HorizontalAlignment="Left" Margin="304,0,0,0" Grid.Row="2" Text=";" TextWrapping="Wrap" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="40"/>
+                        <Label Content="Разделитель в текстовых файлах" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="2" VerticalAlignment="Center" Width="294"/>
+                        <Button Content="i" HorizontalAlignment="Left" Margin="278,0,0,0" Grid.Row="2" VerticalAlignment="Center" RenderTransformOrigin="0.329,0.082" Width="18" Height="18"/>
                     </Grid>
                 </TabItem.Content>
             </TabItem>
@@ -60,6 +64,65 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <CheckBox x:Name="cbMinimizeToTray" Content="При закрытии, сворачивать в область уведомлений" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
+                    </Grid>
+                </TabItem.Content>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="3">Отчеты</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+                <TabItem.Content>
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <CheckBox x:Name="cbCheckReports" Content="Проверять получаемые отчеты" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Checked="CbCheckReports_Checked" Unchecked="CbCheckReports_Unchecked"/>
+                        <ScrollViewer Grid.Row="1">
+                            <Grid x:Name="gCheckReports" IsEnabled="False">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="35"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="35"/>
+                                </Grid.RowDefinitions>
+                                <CheckBox x:Name="cbCheckApps" Content="Проверять отчеты на следующие программы:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="317" Height="20" Checked="CbCheckApps_Checked" Unchecked="CbCheckApps_Unchecked"/>
+                                <ListBox x:Name="lbAppsToCheck" Margin="10,0,30,0" Grid.Row="1" BorderThickness="1" IsEnabled="False">
+                                    <CheckBox Content="Counter-Strike: Global Offensinve (csgo.exe)"/>
+                                    <CheckBox Content="Discord (discord.exe)"/>
+                                    <CheckBox Content="Dota 2 (dota2.exe)"/>
+                                    <CheckBox Content="Epic Games Launcher (EpicGamesLauncher.exe)"/>
+                                    <CheckBox Content="Factorio (Factorio.exe)"/>
+                                    <CheckBox Content="League of Legends (League of Legends.exe)"/>
+                                    <CheckBox Content="Minecraft (Minecraft.exe)"/>
+                                    <CheckBox Content="osu! (osu!.exe)"/>
+                                    <CheckBox Content="Resident Evil: Village (re8.exe)"/>
+                                    <CheckBox Content="Steam (steam.exe)"/>
+                                    <CheckBox Content="Valorant (VALORANT.exe)"/>
+                                </ListBox>
+                                <Button x:Name="bAddApp" Content="Добавить в список..." Grid.Row="2" Margin="0,10,202,0" Click="BAddApp_Click"/>
+                                <CheckBox x:Name="cbCheckSites" Content="Проверять отчеты на следующие сайты:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="317" Height="20" Grid.Row="3" Checked="CbCheckSites_Checked" Unchecked="CbCheckSites_Unchecked"/>
+                                <ListBox x:Name="lbSitesToCheck" Margin="10,0,30,0" Grid.Row="4" BorderThickness="1" IsEnabled="False">
+                                    <CheckBox Content="Twitter (twitter.com)"/>
+                                    <CheckBox Content="Netflix (netflix.com)"/>
+                                    <CheckBox Content="Reddit (reddit.com)"/>
+                                    <CheckBox Content="Facebook (Meta) (facebook.com)"/>
+                                    <CheckBox Content="Instagram (Meta) (instagram.com)"/>
+                                    <CheckBox Content="Twitch (twitch.com)"/>
+                                    <CheckBox Content="YouTube (youtube.com)"/>
+                                    <CheckBox Content="Dotabuff (dotabuff.com)"/>
+                                    <CheckBox Content="Ivi (ivi.com)"/>
+                                    <CheckBox Content="TikTok (tiktok.com)"/>
+                                    <CheckBox Content="Discord (discord.com)"/>
+                                    <CheckBox Content="VK (vk.com)"/>
+                                </ListBox>
+                                <Button x:Name="bAddSite" Content="Добавить в список..." Grid.Row="5" Margin="0,10,202,0" Click="BAddSite_Click"/>
+                            </Grid>
+                        </ScrollViewer>
                     </Grid>
                 </TabItem.Content>
             </TabItem>

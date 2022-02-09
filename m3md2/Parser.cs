@@ -54,6 +54,31 @@ namespace m3md2
 
             return String.Empty;
         }
+
+        /// <summary>
+        /// Возвращает слова в падеже, зависимом от заданного числа
+        /// </summary>
+        /// <param name="number">Число от которого зависит выбранное слово</param>
+        /// <param name="nominativ">Именительный падеж слова. Например "день"</param>
+        /// <param name="genetiv">Родительный падеж слова. Например "дня"</param>
+        /// <param name="plural">Множественное число слова. Например "дней"</param>
+        /// <returns></returns>
+        public static string GetDeclension(int number, string nominativ, string genetiv, string plural)
+        {
+            number %= 100;
+            if (number is >= 11 and <= 19)
+            {
+                return plural;
+            }
+
+            int i = number % 10;
+            return i switch
+            {
+                1 => nominativ,
+                2 or 3 or 4 => genetiv,
+                _ => plural,
+            };
+        }
     }
 
     public enum TimeDescription

@@ -677,7 +677,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.1401 beta 7\nAMWE RealTime server version 1.3.2022.1401\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.0902 beta 8\nAMWE RealTime server version 1.3.2022.1401\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
@@ -705,6 +705,7 @@ namespace AMWE_Administrator
         {
             try
             {
+                notifyIcon1.Dispose();
                 Environment.Exit(0);
             }
             catch (Exception ex)
@@ -931,6 +932,19 @@ namespace AMWE_Administrator
                 default:
                     _ = MessageBox.Show("(17.6) С сервера получено неизвестное значение типа изображения.");
                     break;
+            }
+        }
+
+        private void ExitMenu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                notifyIcon1.Dispose();
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.RegisterNew(ex);
             }
         }
 

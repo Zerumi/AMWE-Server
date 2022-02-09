@@ -23,3 +23,6 @@ dotnet_diagnostic.IDE0011.severity = none
 
 # CA1051: Не объявляйте видимые поля экземпляров
 dotnet_diagnostic.CA1051.severity = none
+
+# IDE0063: Использовать простой оператор using
+csharp_prefer_simple_using_statement = false
