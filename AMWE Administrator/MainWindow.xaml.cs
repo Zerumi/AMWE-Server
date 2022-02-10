@@ -642,7 +642,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory);
+                _ = Process.Start("explorer.exe", AppDomain.CurrentDomain.BaseDirectory); // Windows integration?
             }
             catch (Exception ex)
             {
@@ -677,7 +677,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.0902 beta 8\nAMWE RealTime server version 1.3.2022.1401\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.1002 beta 9\nAMWE RealTime server version 1.3.2022.0902\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {

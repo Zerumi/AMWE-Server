@@ -39,4 +39,10 @@
     <EmbeddedResource Include="cryptcode.txt" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ReportBlackList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -4,7 +4,9 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using m3md2;
 
 namespace AMWE_Administrator
@@ -39,6 +41,45 @@ namespace AMWE_Administrator
             cbCheckApps.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckApps"));
 
             cbCheckSites.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckSites"));
+
+            _ = Task.Run(new Action(async () =>
+            {
+                await LoadConfiguration();
+            }));
+        }
+
+        private async Task LoadConfiguration()
+        {
+            foreach (CheckModel item in App.AppsToCheck)
+            {
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    CheckBox cb = new()
+                    {
+                        Name = item.FrameworkName,
+                        Content = $"{item.Content} ({item.Transcription})",
+                        IsChecked = item.IsEnabled
+                    };
+                    cb.Checked += UniversalCheckBox_Checked;
+                    cb.Unchecked += UniversalCheckBox_Unchecked;
+                    _ = lbAppsToCheck.Items.Add(cb);
+                }));
+            }
+            foreach (CheckModel item in App.SitesToCheck)
+            {
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    CheckBox cb = new()
+                    {
+                        Name = item.FrameworkName,
+                        Content = $"{item.Content} ({item.Transcription})",
+                        IsChecked = item.IsEnabled
+                    };
+                    cb.Checked += UniversalCheckBox_Checked;
+                    cb.Unchecked += UniversalCheckBox_Unchecked;
+                    _ = lbSitesToCheck.Items.Add(cb);
+                }));
+            }
         }
 
         private void BitArray_OnAdd(object sender, EventArgs e)
@@ -94,6 +135,12 @@ namespace AMWE_Administrator
 
             ConfigurationRequest.WriteValueByKey("MinimizeToTray", Convert.ToString(cbMinimizeToTray.IsChecked.GetValueOrDefault(true)));
 
+            ConfigurationRequest.WriteValueByKey("CheckReports", Convert.ToString(cbCheckReports.IsChecked.GetValueOrDefault(true)));
+
+            ConfigurationRequest.WriteValueByKey("CheckApps", Convert.ToString(cbCheckApps.IsChecked.GetValueOrDefault(true)));
+
+            ConfigurationRequest.WriteValueByKey("CheckSites", Convert.ToString(cbCheckSites.IsChecked.GetValueOrDefault(true)));
+
             if (lbRestartRequired.Visibility == Visibility.Visible)
             {
                 System.Windows.Forms.Application.Restart();
@@ -101,17 +148,94 @@ namespace AMWE_Administrator
                 Environment.Exit(0);
             }
 
+            ConfigurationRequest.SaveCheckModels();
+
             Close();
         }
 
-        private void BAddSite_Click(object sender, RoutedEventArgs e)
+        private async void BAddSite_Click(object sender, RoutedEventArgs e)
         {
-
+            CheckModelMaster modelMaster = new(CheckModelIndex.Sites);
+            _ = modelMaster.ShowDialog();
+            CheckModel item = App.SitesToCheck.Last();
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (item.FrameworkName == lbSitesToCheck.Items.OfType<CheckBox>().Last().Name)
+                {
+                    return;
+                }
+                CheckBox cb = new()
+                {
+                    Name = item.FrameworkName,
+                    Content = $"{item.Content} ({item.Transcription})",
+                    IsChecked = item.IsEnabled
+                };
+                cb.Checked += UniversalCheckBox_Checked;
+                cb.Unchecked += UniversalCheckBox_Unchecked;
+                _ = lbSitesToCheck.Items.Add(cb);
+            }));
         }
 
-        private void BAddApp_Click(object sender, RoutedEventArgs e)
+        private async void BAddApp_Click(object sender, RoutedEventArgs e)
         {
+            CheckModelMaster modelMaster = new(CheckModelIndex.Apps);
+            _ = modelMaster.ShowDialog();
+            CheckModel item = App.AppsToCheck.Last();
+            
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (item.FrameworkName == lbAppsToCheck.Items.OfType<CheckBox>().Last().Name)
+                {
+                    return;
+                }
+                CheckBox cb = new()
+                {
+                    Name = item.FrameworkName,
+                    Content = $"{item.Content} ({item.Transcription})",
+                    IsChecked = item.IsEnabled
+                };
+                cb.Checked += UniversalCheckBox_Checked;
+                cb.Unchecked += UniversalCheckBox_Unchecked;
+                _ = lbAppsToCheck.Items.Add(cb);
+            }));
+        }
 
+        private void UniversalCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement obj = (FrameworkElement)sender;
+            string Name = obj.Name;
+            switch (Name[2])
+            {
+                case 'A':
+                    CheckModel astate = App.AppsToCheck.Find(x => x.FrameworkName == Name);
+                    astate.IsEnabled = true;
+                    break;
+                case 'S':
+                    CheckModel sstate = App.SitesToCheck.Find(x => x.FrameworkName == Name);
+                    sstate.IsEnabled = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UniversalCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            FrameworkElement obj = (FrameworkElement)sender;
+            string Name = obj.Name;
+            switch (Name[2])
+            {
+                case 'A':
+                    CheckModel astate = App.AppsToCheck.Find(x => x.FrameworkName == Name);
+                    astate.IsEnabled = false;
+                    break;
+                case 'S':
+                    CheckModel sstate = App.SitesToCheck.Find(x => x.FrameworkName == Name);
+                    sstate.IsEnabled = false;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void CbCheckReports_Checked(object sender, RoutedEventArgs e)

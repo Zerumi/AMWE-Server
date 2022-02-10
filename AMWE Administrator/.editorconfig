@@ -26,3 +26,9 @@ dotnet_diagnostic.CA1051.severity = none
 
 # IDE0063: Использовать простой оператор using
 csharp_prefer_simple_using_statement = false
+
+# IDE0130: Пространство имен (namespace) не соответствует структуре папок.
+dotnet_style_namespace_match_folder = false
+
+# Default severity for analyzer diagnostics with category 'Style'
+dotnet_analyzer_diagnostic.category-Style.severity = suggestion

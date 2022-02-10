@@ -1,25 +1,28 @@
 ﻿[Apps]
-Counter-Strike: Global Offensinve;csgo.exe;True
-Discord;discord.exe;True
-Dota 2;dota2.exe;True
-Epic Games Launcher;EpicGamesLauncher.exe;True
-Factorio;Factorio.exe;True
-League of Legends;League of Legends.exe;True
-Minecraft;Minecraft.exe;True
-osu!;osu!.exe;True
-Resident Evil: Village;re8.exe;True
-Steam;steam.exe;True
-Valorant;VALORANT.exe;True
+cbA1;Counter-Strike: Global Offensinve;csgo.exe;True
+cbA2;Discord;discord.exe;True
+cbA3;Dota 2;dota2.exe;True
+cbA4;Epic Games Launcher;EpicGamesLauncher.exe;True
+cbA5;Factorio;Factorio.exe;True
+cbA6;League of Legends;League of Legends.exe;True
+cbA7;Minecraft;Minecraft.exe;True
+cbA8;osu!;osu!.exe;True
+cbA9;Resident Evil: Village;re8.exe;True
+cbA10;Steam;steam.exe;True
+cbA11;Valorant;VALORANT.exe;True
+cbA12;Visual Studio;devenv.exe;True
 [Sites]
-Twitter;twitter.com;True
-Netflix;netflix.com;True
-Reddit;reddit.com;True
-Facebook (Meta);facebook.com;True
-Instagram (Meta);instagram.com;True
-Twitch;twitch.com;True
-YouTube;youtube.com;True
-Dotabuff;dotabuff.com;True
-Ivi;ivi.com;True
-TikTok;tiktok.com;True
-Discord;discord.com;True
-VK;vk.com;True
+cbS1;Twitter;twitter.com;True
+cbS2;Netflix;netflix.com;True
+cbS3;Reddit;reddit.com;True
+cbS4;Facebook (Meta);facebook.com;True
+cbS5;Instagram (Meta);instagram.com;True
+cbS6;Twitch;twitch.com;True
+cbS7;YouTube;youtube.com;True
+cbS8;Dotabuff;dotabuff.com;True
+cbS9;Ivi;ivi.com;True
+cbS10;TikTok;tiktok.com;True
+cbS11;Discord;discord.com;True
+cbS12;VK;vk.com;True
+cbS13;Kinopoisk;kinopoisk.ru;True
+cbS14;Spotify;spotify.com;True

@@ -24,6 +24,9 @@ namespace AMWE_Administrator
         public static List<Report> reports = new();
         public static DateTime ServerDateTime;
 
+        public static List<CheckModel> AppsToCheck = new();
+        public static List<CheckModel> SitesToCheck = new();
+
         public static Color[] colors = ColorThemes.GetColors(ConfigurationRequest.GetValueByKey("ColorTheme"));
         public static SolidColorBrush MainColor = new(colors[(int)ColorIndex.Main]);
         public static SolidColorBrush SecondColor = new(colors[(int)ColorIndex.Second]);
@@ -36,6 +39,7 @@ namespace AMWE_Administrator
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             ServicePointManager.Expect100Continue = bool.Parse(ConfigurationRequest.GetValueByKey("Expect100Continue"));
+            ConfigurationRequest.LoadCheckModels(AppsToCheck, SitesToCheck);
         }
     }
 }

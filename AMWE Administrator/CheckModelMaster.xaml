@@ -1,0 +1,23 @@
+﻿<Window x:Class="AMWE_Administrator.CheckModelMaster"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AMWE_Administrator"
+        mc:Ignorable="d"
+        Title="Мастер создания модели проверки" Height="150" Width="340" ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Label Content="Отображаемое имя" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        <Label Content="Абсолютная ссылка" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Row="1"/>
+        <TextBox x:Name="tbContent" Margin="170,0,10,0" Text="" TextWrapping="NoWrap" VerticalAlignment="Center"/>
+        <TextBox x:Name="tbTranscription" Margin="170,0,10,0" Text="" TextWrapping="NoWrap" VerticalAlignment="Center" Grid.Row="1"/>
+        <Button x:Name="Apply" Content="Применить" Grid.Row="3" Click="Apply_Click" Margin="10,0,10,7" Height="20" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="cbEnable" Content="Изначальная активация" Margin="160,0,10,0" Grid.Row="2" VerticalAlignment="Center"/>
+    </Grid>
+</Window>

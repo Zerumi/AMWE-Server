@@ -67,9 +67,7 @@ namespace m3md2
         {
             number %= 100;
             if (number is >= 11 and <= 19)
-            {
                 return plural;
-            }
 
             int i = number % 10;
             return i switch
@@ -78,6 +76,21 @@ namespace m3md2
                 2 or 3 or 4 => genetiv,
                 _ => plural,
             };
+        }
+
+        public static string GetUntilFromLastOrEmpty(this string text, string stopAt = "-")
+        {
+            if (!String.IsNullOrWhiteSpace(text))
+            {
+                int charLocation = text.LastIndexOf(stopAt);
+
+                if (charLocation > 0)
+                {
+                    return text.Substring(0, charLocation);
+                }
+            }
+
+            return String.Empty;
         }
     }
 
