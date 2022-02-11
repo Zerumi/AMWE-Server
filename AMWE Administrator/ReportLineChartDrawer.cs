@@ -106,7 +106,7 @@ namespace AMWE_Administrator
                     }
 
 
-                    TextBlock yTextBlock0 = new() { Text = $"{0}" };
+                    TextBlock yTextBlock0 = new() { Text = $"{0}", Foreground = App.FontColor };
                     _ = UserWindow.chartCanvas.Children.Add(yTextBlock0);
                     Canvas.SetLeft(yTextBlock0, origin.X - 20);
                     Canvas.SetTop(yTextBlock0, origin.Y - 10);
@@ -131,7 +131,7 @@ namespace AMWE_Administrator
 
                         if (yValue / 100 <= 1)
                         {
-                            TextBlock textBlock = new() { Text = $"{yValue / 100}" };
+                            TextBlock textBlock = new() { Text = $"{yValue / 100}", Foreground = App.FontColor };
                             _ = UserWindow.chartCanvas.Children.Add(textBlock);
                             Canvas.SetLeft(textBlock, line.X1 - 30);
                             Canvas.SetTop(textBlock, yPoint - 10);
@@ -187,8 +187,8 @@ namespace AMWE_Administrator
                     // polyline
                     chartPolyline = new Polyline()
                     {
-                        Stroke = new SolidColorBrush(Color.FromRgb(68, 114, 196)),
-                        StrokeThickness = 1,
+                        Stroke = App.LineChartColor,
+                        StrokeThickness = 2,
                     };
                     _ = UserWindow.chartCanvas.Children.Add(chartPolyline);
 

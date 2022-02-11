@@ -6,12 +6,12 @@ using System.Windows;
 // набор атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
 [assembly: AssemblyTitle("AMWE Administrator")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Assistant in Monitoring the Work of Employes 1.4")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("AMWE Administrator")]
 [assembly: AssemblyCopyright("Copyright © Zerumi 2020")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("AMWE")]
 [assembly: AssemblyCulture("")]
 
 // Установка значения False для параметра ComVisible делает типы в этой сборке невидимыми
@@ -49,5 +49,5 @@ using System.Windows;
 // Можно задать все значения или принять номера сборки и редакции по умолчанию 
 // используя "*", как показано ниже:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.2022.0701")]
-[assembly: AssemblyFileVersion("1.4.2022.0701")]
+[assembly: AssemblyVersion("1.4.2022.1002")]
+[assembly: AssemblyFileVersion("1.4.2022.1002")]

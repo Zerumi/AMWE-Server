@@ -1,16 +1,16 @@
 ﻿[Apps]
-cbA1;Counter-Strike: Global Offensinve;csgo.exe;True
-cbA2;Discord;discord.exe;True
-cbA3;Dota 2;dota2.exe;True
-cbA4;Epic Games Launcher;EpicGamesLauncher.exe;True
-cbA5;Factorio;Factorio.exe;True
-cbA6;League of Legends;League of Legends.exe;True
-cbA7;Minecraft;Minecraft.exe;True
-cbA8;osu!;osu!.exe;True
-cbA9;Resident Evil: Village;re8.exe;True
-cbA10;Steam;steam.exe;True
-cbA11;Valorant;VALORANT.exe;True
-cbA12;Visual Studio;devenv.exe;True
+cbA1;Counter-Strike: Global Offensinve;csgo;True
+cbA2;Discord;discord;True
+cbA3;Dota 2;dota2;True
+cbA4;Epic Games Launcher;EpicGamesLauncher;True
+cbA5;Factorio;Factorio;True
+cbA6;League of Legends;League of Legends;True
+cbA7;Minecraft;Minecraft;True
+cbA8;osu!;osu!;True
+cbA9;Resident Evil: Village;re8;True
+cbA10;Steam;steam;True
+cbA11;Valorant;VALORANT;True
+cbA12;Visual Studio;devenv;False
 [Sites]
 cbS1;Twitter;twitter.com;True
 cbS2;Netflix;netflix.com;True

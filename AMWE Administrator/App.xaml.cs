@@ -27,13 +27,17 @@ namespace AMWE_Administrator
         public static List<CheckModel> AppsToCheck = new();
         public static List<CheckModel> SitesToCheck = new();
 
-        public static Color[] colors = ColorThemes.GetColors(ConfigurationRequest.GetValueByKey("ColorTheme"));
+        private static readonly string ColorTheme = ConfigurationRequest.GetValueByKey("ColorTheme");
+        public static Color[] colors = ColorThemes.GetColors(ColorTheme);
+        public static Color[] repGradient = ColorThemes.GetGradient(ColorTheme);
         public static SolidColorBrush MainColor = new(colors[(int)ColorIndex.Main]);
         public static SolidColorBrush SecondColor = new(colors[(int)ColorIndex.Second]);
         public static SolidColorBrush FontColor = new(colors[(int)ColorIndex.Font]);
         public static SolidColorBrush ExtraColor = new(colors[(int)ColorIndex.Extra]);
         public static SolidColorBrush GreenColor = new(colors[(int)ColorIndex.Green]);
         public static SolidColorBrush RedColor = new(colors[(int)ColorIndex.Red]);
+        public static SolidColorBrush ControlColor = new(colors[(int)ColorIndex.Control]);
+        public static SolidColorBrush LineChartColor = new(colors[(int)ColorIndex.LineChart]);
 #pragma warning restore CA2211 // Поля, не являющиеся константами, не должны быть видимыми
 
         private void Application_Startup(object sender, StartupEventArgs e)

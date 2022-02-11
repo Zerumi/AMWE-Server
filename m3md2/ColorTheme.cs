@@ -9,6 +9,7 @@ namespace m3md2
     {
         public string Name { get; set; }
         public Color[] Colors { get; set; }
+        public Color[] ReportGradient { get; set; }
     }
 
     public enum ColorIndex
@@ -18,6 +19,8 @@ namespace m3md2
         Font,
         Extra,
         Green,
-        Red
+        Red,
+        Control,
+        LineChart
     }
 }

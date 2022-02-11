@@ -275,6 +275,16 @@ namespace AMWE_Administrator
 
                 Grid.Background = App.MainColor;
 
+                mwMenu.Background = App.ControlColor;
+                mwMenu.Foreground = App.FontColor;
+                foreach (var item in mwMenu.Items.OfType<MenuItem>())
+                {
+                    foreach (var mitem in item.Items.OfType<MenuItem>())
+                    {
+                        mitem.Foreground = SystemColors.ActiveCaptionTextBrush;
+                    }
+                }
+
                 WelcomeLabel.Content = $"{Parser.GetWelcomeLabel(Parser.GetTimeDescription(App.ServerDateTime))}, {App.Username}";
             }
             catch (Exception ex)
@@ -333,11 +343,29 @@ namespace AMWE_Administrator
                     return;
                 }
 
+                report.ProcIntersection = App.AppsToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.LastProcesses?.ToList().FindAll(x => x != string.Empty) ?? new List<string>()).ToList();
+
+                report.SiteIntersection = App.SitesToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.CurrentSites?.Select(x => x.SiteUri.DnsSafeHost) ?? new List<string>()).ToArray();
+
+                string message = string.Empty;
+
+                if (report.ProcIntersection.Count != 0)
+                {
+                    message = $"({DateTime.Now.ToShortTimeString()}) / ! \\ ID {report.Client.Id}: Обнаружена запрещенная программа ({report.OverallRating})";
+                }
+                else if (report.SiteIntersection.Count != 0)
+                {
+                    message = $"({DateTime.Now.ToShortTimeString()}) / ! \\ ID {report.Client.Id}: Обнаружен запрещенный сайт ({report.OverallRating})";
+                }
+                else
+                {
+                    message = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})";
+                }
                 await Dispatcher.BeginInvoke((Action)(async () =>
                 {
                     TextBlock textBlock = new()
                     {
-                        Text = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})",
+                        Text = message,
                         Foreground = App.FontColor
                     };
                     textBlock.MouseEnter += Notification_GotMouseCapture;
@@ -457,7 +485,7 @@ namespace AMWE_Administrator
                     {
                         Name = temptextblock.Name,
                         Header = temptextblock.Text,
-                        Foreground = App.FontColor
+                        Foreground = SystemColors.ActiveCaptionTextBrush
                     };
                     tempmenuitem.Click += RmUniversalUser_Click;
                     _ = mReports.Items.Add(tempmenuitem); // save reports on server
@@ -658,6 +686,8 @@ namespace AMWE_Administrator
 
                 if (result == MessageBoxResult.Yes)
                 {
+                    notifyIcon1.Dispose();
+
                     System.Windows.Forms.Application.Restart();
 
                     Environment.Exit(0);
@@ -837,6 +867,23 @@ namespace AMWE_Administrator
                 }
             }
             if (ChatSystemConnection.State == HubConnectionState.Disconnected)
+            {
+                try
+                {
+                    await ChatSystemConnection.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex);
+                    await Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                        mConnect.IsEnabled = true;
+                    }));
+                    return;
+                }
+            }
+            if (ScreenSystemConnection.State == HubConnectionState.Disconnected)
             {
                 try
                 {

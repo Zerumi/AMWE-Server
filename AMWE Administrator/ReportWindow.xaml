@@ -5,6 +5,44 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Информация об отчете" Height="400" Width="1000" ResizeMode="CanMinimize">
+    <Window.Resources>
+        <SolidColorBrush x:Key="TabControlBrush" Color="WhiteSmoke" />
+        <SolidColorBrush x:Key="TabSelectedBrush" Color="LightGray" />
+        <Style TargetType="{x:Type TabItem}">
+            <Setter x:Uid="TabSetter" Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Border>
+                            <Grid>
+                                <Grid>
+                                    <Border x:Name="border" 
+                                            CornerRadius="3,3,0,0"
+                                            Background="{DynamicResource TabControlBrush}"/>
+                                </Grid>
+                                <ContentPresenter ContentSource="Header"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="{DynamicResource TabSelectedBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="{DynamicResource TabSelectedBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="166.4"/>
@@ -15,9 +53,6 @@
             <RowDefinition Height="9*"/>
         </Grid.RowDefinitions>
         <Rectangle x:Name="rOverallRating" Margin="10,10.2,10.4,0" Grid.Row="1" HorizontalAlignment="Stretch" StrokeThickness="3" Stroke="Black" VerticalAlignment="Top" Height="201">
-            <Rectangle.Clip>
-                <RectangleGeometry Rect="0,0,146.395,201.595" RadiusX="14" RadiusY="14"/>
-            </Rectangle.Clip>
             <Rectangle.Fill>
                 <LinearGradientBrush StartPoint="1, 0">
                     <GradientStop Color="#C1ff0000" Offset="0.09"/>
@@ -284,7 +319,7 @@
                     </Grid>
                 </TabItem.Content>
             </TabItem>
-            <TabItem x:Name="Proccesses">
+            <TabItem x:Name="ProccessesTab">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="3">Процессы</TextBlock>
@@ -293,50 +328,46 @@
                 <TabItem.Content>
                     <Grid x:Name="gProcesses" Margin="10">
                         <Label x:Name="gpOverallInfo" Content="Количество измененных процессов: {x}" Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                        <Label Content="Список измененных процессов:" Margin="10,36,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <Label x:Name="lProcInfo" Content="Информация из отчета:" Margin="10,36,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                         <ScrollViewer Margin="10,62,10,10">
                             <Grid Margin="5">
-                                <Label Content="Прошлый отчет:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                <Label Name="lLast" Content="Прошлый отчет:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                 <TextBlock x:Name="tbLast" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,31,0,0" Width="230"/>
-                                <Label Content="Изменения:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,0,0,0"/>
+                                <Label Name="lChanges" Content="Изменения:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,0,0,0"/>
                                 <TextBlock x:Name="tbChanges" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,31,0,0" Width="230"/>
-                                <Label Content="Текущий отчет:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,0,0,0"/>
+                                <Label Name="lCurrent" Content="Текущий отчет:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,0,0,0"/>
                                 <TextBlock x:Name="tbCurrent" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,31,0,0" Width="230"/>
                             </Grid>
                         </ScrollViewer>
                     </Grid>
                 </TabItem.Content>
             </TabItem>
-            <TabItem x:Name="GraphsTab" Visibility="Hidden">
+            <TabItem x:Name="SitesTab">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Margin="3">Графики</TextBlock>
+                        <TextBlock Margin="3">Сайты</TextBlock>
                     </StackPanel>
                 </TabItem.Header>
                 <TabItem.Content>
-                    <Grid>
-                        <Border BorderThickness="1" Margin="10,34,0,0" BorderBrush="Black" Height="120" VerticalAlignment="Top" HorizontalAlignment="Left" Width="250">
-                            <Canvas x:Name="grOverall">
-                                <Line X1="0" Y1="20" X2="124" Y2="38" Stroke="Green"/>
-                                <Line X1="124" Y1="38" X2="249" Y2="20" Stroke="Green"/>
-                                <Line X1="0" Y1="58" X2="249" Y2="58" Stroke="Green"/>
-                                <Label Content="1" Margin="0,0,0,0" FontSize="8"/>
-                                <Label Content="0,7" Margin="0,19,0,0" FontSize="8"/>
-                                <Label Content="0,5" Margin="0,38,0,0" FontSize="8"/>
-                            </Canvas>
-                        </Border>
-                        <Border BorderThickness="1" Margin="10,0,0,10" BorderBrush="Black" HorizontalAlignment="Left" Width="125" Height="80" VerticalAlignment="Bottom">
-                            <Canvas/>
-                        </Border>
-                        <Border BorderThickness="1" Margin="150,0,0,10" BorderBrush="Black" HorizontalAlignment="Left" Width="125" Height="80" VerticalAlignment="Bottom">
-                            <Canvas/>
-                        </Border>
+                    <Grid x:Name="gSites" Margin="10">
+                        <Label x:Name="lBrowser" Content="Используемый браузер: Google Chrome" HorizontalAlignment="Center" VerticalAlignment="Top" Width="777" Margin="0,10,0,0"/>
+                        <Label x:Name="lSiteInfo" Content="Информация из отчета:" Margin="10,36,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <ScrollViewer Margin="10,62,10,10">
+                            <Grid Margin="5">
+                                <Label Name="lSlast" Content="Прошлый отчет:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                <TextBlock x:Name="tbSiteLast" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,31,0,0" Width="230"/>
+                                <Label x:Name="lSchanges" Content="Изменения:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,0,0,0"/>
+                                <TextBlock x:Name="tbSiteChanges" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,31,0,0" Width="230"/>
+                                <Label Name="lScurrent" Content="Текущий отчет:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,0,0,0"/>
+                                <TextBlock x:Name="tbSiteCurrent" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,31,0,0" Width="230"/>
+                            </Grid>
+                        </ScrollViewer>
                     </Grid>
                 </TabItem.Content>
             </TabItem>
         </TabControl>
         <Label Content="1" HorizontalAlignment="Left" Margin="10,11.8,0,0" VerticalAlignment="Top" Grid.Row="1" Height="20" FontSize="8.67" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="22"/>
-        <Label Content="0,9" HorizontalAlignment="Left" Margin="10,31.8,0,0" VerticalAlignment="Top" Grid.Row="1" Height="19" FontSize="8.67" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="22"/>
+        <Label Content="0,9" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Grid.Row="1" Height="20" FontSize="8.67" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Width="22"/>
         <Label Content="0,8" HorizontalAlignment="Left" Margin="10,50.8,0,0" VerticalAlignment="Top" Grid.Row="1" Height="20" FontSize="8.67" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <Label Content="0,7" HorizontalAlignment="Left" Margin="10,70.8,0,0" VerticalAlignment="Top" Grid.Row="1" Height="20" FontSize="8.67" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
         <Label Content="0,6" HorizontalAlignment="Left" Margin="10,89.8,0,0" VerticalAlignment="Top" Grid.Row="1" Height="20" FontSize="8.67" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
