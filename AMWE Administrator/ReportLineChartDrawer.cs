@@ -65,7 +65,7 @@ namespace AMWE_Administrator
                         Y1 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
                         X2 = UserWindow.chartCanvas.ActualWidth - xAxisStart,
                         Y2 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
-                        Stroke = Brushes.Black,
+                        Stroke = App.FontColor,
                         StrokeThickness = 1,
                     };
                     yAxisLine = new Line()
@@ -74,7 +74,7 @@ namespace AMWE_Administrator
                         Y1 = yAxisStart - 5,
                         X2 = xAxisStart,
                         Y2 = UserWindow.chartCanvas.ActualHeight - yAxisStart,
-                        Stroke = Brushes.Black,
+                        Stroke = App.FontColor,
                         StrokeThickness = 1,
                     };
 

@@ -11,5 +11,7 @@ namespace ReportHandler
         public bool IsOnline { get; set; }
         public DateTime LastLoginDateTime { get; set; }
         public DateTime LastLogoutDateTime { get; set; }
+
+        public bool IgnoreWarning { get; set; }
     }
 }

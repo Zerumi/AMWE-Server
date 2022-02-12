@@ -37,6 +37,8 @@ namespace AMWE_Administrator
                 gScreenViewer.Background = App.MainColor;
                 chartCanvas.Background = App.MainColor;
 
+                Resources["ButtonSelectedBrush"] = App.ButtonHighlightColor;
+
                 foreach (Label obj in WinHelper.FindVisualChildren<Label>(gScreenViewer))
                 {
                     obj.Foreground = App.FontColor;
@@ -47,7 +49,19 @@ namespace AMWE_Administrator
                     obj.Foreground = App.FontColor;
                 }
 
-                clientState = MainWindow.clientStates.Find(x => x.Client == client);
+                foreach (Button obj in WinHelper.FindVisualChildren<Button>(gScreenViewer))
+                {
+                    obj.Background = App.ButtonColor;
+                    obj.Foreground = App.FontColor;
+                }
+
+                foreach (Button obj in WinHelper.FindVisualChildren<Button>(Grid))
+                {
+                    obj.Background = App.ButtonColor;
+                    obj.Foreground = App.FontColor;
+                }
+
+                clientState = MainWindow.clientStates.Find(x => x.Client.Id == client.Id);
 
                 UserInWindow = client;
                 userReports = App.reports.FindAll(x => x.Client.Id == UserInWindow.Id); // long time parsing??
@@ -95,7 +109,9 @@ namespace AMWE_Administrator
                     int a = App.reports.IndexOf(report);
                     Button tempbutton = new()
                     {
-                        Content = $"Отчет {a} ({report.Timestamp.ToLocalTime().ToLongTimeString()}) ({report.OverallRating})" // report timestamp (server utc only!)
+                        Content = $"Отчет {a} ({report.Timestamp.ToLocalTime().ToLongTimeString()}) ({report.OverallRating})", // report timestamp (server utc only!)
+                        Foreground = App.FontColor,
+                        Background = App.ButtonColor
                     };
 
                     tempbutton.Click += Reportbutton_Click;
@@ -120,7 +136,7 @@ namespace AMWE_Administrator
                 TimeSpan a = e.SignalTime.Subtract(clientState.LastLoginDateTime);
                 await Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    lOnlineStatus.Content = $"В сети уже {a.Hours} {Parser.GetDeclension(a.Hours,"час", "часа", "часов")} (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
+                    lOnlineStatus.Content = $"В сети уже {a.Hours} {Parser.GetDeclension(a.Hours, "час", "часа", "часов")} (с {clientState.LastLoginDateTime.ToLongTimeString()})"; // add connect & disconnect time (server utc only!)
                 }));
                 (sender as Timer).Interval = TimeSpan.FromMinutes(clientState.LastLoginDateTime.AddHours(e.SignalTime.Subtract(clientState.LastLoginDateTime).Hours + 1).Subtract(e.SignalTime).Minutes + 1).TotalMilliseconds;
                 // Calculate next hour: 
@@ -141,6 +157,7 @@ namespace AMWE_Administrator
                 _ = Dispatcher.BeginInvoke(new Action(() =>
                 {
                     iScreen.Source = LoadImage(screen.Bytes);
+                    bSaveScr.IsEnabled = true;
                 }));
             }
         }
@@ -203,7 +220,9 @@ namespace AMWE_Administrator
                     int a = App.reports.IndexOf(obj);
                     Button tempbutton = new()
                     {
-                        Content = $"Отчет {a} ({obj.Timestamp.ToLocalTime().ToLongTimeString()}) ({obj.OverallRating})" // report timestamp (server utc only!)
+                        Content = $"Отчет {a} ({obj.Timestamp.ToLocalTime().ToLongTimeString()}) ({obj.OverallRating})", // report timestamp (server utc only!)
+                        Foreground = App.FontColor,
+                        Background = App.ButtonColor
                     };
 
                     tempbutton.Click += Reportbutton_Click;
@@ -233,6 +252,33 @@ namespace AMWE_Administrator
             MainWindow.OnUserDisconnected -= MainWindow_OnUserDisconnected;
             MainWindow.OnNewScreen -= UpdateScreen;
             GC.Collect();
+        }
+
+        private void bSaveScr_Click(object sender, RoutedEventArgs e)
+        {
+            if (iScreen.Source == null)
+            {
+                _ = MessageBox.Show("(19.1) Отсутсвует изображение для сохранения");
+                return;
+            }
+        linkcreatepng:
+            try
+            {
+                PngBitmapEncoder encoder = new();
+                encoder.Frames.Add(BitmapFrame.Create((BitmapSource)iScreen.Source));
+                using FileStream stream = new($"{Directory.GetCurrentDirectory()}\\Screens\\Screen-{UserInWindow.Nameofpc}-{DateTime.Now.Ticks}.png", FileMode.Create);
+                encoder.Save(stream);
+                bSaveScr.IsEnabled = false;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                _ = Directory.CreateDirectory($"{Directory.GetCurrentDirectory()}\\Screens");
+                goto linkcreatepng;
+            }
+            catch (Exception ex)
+            {
+                _ = MessageBox.Show(ex.ToString());
+            }
         }
     }
 }

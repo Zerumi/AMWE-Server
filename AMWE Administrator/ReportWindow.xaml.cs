@@ -1,6 +1,7 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using Microsoft.AspNetCore.SignalR.Client;
 using ReportHandler;
 using System;
 using System.Collections.Generic;
@@ -23,12 +24,18 @@ namespace AMWE_Administrator
         private string sOldProcesses;
         private string sCurrentSites;
         private string sOldSites;
+        private string sWarnedApps;
+        private string sWarnedSites;
+
+        private Client client = default;
 
         public ReportWindow(Report report)
         {
             try
             {
                 InitializeComponent();
+
+                client = report.Client;
 
                 Grid.Background = App.MainColor;
                 gKeyboard.Background = App.SecondColor;
@@ -37,13 +44,16 @@ namespace AMWE_Administrator
                 KeyboardTab.Background = App.ControlColor;
                 ProccessesTab.Background = App.ControlColor;
                 SitesTab.Background = App.ControlColor;
+                WarnActivityTab.Background = App.ControlColor;
                 TextOutputTab.Foreground = App.FontColor;
                 KeyboardTab.Foreground = App.FontColor;
                 ProccessesTab.Foreground = App.FontColor;
                 SitesTab.Foreground = App.FontColor;
+                WarnActivityTab.Foreground = App.FontColor;
 
                 Resources["TabControlBrush"] = App.ControlColor;
                 Resources["TabSelectedBrush"] = App.ExtraColor;
+                Resources["ButtonSelectedBrush"] = App.ButtonHighlightColor;
 
                 foreach (Rectangle obj in m3md2.WinHelper.FindVisualChildren<Rectangle>(gKeyboard))
                 {
@@ -60,11 +70,24 @@ namespace AMWE_Administrator
                     obj.Foreground = App.FontColor;
                 }
 
+                foreach (Label obj in m3md2.WinHelper.FindVisualChildren<Label>(gActivity))
+                {
+                    obj.Foreground = App.FontColor;
+                }
+
+                foreach (Button obj in m3md2.WinHelper.FindVisualChildren<Button>(gActivity))
+                {
+                    obj.Background = App.ButtonColor;
+                    obj.Foreground = App.FontColor;
+                }
+
                 tcReportVisualiser.Background = App.SecondColor;
 
                 ReportOutput.Foreground = App.FontColor;
                 ReportOutput.Background = App.SecondColor;
                 ReportOutput.Text = string.Empty;
+
+                tbWarnActivityOutput.Foreground = App.FontColor;
 
                 gpOverallInfo.Foreground = App.FontColor;
                 lProcInfo.Foreground = App.FontColor;
@@ -84,7 +107,7 @@ namespace AMWE_Administrator
                 tbSiteChanges.Foreground = App.FontColor;
                 tbSiteCurrent.Foreground = App.FontColor;
 
-                rOverallRating.Stroke = App.SecondColor;
+                rOverallRating.Stroke = App.BorderColor;
 
                 _ = Task.Run(new Action(async () =>
                 {
@@ -106,6 +129,7 @@ namespace AMWE_Administrator
                     await LoadKeyboardOutput(report);
                     await LoadProcessesOutput(report);
                     await LoadSitesOutput(report);
+                    await LoadWarnOutput(report);
                 });
                 await Task.Run(async () =>
                 {
@@ -136,7 +160,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.1
                     },
                     new GradientStop()
@@ -151,7 +175,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.2
                     },
                     new GradientStop()
@@ -166,7 +190,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.3
                     },
                     new GradientStop()
@@ -181,7 +205,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.4
                     },
                     new GradientStop()
@@ -196,7 +220,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.5
                     },
                     new GradientStop()
@@ -211,7 +235,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.6
                     },
                     new GradientStop()
@@ -226,7 +250,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.7
                     },
                     new GradientStop()
@@ -241,7 +265,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.8
                     },
                     new GradientStop()
@@ -256,7 +280,7 @@ namespace AMWE_Administrator
                     },
                     new GradientStop()
                     {
-                        Color = App.SecondColor.Color,
+                        Color = App.BorderColor.Color,
                         Offset = 0.9
                     },
                     new GradientStop()
@@ -414,6 +438,69 @@ namespace AMWE_Administrator
                     }));
                 }
             }));
+        }
+
+        private async Task LoadWarnOutput(Report report)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    if ((report.SiteIntersection?.Count ?? 0) == 0 && (report.ProcIntersection?.Count ?? 0) == 0)
+                    {
+                        WarnActivityTab.Visibility = Visibility.Collapsed;
+                        return;
+                    }
+                    foreach (CheckModel item in report.SiteIntersection ?? new List<CheckModel>())
+                    {
+                        sWarnedSites += $"{item.Transcription} - {item.Content}\n";
+                    }
+                    foreach (CheckModel item in report.ProcIntersection ?? new List<CheckModel>())
+                    {
+                        sWarnedApps += $"{item.Transcription} - {item.Content}\n";
+                    }
+                    tbWarnActivityOutput.Text = $"{((report.SiteIntersection?.Count ?? 0) != 0 ? $"Обнаруженные сайты: \n{sWarnedSites}" : "")}{((report.ProcIntersection?.Count ?? 0) != 0 ? $"Обнаруженные программы: \n{sWarnedApps}" : "")}";
+                    lReportTime.Content = $"{report.Timestamp.ToLocalTime().ToShortDateString()} {report.Timestamp.ToLocalTime().ToLongTimeString()}";
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex, false);
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        ReportOutput.Text += $"Во время обработки отчета возникло исключение (Оно занесено в Меню -> Диагностика)\n{ex.Message}\n\n";
+                    }));
+                }
+            }));
+        }
+
+        private void bMoreAboutUser_Click(object sender, RoutedEventArgs e)
+        {
+            UserReports userReports = new(client, MainWindow.clientStates.Find(x => x.Client.Id == client.Id).IsOnline);
+            userReports.Show();
+        }
+
+        private void bEnhanceControl_Click(object sender, RoutedEventArgs e)
+        {
+            // send request to Server for current user to send reports quickly
+            _ = MessageBox.Show("Усиление контроля будет реализовано в версии 1.4.1");
+        }
+
+        private async void bOpenChat_Click(object sender, RoutedEventArgs e)
+        {
+            await (App.Current.Windows[0] as MainWindow).OpenChat(client.Id);
+        }
+
+        private void bIgnore_Click(object sender, RoutedEventArgs e)
+        {
+            ClientState a = MainWindow.clientStates.Find(x => x.Client.Id == client.Id);
+            a.IgnoreWarning = true;
+        }
+
+        private void bSettings_Click(object sender, RoutedEventArgs e)
+        {
+            Settings settings = new();
+            settings.Show();
+            _ = settings.Activate();
         }
     }
 }

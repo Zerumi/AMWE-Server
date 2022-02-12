@@ -61,7 +61,10 @@ namespace m3md2
                     Color.FromRgb(67,181,129), // green color
                     Color.FromRgb(240,71,71), // red color
                     SystemColors.ControlColor, // control color
-                    Color.FromRgb(68, 114, 196) // linechart color
+                    Color.FromRgb(68, 114, 196), // linechart color
+                    Color.FromRgb(0,0,0), // border color
+                    SystemColors.ControlColor, // button color
+                    Colors.LightGray // ButtonHighlight
                 },
                 ReportGradient = new Color[]
                 {
@@ -89,7 +92,10 @@ namespace m3md2
                     Color.FromRgb(67,181,129), // green color
                     Color.FromRgb(240,71,71), // red color
                     SystemColors.ControlColor, // control color
-                    Color.FromRgb(68, 114, 196) // linechart color
+                    Color.FromRgb(68, 114, 196), // linechart color
+                    Color.FromRgb(0,0,0), // border color
+                    SystemColors.ControlColor, // button color
+                    SystemColors.ControlDarkColor // ButtonHighlight
                 },
                 ReportGradient = new Color[]
                 {
@@ -117,7 +123,10 @@ namespace m3md2
                     Color.FromRgb(67,181,129), // green color
                     Color.FromRgb(240,71,71), // red color
                     Color.FromRgb(32,34,37), // control color
-                    Color.FromRgb(255, 239, 0) // linechart color
+                    Color.FromRgb(255,239,0), // linechart color
+                    Color.FromRgb(54,57,63), // border color
+                    Color.FromRgb(42,44,47), // button color
+                    Color.FromRgb(64,68,75) // ButtonHighlight
                 },
                 ReportGradient = new Color[]
                 {

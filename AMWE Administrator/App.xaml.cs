@@ -24,6 +24,10 @@ namespace AMWE_Administrator
         public static List<Report> reports = new();
         public static DateTime ServerDateTime;
 
+        public static bool CheckReports = Convert.ToBoolean(ConfigurationRequest.GetValueByKey("CheckReports"));
+        public static bool CheckApps = Convert.ToBoolean(ConfigurationRequest.GetValueByKey("CheckApps"));
+        public static bool CheckSites = Convert.ToBoolean(ConfigurationRequest.GetValueByKey("CheckSites"));
+
         public static List<CheckModel> AppsToCheck = new();
         public static List<CheckModel> SitesToCheck = new();
 
@@ -38,6 +42,9 @@ namespace AMWE_Administrator
         public static SolidColorBrush RedColor = new(colors[(int)ColorIndex.Red]);
         public static SolidColorBrush ControlColor = new(colors[(int)ColorIndex.Control]);
         public static SolidColorBrush LineChartColor = new(colors[(int)ColorIndex.LineChart]);
+        public static SolidColorBrush BorderColor = new(colors[(int)ColorIndex.Border]);
+        public static SolidColorBrush ButtonColor = new(colors[(int)ColorIndex.Button]);
+        public static SolidColorBrush ButtonHighlightColor = new(colors[(int)ColorIndex.ButtonHighlight]);
 #pragma warning restore CA2211 // Поля, не являющиеся константами, не должны быть видимыми
 
         private void Application_Startup(object sender, StartupEventArgs e)

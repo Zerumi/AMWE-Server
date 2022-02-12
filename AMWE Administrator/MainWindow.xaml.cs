@@ -25,8 +25,8 @@ namespace AMWE_Administrator
     public partial class MainWindow : Window, IDisposable
     {
         public static readonly List<ClientState> clientStates = new();
-        private static readonly List<Notification> notifications = new();
         private static readonly List<Client> сurrentclients = new();
+        private static readonly List<Notification> notifications = new();
         private static readonly List<Client> allclients = new();
         private static readonly List<Chat> chats = new();
         private static readonly Stopwatch LastConnectStopwatch = new();
@@ -275,14 +275,13 @@ namespace AMWE_Administrator
 
                 Grid.Background = App.MainColor;
 
+                Resources["ButtonSelectedBrush"] = App.ButtonHighlightColor;
+
                 mwMenu.Background = App.ControlColor;
                 mwMenu.Foreground = App.FontColor;
-                foreach (var item in mwMenu.Items.OfType<MenuItem>())
+                foreach (MenuItem mitem in mwMenu.Items.OfType<MenuItem>().SelectMany(item => item.Items.OfType<MenuItem>()))
                 {
-                    foreach (var mitem in item.Items.OfType<MenuItem>())
-                    {
-                        mitem.Foreground = SystemColors.ActiveCaptionTextBrush;
-                    }
+                    mitem.Foreground = SystemColors.ActiveCaptionTextBrush;
                 }
 
                 WelcomeLabel.Content = $"{Parser.GetWelcomeLabel(Parser.GetTimeDescription(App.ServerDateTime))}, {App.Username}";
@@ -343,26 +342,38 @@ namespace AMWE_Administrator
                     return;
                 }
 
-                report.ProcIntersection = App.AppsToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.LastProcesses?.ToList().FindAll(x => x != string.Empty) ?? new List<string>()).ToList();
-
-                report.SiteIntersection = App.SitesToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.CurrentSites?.Select(x => x.SiteUri.DnsSafeHost) ?? new List<string>()).ToArray();
-
-                string message = string.Empty;
-
-                if (report.ProcIntersection.Count != 0)
+                if (App.CheckReports)
                 {
-                    message = $"({DateTime.Now.ToShortTimeString()}) / ! \\ ID {report.Client.Id}: Обнаружена запрещенная программа ({report.OverallRating})";
+                    if (App.CheckApps)
+                    {
+                        report.ProcIntersection = App.AppsToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.LastProcesses?.ToList().FindAll(x => x != string.Empty) ?? new List<string>()).Select(f => App.AppsToCheck.Find(z => z.Transcription == f)).ToList();
+                    }
+                    if (App.CheckSites)
+                    {
+                        report.SiteIntersection = App.SitesToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.CurrentSites?.Select(x => x.SiteUri.DnsSafeHost) ?? new List<string>()).Select(f => App.SitesToCheck.Find(z => z.Transcription == f)).ToArray();
+                    }
                 }
-                else if (report.SiteIntersection.Count != 0)
-                {
-                    message = $"({DateTime.Now.ToShortTimeString()}) / ! \\ ID {report.Client.Id}: Обнаружен запрещенный сайт ({report.OverallRating})";
-                }
-                else
-                {
-                    message = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})";
-                }
+
                 await Dispatcher.BeginInvoke((Action)(async () =>
                 {
+                    bool flag = false;
+
+                    string message = string.Empty;
+
+                    if ((report.ProcIntersection?.Count ?? 0) != 0)
+                    {
+                        message = $"({DateTime.Now.ToShortTimeString()}) / ! \\ ID {report.Client.Id}: Обнаружена запрещенная программа ({report.OverallRating})";
+                        flag = true;
+                    }
+                    else if ((report.SiteIntersection?.Count ?? 0) != 0)
+                    {
+                        message = $"({DateTime.Now.ToShortTimeString()}) / ! \\ ID {report.Client.Id}: Обнаружен запрещенный сайт ({report.OverallRating})";
+                        flag = true;
+                    }
+                    else
+                    {
+                        message = $"({DateTime.Now.ToShortTimeString()}) ID {report.Client.Id}: Отправлен отчет ({report.OverallRating})";
+                    }
                     TextBlock textBlock = new()
                     {
                         Text = message,
@@ -375,8 +386,15 @@ namespace AMWE_Administrator
                     TextBlock tb = WinHelper.FindChild<TextBlock>(ClientList, $"ID{report.Client.Id}");
                     if (tb != null)
                     {
-                        tb.Foreground = report.OverallRating > 0.5 ? App.RedColor : App.GreenColor;
-                    } // optimize for disconnected users
+                        if (flag)
+                        {
+                            tb.Foreground = App.RedColor;
+                        }
+                        else
+                        {
+                            tb.Foreground = report.OverallRating > 0.5 ? App.RedColor : App.GreenColor;
+                        }
+                    }
                     else
                     {
                         _ = MessageBox.Show("(17.3) Получен отчет от удаленного из сети пользователя.\nВозможно на API совершена атака.");
@@ -537,7 +555,9 @@ namespace AMWE_Administrator
                 Button button = new()
                 {
                     Content = $"({id}) Начать чат",
-                    Margin = (e.Source as FrameworkElement).Margin
+                    Margin = (e.Source as FrameworkElement).Margin,
+                    Background = App.ButtonColor,
+                    Foreground = App.FontColor
                 };
                 button.Click += ManageUser;
                 button.MouseLeave += TextBlock_LostMouseCapture;
@@ -555,30 +575,35 @@ namespace AMWE_Administrator
             try
             {
                 uint id = uint.Parse((e.Source as Button).Content.ToString().GetUntilOrEmpty(")").Remove(0, 1));
-                Client client = сurrentclients.Find(x => x.Id == id);
-                await Dispatcher.BeginInvoke((Action)(async () =>
-                {
-                    Chat chat = new(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
-                    chats.Add(chat);
-                    TextBlock textBlock = new()
-                    {
-                        Text = $"({DateTime.Now.ToShortTimeString()}) Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
-                        Foreground = App.FontColor
-                    };
-                    textBlock.MouseEnter += Notification_GotMouseCapture;
-                    textBlock.MouseLeave += Notification_LostMouseCapture;
-                    Notification notification = new TextActionNotification()
-                    {
-                        Name = $"ChatWait{id}",
-                        NotifyBlock = textBlock
-                    };
-                    AddNotification(notification);
-                }));
+                await OpenChat(id);
             }
             catch (Exception ex)
             {
                 ExceptionHandler.RegisterNew(ex);
             }
+        }
+
+        public async Task OpenChat(uint id)
+        {
+            Client client = сurrentclients.Find(x => x.Id == id);
+            await Dispatcher.BeginInvoke((Action)(async () =>
+            {
+                Chat chat = new(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
+                chats.Add(chat);
+                TextBlock textBlock = new()
+                {
+                    Text = $"({DateTime.Now.ToShortTimeString()}) Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
+                    Foreground = App.FontColor
+                };
+                textBlock.MouseEnter += Notification_GotMouseCapture;
+                textBlock.MouseLeave += Notification_LostMouseCapture;
+                Notification notification = new TextActionNotification()
+                {
+                    Name = $"ChatWait{id}",
+                    NotifyBlock = textBlock
+                };
+                AddNotification(notification);
+            }));
         }
 
         private void TextBlock_LostMouseCapture(object sender, MouseEventArgs e)
@@ -707,7 +732,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.1002 beta 9\nAMWE RealTime server version 1.3.2022.0902\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.1202\nAMWE RealTime server version 1.3.2022.0902\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {

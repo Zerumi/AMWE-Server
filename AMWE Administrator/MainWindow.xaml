@@ -5,6 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="AMWE Administrator by Zerumi" Height="600" Width="570" Closing="Main_Closing" Closed="Main_Closed">
+    <Window.Resources>
+        <SolidColorBrush x:Key="ButtonSelectedBrush" Color="{DynamicResource {x:Static SystemColors.ControlDarkBrush}}" />
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Buttonborder" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Buttonborder" Property="Background" Value="{DynamicResource ButtonSelectedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid ShowGridLines="False" x:Name="Grid" Background="{DynamicResource {x:Static SystemColors.InfoBrushKey}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>

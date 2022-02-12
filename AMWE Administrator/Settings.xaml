@@ -28,9 +28,9 @@
                         </Grid.RowDefinitions>
                         <CheckBox x:Name="cbAllowSocketsOnly" Content="Разрешать соединение только через WebSockets" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center" Checked="CbAllowSocketsOnly_Checked" Unchecked="CbAllowSocketsOnly_Checked"/>
                         <CheckBox x:Name="cbExpect100Continue" Content="Игнорировать ожидание (HTTP 100)" Grid.Row="1" HorizontalAlignment="Left" Margin="5" VerticalAlignment="Center"/>
-                        <TextBox x:Name="tbGlobalSeparator" Margin="304,0,10,0" Grid.Row="2" Text=";" TextWrapping="Wrap" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
-                        <Label Content="Разделитель в текстовых файлах" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="2" VerticalAlignment="Center" Width="294"/>
-                        <Button Content="i" HorizontalAlignment="Left" Margin="278,0,0,0" Grid.Row="2" VerticalAlignment="Center" RenderTransformOrigin="0.329,0.082" Width="18" Height="18"/>
+                        <TextBox x:Name="tbGlobalSeparator" Margin="304,0,10,0" Grid.Row="2" Text=";" TextWrapping="Wrap" VerticalAlignment="Center" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Visibility="Collapsed"/>
+                        <Label Content="Разделитель в текстовых файлах" HorizontalAlignment="Left" Margin="5,0,0,0" Grid.Row="2" VerticalAlignment="Center" Width="294" Visibility="Collapsed"/>
+                        <Button Content="i" HorizontalAlignment="Left" Margin="278,0,0,0" Grid.Row="2" VerticalAlignment="Center" RenderTransformOrigin="0.329,0.082" Width="18" Height="18" Visibility="Collapsed"/>
                     </Grid>
                 </TabItem.Content>
             </TabItem>

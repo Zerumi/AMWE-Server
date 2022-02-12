@@ -22,12 +22,12 @@ namespace ReportHandler
         public int ProcessChangedCount { get; set; }
         public ICollection<string> OldProcesses { get; set; }
         public ICollection<string> LastProcesses { get; set; }
-        public ICollection<string> ProcIntersection { get; set; }
+        public ICollection<CheckModel> ProcIntersection { get; set; }
 
         public string Browser { get; set; }
         public ICollection<Site> OldSites { get; set; }
         public ICollection<Site> CurrentSites { get; set; }
-        public ICollection<string> SiteIntersection { get; set; }
+        public ICollection<CheckModel> SiteIntersection { get; set; }
 
         public Uri Server { get; set; }
         public DateTime Timestamp { get; set; }

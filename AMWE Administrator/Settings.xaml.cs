@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using m3md2;
+using ReportHandler;
 
 namespace AMWE_Administrator
 {
@@ -36,11 +37,11 @@ namespace AMWE_Administrator
 
             cbMinimizeToTray.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("MinimizeToTray"));
 
-            cbCheckReports.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckReports"));
+            cbCheckReports.IsChecked = App.CheckReports;
 
-            cbCheckApps.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckApps"));
+            cbCheckApps.IsChecked = App.CheckApps;
 
-            cbCheckSites.IsChecked = bool.Parse(ConfigurationRequest.GetValueByKey("CheckSites"));
+            cbCheckSites.IsChecked = App.CheckSites;
 
             _ = Task.Run(new Action(async () =>
             {
@@ -109,7 +110,7 @@ namespace AMWE_Administrator
 
         private bool isColorChanged;
 
-        private void ComboxColorTheme_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void ComboxColorTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (comboxColorTheme.SelectedIndex != Colorindex && !isColorChanged)
             {
@@ -135,10 +136,13 @@ namespace AMWE_Administrator
 
             ConfigurationRequest.WriteValueByKey("MinimizeToTray", Convert.ToString(cbMinimizeToTray.IsChecked.GetValueOrDefault(true)));
 
+            App.CheckReports = cbCheckReports.IsChecked.GetValueOrDefault(true);
             ConfigurationRequest.WriteValueByKey("CheckReports", Convert.ToString(cbCheckReports.IsChecked.GetValueOrDefault(true)));
 
+            App.CheckApps = cbCheckApps.IsChecked.GetValueOrDefault(true);
             ConfigurationRequest.WriteValueByKey("CheckApps", Convert.ToString(cbCheckApps.IsChecked.GetValueOrDefault(true)));
 
+            App.CheckSites = cbCheckSites.IsChecked.GetValueOrDefault(true);
             ConfigurationRequest.WriteValueByKey("CheckSites", Convert.ToString(cbCheckSites.IsChecked.GetValueOrDefault(true)));
 
             if (lbRestartRequired.Visibility == Visibility.Visible)
@@ -181,7 +185,7 @@ namespace AMWE_Administrator
             CheckModelMaster modelMaster = new(CheckModelIndex.Apps);
             _ = modelMaster.ShowDialog();
             CheckModel item = App.AppsToCheck.Last();
-            
+
             await Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (item.FrameworkName == lbAppsToCheck.Items.OfType<CheckBox>().Last().Name)

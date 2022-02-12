@@ -21,6 +21,9 @@ namespace m3md2
         Green,
         Red,
         Control,
-        LineChart
+        LineChart,
+        Border,
+        Button,
+        ButtonHighlight
     }
 }

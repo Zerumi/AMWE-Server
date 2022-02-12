@@ -6,6 +6,25 @@
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
         Title="Сводка по сотруднику" Height="550" Width="700" ResizeMode="CanResizeWithGrip" Closed="Window_Closed">
+    <Window.Resources>
+        <SolidColorBrush x:Key="ButtonSelectedBrush" Color="{DynamicResource {x:Static SystemColors.ControlDarkBrush}}" />
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Buttonborder" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Buttonborder" Property="Background" Value="{DynamicResource ButtonSelectedBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid x:Name="Grid">
         <Grid.RowDefinitions>
             <RowDefinition Height="160"/>
@@ -20,7 +39,7 @@
         <Grid x:Name="gScreenViewer" Grid.Row="1" Grid.Column="1" Margin="10,10,10,10">
             <Image x:Name="iScreen" Margin="10,50,10,60"/>
             <Button x:Name="bScreen" Content="Снимок экрана" Margin="0,0,170,10" HorizontalAlignment="Right" Width="120" Height="27" VerticalAlignment="Bottom" Click="BScreen_Click"/>
-            <Button x:Name="bSaveScr" Content="Сохр." Margin="0,0,110,10" HorizontalAlignment="Right" Width="50" Height="27" VerticalAlignment="Bottom"/>
+            <Button x:Name="bSaveScr" Content="Сохр." Margin="0,0,110,10" HorizontalAlignment="Right" Width="50" Height="27" VerticalAlignment="Bottom" Click="bSaveScr_Click" IsEnabled="False"/>
             <Label x:Name="lGetScreen" Content="Получить снимок экрана компьютера для самостоятельного анализа:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="420"/>
         </Grid>
         <Label x:Name="lGraph" Content="Графическое представление коэффициента эффективности сотрудника:" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Margin="0,10,0,0" Width="407"/>
@@ -32,6 +51,5 @@
         <ScrollViewer Grid.Row="1" Margin="0,31,0,0" VerticalScrollBarVisibility="Auto">
             <StackPanel x:Name="spReports"/>
         </ScrollViewer>
-        <Label x:Name="lDebug" Content="Looks like it's beta // __ \\" HorizontalAlignment="Left" Margin="10,131,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>
