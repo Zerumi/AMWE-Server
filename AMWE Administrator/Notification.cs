@@ -20,4 +20,9 @@ namespace AMWE_Administrator
     {
 
     }
+
+    public class LogNotification : Notification
+    {
+
+    }
 }

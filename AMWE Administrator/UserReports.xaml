@@ -39,8 +39,9 @@
         <Grid x:Name="gScreenViewer" Grid.Row="1" Grid.Column="1" Margin="10,10,10,10">
             <Image x:Name="iScreen" Margin="10,50,10,60"/>
             <Button x:Name="bScreen" Content="Снимок экрана" Margin="0,0,170,10" HorizontalAlignment="Right" Width="120" Height="27" VerticalAlignment="Bottom" Click="BScreen_Click"/>
+            <Button x:Name="bWebCam" Content="Снимок камеры" Margin="0,0,300,10" HorizontalAlignment="Right" Width="120" Height="27" VerticalAlignment="Bottom" Click="BWebCam_Click"/>
             <Button x:Name="bSaveScr" Content="Сохр." Margin="0,0,110,10" HorizontalAlignment="Right" Width="50" Height="27" VerticalAlignment="Bottom" Click="bSaveScr_Click" IsEnabled="False"/>
-            <Label x:Name="lGetScreen" Content="Получить снимок экрана компьютера для самостоятельного анализа:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="420"/>
+            <Label x:Name="lGetScreen" Content="Получить изображение для самостоятельного анализа:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="420"/>
         </Grid>
         <Label x:Name="lGraph" Content="Графическое представление коэффициента эффективности сотрудника:" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top" Height="26" Margin="0,10,0,0" Width="407"/>
         <Label x:Name="lRepCount" Content="Количество отчетов: 0" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top" Width="220"/>

@@ -9,6 +9,7 @@ namespace AMWE_RealTime_Server.Models
     {
         public Client Client { get; set; }
         public bool IsOnline { get; set; }
+        public bool IsEnhanced { get; set; }
         public DateTime LastLoginDateTime { get; set; }
         public DateTime LastLogoutDateTime { get; set; }
     }

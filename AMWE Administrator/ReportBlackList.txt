@@ -1,6 +1,6 @@
 ﻿[Apps]
 cbA1;Counter-Strike: Global Offensinve;csgo;True
-cbA2;Discord;discord;True
+cbA2;Discord;Discord;True
 cbA3;Dota 2;dota2;True
 cbA4;Epic Games Launcher;EpicGamesLauncher;True
 cbA5;Factorio;Factorio;True

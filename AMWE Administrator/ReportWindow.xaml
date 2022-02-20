@@ -369,14 +369,9 @@
                     <Grid x:Name="gSites" Margin="10">
                         <Label x:Name="lBrowser" Content="Используемый браузер: Google Chrome" HorizontalAlignment="Center" VerticalAlignment="Top" Width="777" Margin="0,10,0,0"/>
                         <Label x:Name="lSiteInfo" Content="Информация из отчета:" Margin="10,36,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                        <ScrollViewer Margin="10,62,10,10">
+                        <ScrollViewer Margin="10,62,10,10" HorizontalScrollBarVisibility="Auto">
                             <Grid Margin="5">
-                                <Label Name="lSlast" Content="Прошлый отчет:" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                                <TextBlock x:Name="tbSiteLast" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,31,0,0" Width="230"/>
-                                <Label x:Name="lSchanges" Content="Изменения:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,0,0,0"/>
-                                <TextBlock x:Name="tbSiteChanges" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="245,31,0,0" Width="230"/>
-                                <Label Name="lScurrent" Content="Текущий отчет:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,0,0,0"/>
-                                <TextBlock x:Name="tbSiteCurrent" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,31,0,0" Width="230"/>
+                                <TextBlock x:Name="tbSites" Text="123" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                             </Grid>
                         </ScrollViewer>
                     </Grid>

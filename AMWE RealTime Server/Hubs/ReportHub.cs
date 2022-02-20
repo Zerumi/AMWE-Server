@@ -22,16 +22,19 @@ namespace AMWE_RealTime_Server.Hubs
 
         private readonly ILogger _logger;
 
+        private readonly IHubContext<ClientHandlerHub> _hubContext;
+
         public static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
 
-        public ReportHub(ILogger<ReportHub> logger)
+        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext)
         {
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         public override async Task OnConnectedAsync()
         {
-            _logger.LogInformation($"Подключен клиент {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} {Context.ConnectionId} / Роль: {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value}");
+            _logger.LogInformation($"Подключен клиент {Context.User.Identity.Name} {Context.ConnectionId} / Роль: {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value}");
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
@@ -49,7 +52,7 @@ namespace AMWE_RealTime_Server.Hubs
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            _logger.LogError($"От хаба был отключен клиент {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} по причине {exception?.Message}");
+            _logger.LogError($"От хаба был отключен клиент {Context.User.Identity.Name} по причине {exception?.Message}");
             _logger.LogDebug($"Подробности: {exception}");
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
@@ -78,7 +81,7 @@ namespace AMWE_RealTime_Server.Hubs
         public async void SetWorkdayValue(bool value)
         {
             WorkdayValue = value;
-            _logger.LogInformation($"Администратор {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value} изменил значение Workday на {value}");
+            _logger.LogInformation($"Администратор {Context.User.Identity.Name} изменил значение Workday на {value}");
             await Clients.All.SendAsync("SetWorkday", value);
         }
 
@@ -92,6 +95,16 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 await StaticVariables.svControllers.FirstOrDefault()?.Logout(b[i]);
             }
+        }
+
+        public async void EnhanceControl(uint clientID)
+        {
+            string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
+            await Clients.Client(address).SendAsync("EnhanceControl");
+            var x = AuthController.GlobalClientStatesList.Find(x => x.Client.Id == clientID);
+            x.IsEnhanced = true;
+            _logger.LogInformation($"Администратор {Context.User.Identity.Name} усилил контроль за сотрудником {clientID}: {x.Client.Nameofpc}");
+            await _hubContext.Clients.All.SendAsync("EnhanceControlForUser", clientID, Context.User.Identity.Name);
         }
 
         public bool GetWorkdayValue()

@@ -19,13 +19,12 @@ namespace ReportHandler
         public int PressingCount { get; set; }
         public bool IsMouseCoordChanged { get; set; }
 
-        public int ProcessChangedCount { get; set; }
+        public string CurrentProccess { get; set; }
         public ICollection<string> OldProcesses { get; set; }
         public ICollection<string> LastProcesses { get; set; }
         public ICollection<CheckModel> ProcIntersection { get; set; }
 
-        public string Browser { get; set; }
-        public ICollection<Site> OldSites { get; set; }
+        public string MainBrowser { get; set; }
         public ICollection<Site> CurrentSites { get; set; }
         public ICollection<CheckModel> SiteIntersection { get; set; }
 

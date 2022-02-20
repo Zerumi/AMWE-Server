@@ -7,6 +7,7 @@ namespace ReportHandler
 {
     public class Site
     {
+        public string Browser { get; set; }
         public Uri SiteUri { get; set; }
         public string Header { get; set; }
     }

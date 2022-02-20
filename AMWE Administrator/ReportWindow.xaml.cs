@@ -23,11 +23,10 @@ namespace AMWE_Administrator
         private string sLastProcesses;
         private string sOldProcesses;
         private string sCurrentSites;
-        private string sOldSites;
         private string sWarnedApps;
         private string sWarnedSites;
 
-        private Client client = default;
+        private readonly Client client;
 
         public ReportWindow(Report report)
         {
@@ -100,12 +99,7 @@ namespace AMWE_Administrator
 
                 lBrowser.Foreground = App.FontColor;
                 lSiteInfo.Foreground = App.FontColor;
-                lSlast.Foreground = App.FontColor;
-                lSchanges.Foreground = App.FontColor;
-                lScurrent.Foreground = App.FontColor;
-                tbSiteLast.Foreground = App.FontColor;
-                tbSiteChanges.Foreground = App.FontColor;
-                tbSiteCurrent.Foreground = App.FontColor;
+                tbSites.Foreground = App.FontColor;
 
                 rOverallRating.Stroke = App.BorderColor;
 
@@ -297,7 +291,7 @@ namespace AMWE_Administrator
                     };
                     rOverallRating.Fill = ovbrush;
                     ReportHeader.Content = $"Отчет №{App.reports.IndexOf(report)} от {report.Client.Nameofpc} ({report.Client.Id}):";
-                    ReportOutput.Text += $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.IsMouseCoordChanged ? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменилось {report.ProcessChangedCount} процессов (список:){sOldProcesses}\nИнформация по текущим сайтам:{sCurrentSites}\nХост: {report.Server.DnsSafeHost} ({report.Server.AbsolutePath})\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
+                    ReportOutput.Text += $"Вердикт нейросети клиента: {report.OverallRating}\nВердикт по клавиатуре: {report.KeyBoardRating}\nВердикт по мышке: {report.MouseRating}\nВердикт по процессам: {report.ProcessRating}\n--------------------------------\nИнформация по нажатым клавишам:{sKeyPressedInfo}\n{(report.IsMouseCoordChanged ? "Замечено движение курсора" : "Движение курсора не было замечено")}\nИнформация по активным приложениям:{sLastProcesses}\nПо сравнению с первоначальными замерами, изменились следующие процессы: {sOldProcesses}\nИнформация по текущим сайтам:{sCurrentSites}\nХост: {report.Server.DnsSafeHost} ({report.Server.AbsolutePath})\nОтчет подготовлен AMWE Client'ом компьютера {report.Client.Nameofpc} и обработан AMWE Administrator для {App.Username}\n{DateTime.Now} по локальному времени";
                 }
                 catch (Exception ex)
                 {
@@ -378,7 +372,7 @@ namespace AMWE_Administrator
                         sChangesProcesses += $"- {item}\n";
                     }
 
-                    gpOverallInfo.Content = $"Количество измененных процессов: {report.ProcessChangedCount}";
+                    gpOverallInfo.Content = $"Текущий открытый процесс: {report.CurrentProccess}";
                     if (sOldProcesses is not "")
                         tbLast.Text = sOldProcesses?.Remove(0, 1);
                     if (sLastProcesses is not "")
@@ -402,32 +396,13 @@ namespace AMWE_Administrator
             {
                 try
                 {
-                    foreach (Site item in report.OldSites)
-                    {
-                        sOldSites += $"\n{item.SiteUri.DnsSafeHost} - {item.Header}";
-                    }
                     foreach (Site item in report.CurrentSites)
                     {
-                        sCurrentSites += $"\n{item.SiteUri.DnsSafeHost} - {item.Header}";
+                        sCurrentSites += $"\n({item.Browser}): {item?.SiteUri?.DnsSafeHost ?? "Ссылку получить невозможно"} // \"{item.Header}\" * {item?.SiteUri?.AbsoluteUri ?? string.Empty}";
                     }
 
-                    List<string> added = report.CurrentSites.Select(x => x.SiteUri.DnsSafeHost).Except(report.OldSites.Select(x => x.SiteUri.DnsSafeHost)).ToList();
-                    List<string> removed = report.OldSites.Select(x => x.SiteUri.DnsSafeHost).Except(report.CurrentSites.Select(x => x.SiteUri.DnsSafeHost)).ToList();
-
-                    string sChangesSites = "";
-                    foreach (string item in added)
-                    {
-                        sChangesSites += $"+ {item}\n";
-                    }
-                    foreach (string item in removed)
-                    {
-                        sChangesSites += $"- {item}\n";
-                    }
-
-                    lBrowser.Content = $"Используемый браузер: {report.Browser}";
-                    tbSiteLast.Text = sOldSites.Remove(0, 1);
-                    tbSiteCurrent.Text = sCurrentSites.Remove(0, 1);
-                    tbSiteChanges.Text = sChangesSites;
+                    lBrowser.Content = $"Основной используемый браузер: {report.MainBrowser}";
+                    tbSites.Text = sCurrentSites.Remove(0, 1);
                 }
                 catch (Exception ex)
                 {
@@ -479,10 +454,9 @@ namespace AMWE_Administrator
             userReports.Show();
         }
 
-        private void bEnhanceControl_Click(object sender, RoutedEventArgs e)
+        private async void bEnhanceControl_Click(object sender, RoutedEventArgs e)
         {
-            // send request to Server for current user to send reports quickly
-            _ = MessageBox.Show("Усиление контроля будет реализовано в версии 1.4.1");
+            await MainWindow.ReportHandleConnection.SendAsync("EnhanceControl", client.Id);
         }
 
         private async void bOpenChat_Click(object sender, RoutedEventArgs e)

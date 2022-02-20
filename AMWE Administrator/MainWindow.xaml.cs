@@ -87,9 +87,7 @@ namespace AMWE_Administrator
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
         };
 
-        public static event Action<Screen, Client> OnNewScreen;
-
-        public static event Action<Screen, Client> OnNewWebcam;
+        public static event Action<Screen, Client> OnNewImage;
 
         public MainWindow()
         {
@@ -100,6 +98,7 @@ namespace AMWE_Administrator
                 _ = ClientHandlerConnection.On<List<ClientState>>("GetAllClients", UpdateClients);
                 _ = ClientHandlerConnection.On<ClientState>("OnUserAuth", AddClient);
                 _ = ClientHandlerConnection.On<ClientState>("OnUserLeft", DeleteClient);
+                _ = ClientHandlerConnection.On<uint, string>("EnhanceControlForUser", EnhanceClientControl);
                 ClientHandlerConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -292,6 +291,28 @@ namespace AMWE_Administrator
             }
         }
 
+        private async void EnhanceClientControl(uint clientId, string admin)
+        {
+            var a = clientStates.Find(x => x.Client.Id == clientId);
+            a.IsEnhanced = true;
+            await Dispatcher.BeginInvoke(new Action(async () =>
+            {
+                TextBlock textBlock = new()
+                {
+                    Text = $"({DateTime.Now.ToShortTimeString()}) Администратор {admin} усилил контроль за {a.Client.Nameofpc} // ID: {clientId}",
+                    Foreground = App.FontColor
+                };
+                textBlock.MouseEnter += Notification_GotMouseCapture;
+                textBlock.MouseLeave += Notification_LostMouseCapture;
+                Notification notification = new LogNotification()
+                {
+                    Name = $"EnhanceLog{DateTime.Now.Ticks}",
+                    NotifyBlock = textBlock
+                };
+                await Task.Run(() => AddNotification(notification));
+            }));
+        }
+
         private async void DeleteChat(uint id)
         {
             Chat chat = chats.Find(x => x.ChatID == id);
@@ -350,7 +371,7 @@ namespace AMWE_Administrator
                     }
                     if (App.CheckSites)
                     {
-                        report.SiteIntersection = App.SitesToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.CurrentSites?.Select(x => x.SiteUri.DnsSafeHost) ?? new List<string>()).Select(f => App.SitesToCheck.Find(z => z.Transcription == f)).ToArray();
+                        report.SiteIntersection = App.SitesToCheck.Select(x => { return x.IsEnabled ? x.Transcription : string.Empty; }).Intersect(report?.CurrentSites?.Select(x => x.SiteUri?.DnsSafeHost ?? string.Empty) ?? new List<string>()).Select(f => App.SitesToCheck.Find(z => z.Transcription == f)).ToArray();
                     }
                 }
 
@@ -597,7 +618,7 @@ namespace AMWE_Administrator
                 };
                 textBlock.MouseEnter += Notification_GotMouseCapture;
                 textBlock.MouseLeave += Notification_LostMouseCapture;
-                Notification notification = new TextActionNotification()
+                Notification notification = new LogNotification()
                 {
                     Name = $"ChatWait{id}",
                     NotifyBlock = textBlock
@@ -993,18 +1014,7 @@ namespace AMWE_Administrator
 
         private void RmNewScreen(Screen screen, Client client, ScreenType type)
         {
-            switch (type)
-            {
-                case ScreenType.ScreenImage:
-                    OnNewScreen?.Invoke(screen, client);
-                    break;
-                case ScreenType.WebcamImage:
-                    OnNewWebcam?.Invoke(screen, client);
-                    break;
-                default:
-                    _ = MessageBox.Show("(17.6) С сервера получено неизвестное значение типа изображения.");
-                    break;
-            }
+            OnNewImage?.Invoke(screen, client);
         }
 
         private void ExitMenu_Click(object sender, RoutedEventArgs e)
@@ -1023,6 +1033,11 @@ namespace AMWE_Administrator
         public void Dispose()
         {
             GC.SuppressFinalize(this);
+        }
+
+        private void mReportPolling_Click(object sender, RoutedEventArgs e)
+        {
+            // 1.4.2 change polling interval
         }
     }
 }

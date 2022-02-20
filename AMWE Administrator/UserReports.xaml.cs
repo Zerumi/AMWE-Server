@@ -121,7 +121,7 @@ namespace AMWE_Administrator
 
                 MainWindow.OnNewReport += MainWindow_OnNewReport;
                 MainWindow.OnUserDisconnected += MainWindow_OnUserDisconnected;
-                MainWindow.OnNewScreen += UpdateScreen;
+                MainWindow.OnNewImage += UpdateScreen;
             }
             catch (Exception ex)
             {
@@ -210,35 +210,38 @@ namespace AMWE_Administrator
 
         private async void MainWindow_OnNewReport(Report obj)
         {
-            await Dispatcher.BeginInvoke(new Action(() =>
+            if (obj.Client.Id == UserInWindow.Id)
             {
-                try
+                await Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    userReports.Add(obj);
-                    ReportDrawer.Values.Add(new Value(ReportDrawer.Values.Count, obj.OverallRating * 100));
-
-                    int a = App.reports.IndexOf(obj);
-                    Button tempbutton = new()
+                    try
                     {
-                        Content = $"Отчет {a} ({obj.Timestamp.ToLocalTime().ToLongTimeString()}) ({obj.OverallRating})", // report timestamp (server utc only!)
+                        userReports.Add(obj);
+                        ReportDrawer.Values.Add(new Value(ReportDrawer.Values.Count, obj.OverallRating * 100));
+
+                        int a = App.reports.IndexOf(obj);
+                        Button tempbutton = new()
+                        {
+                            Content = $"Отчет {a} ({obj.Timestamp.ToLocalTime().ToLongTimeString()}) ({obj.OverallRating})", // report timestamp (server utc only!)
                         Foreground = App.FontColor,
-                        Background = App.ButtonColor
-                    };
+                            Background = App.ButtonColor
+                        };
 
-                    tempbutton.Click += Reportbutton_Click;
+                        tempbutton.Click += Reportbutton_Click;
 
-                    _ = spReports.Children.Add(tempbutton);
+                        _ = spReports.Children.Add(tempbutton);
 
-                    lRepCount.Content = $"Количество отчетов: {userReports.Count}";
+                        lRepCount.Content = $"Количество отчетов: {userReports.Count}";
 
-                    double avgmark = userReports.Select(x => x.OverallRating).Average();
-                    lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
-                }
-                catch (Exception ex)
-                {
-                    ExceptionHandler.RegisterNew(ex);
-                }
-            }));
+                        double avgmark = userReports.Select(x => x.OverallRating).Average();
+                        lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                    }
+                }));
+            }
         }
 
         private async void BScreen_Click(object sender, RoutedEventArgs e)
@@ -246,11 +249,16 @@ namespace AMWE_Administrator
             await MainWindow.ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.ScreenImage);
         }
 
+        private async void BWebCam_Click(object sender, RoutedEventArgs e)
+        {
+            await MainWindow.ScreenSystemConnection.InvokeAsync("RequestScreen", UserInWindow, ScreenType.WebcamImage);
+        }
+
         private void Window_Closed(object sender, EventArgs e)
         {
             MainWindow.OnNewReport -= MainWindow_OnNewReport;
             MainWindow.OnUserDisconnected -= MainWindow_OnUserDisconnected;
-            MainWindow.OnNewScreen -= UpdateScreen;
+            MainWindow.OnNewImage -= UpdateScreen;
             GC.Collect();
         }
 
