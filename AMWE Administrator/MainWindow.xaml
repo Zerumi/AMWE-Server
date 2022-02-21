@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="AMWE Administrator by Zerumi" Height="600" Width="570" Closing="Main_Closing" Closed="Main_Closed">
+        Title="AMWE Administrator by Zerumi" Height="600" Width="670" Closing="Main_Closing" Closed="Main_Closed">
     <Window.Resources>
         <SolidColorBrush x:Key="ButtonSelectedBrush" Color="{DynamicResource {x:Static SystemColors.ControlDarkBrush}}" />
         <Style TargetType="{x:Type Button}">
@@ -45,7 +45,7 @@
                 <MenuItem Header="Открыть в проводнике" Click="MenuManage_OpenAtExplorer_Click"/>
                 <MenuItem Header="Сменить адрес" Click="MenuManage_ChangeServer_Click"/>
                 <MenuItem x:Name="mWorkday" Header="Получение информации о рабочем дне..." IsEnabled="False" Click="MWorkday_Click"/>
-                <MenuItem x:Name="mReportPolling" Header="Опрос отчетов происходит каждые {n} минут" IsEnabled="False" Click="mReportPolling_Click"/>
+                <MenuItem x:Name="mReportPolling" Header="Опрос отчетов происходит каждые {n} минут" Click="mReportPolling_Click"/>
                 <MenuItem Header="Выйти" Click="ExitMenu_Click"/>
             </MenuItem>
             <MenuItem x:Name="mReports" Header="Отчеты">
@@ -57,6 +57,7 @@
                 <MenuItem Header="Информация об исключениях" Click="GetExceptions_Click"/>
                 <MenuItem Header="Диагностика сервера" Click="DiagnoseServer_Click"/>
                 <MenuItem x:Name="mLastConnectTime" Header="Подключение всё ещё устанавливается..." IsEnabled="False"/>
+                <MenuItem Header="Информация о сервере" Click="MenuDiagnostic_GetServerInfo"/>
             </MenuItem>
             <MenuItem Header="Информация">
                 <MenuItem Header="О программе" Click="PrintInfo"/>

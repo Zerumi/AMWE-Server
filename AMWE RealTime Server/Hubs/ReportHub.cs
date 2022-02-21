@@ -19,24 +19,29 @@ namespace AMWE_RealTime_Server.Hubs
     public class ReportHub : Hub
     {
         static bool WorkdayValue = false;
+        static TimeSpan BaseRepInterval = new TimeSpan(0,1,0);
 
         private readonly ILogger _logger;
 
         private readonly IHubContext<ClientHandlerHub> _hubContext;
+        private readonly IHubContext<AdminSystemHub> _AdmHubContext;
 
         public static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
 
-        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext)
+        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> AdmHubContext)
         {
             _logger = logger;
             _hubContext = hubContext;
+            _AdmHubContext = AdmHubContext;
         }
 
         public override async Task OnConnectedAsync()
         {
-            _logger.LogInformation($"Подключен клиент {Context.User.Identity.Name} {Context.ConnectionId} / Роль: {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value}");
+            string logMsg = $"Подключен клиент {Context.User.Identity.Name} {Context.ConnectionId} / Роль: {Context.User.Claims.First(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value}";
+            _logger.LogInformation(logMsg);
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
+                await _AdmHubContext.Clients.All.SendAsync("Log", $"Администратор {Context.User.Identity.Name} вошел в сеть");
                 await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
             }
             else if (Context.User.IsInRole(Role.GlobalUserRole))
@@ -47,6 +52,7 @@ namespace AMWE_RealTime_Server.Hubs
                 connectedClients.Add(Context.ConnectionId, new Client() { Id = id, Nameofpc = nameofpc });
             }
             await Clients.Caller.SendAsync("SetWorkday", WorkdayValue);
+            await Clients.Caller.SendAsync("SetBaseSendingTime", BaseRepInterval);
             await base.OnConnectedAsync();
         }
 
@@ -57,6 +63,7 @@ namespace AMWE_RealTime_Server.Hubs
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
+                await _AdmHubContext.Clients.All.SendAsync("Log", $"Администратор {Context.User.Identity.Name} вышел из сети");
             }
             else if (Context.User.IsInRole(Role.GlobalUserRole))
             {
@@ -81,7 +88,9 @@ namespace AMWE_RealTime_Server.Hubs
         public async void SetWorkdayValue(bool value)
         {
             WorkdayValue = value;
-            _logger.LogInformation($"Администратор {Context.User.Identity.Name} изменил значение Workday на {value}");
+            string logMsg = $"Администратор {Context.User.Identity.Name} изменил состояние рабочего дня на {value}";
+            await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+            _logger.LogInformation(logMsg);
             await Clients.All.SendAsync("SetWorkday", value);
         }
 
@@ -97,14 +106,51 @@ namespace AMWE_RealTime_Server.Hubs
             }
         }
 
+        [Authorize(Roles = Role.GlobalAdminRole)]
         public async void EnhanceControl(uint clientID)
         {
             string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
-            await Clients.Client(address).SendAsync("EnhanceControl");
             var x = AuthController.GlobalClientStatesList.Find(x => x.Client.Id == clientID);
-            x.IsEnhanced = true;
-            _logger.LogInformation($"Администратор {Context.User.Identity.Name} усилил контроль за сотрудником {clientID}: {x.Client.Nameofpc}");
-            await _hubContext.Clients.All.SendAsync("EnhanceControlForUser", clientID, Context.User.Identity.Name);
+            if (!x.IsEnhanced)
+            {
+                x.IsEnhanced = true;
+                await Clients.Client(address).SendAsync("EnhanceControl");
+                string logMsg = $"Администратор {Context.User.Identity.Name} усилил контроль за сотрудником {clientID}: {x.Client.Nameofpc}";
+                _logger.LogInformation(logMsg);
+                await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+                await _hubContext.Clients.All.SendAsync("EnhanceControlForUser", clientID);
+            }
+        }
+
+        [Authorize(Roles = Role.GlobalAdminRole)]
+        public async void LoosenControl(uint clientID)
+        {
+            string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
+            var x = AuthController.GlobalClientStatesList.Find(x => x.Client.Id == clientID);
+            if (x.IsEnhanced)
+            {
+                x.IsEnhanced = false;
+                await Clients.Client(address).SendAsync("LoosenControl");
+                string logMsg = $"Администратор {Context.User.Identity.Name} ослабил контроль за сотрудником {clientID}: {x.Client.Nameofpc}";
+                await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+                _logger.LogInformation(logMsg);
+                await _hubContext.Clients.All.SendAsync("LoosenControlForUser", clientID);
+            }
+        }
+
+        [Authorize(Roles = Role.GlobalAdminRole)]
+        public async void UpdateReportPollingTime(TimeSpan timeSpan)
+        {
+            await Clients.All.SendAsync("SetBaseSendingTime", timeSpan);
+            string logMsg = $"Администратор {Context.User.Identity.Name} изменил базовый интервал опроса отчетов с {BaseRepInterval} до {timeSpan}";
+            await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+            _logger.LogInformation(logMsg);
+            BaseRepInterval = timeSpan;
+        }
+
+        public TimeSpan GetBaseReportPollingInterval()
+        {
+            return BaseRepInterval;
         }
 
         public bool GetWorkdayValue()

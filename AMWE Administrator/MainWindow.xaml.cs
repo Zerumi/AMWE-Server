@@ -32,6 +32,7 @@ namespace AMWE_Administrator
         private static readonly Stopwatch LastConnectStopwatch = new();
         private static readonly List<TextBlock> tbpClientList = new();
 
+        private TimeSpan ReportPollingInterval;
         private bool isWorkdayStarted;
 
         public static readonly HubConnection ClientHandlerConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}listen/clients", options =>
@@ -82,6 +83,18 @@ namespace AMWE_Administrator
             options.Cookies.Add(App.AuthCookie);
         }).Build();
 
+        public static readonly HubConnection AdminSystemConnection = new HubConnectionBuilder().WithUrl($"{App.ServerAddress}admin", options =>
+        {
+            options.UseDefaultCredentials = true;
+            if (bool.Parse(ConfigurationRequest.GetValueByKey("WebSocketsOnly")))
+            {
+                options.Transports = HttpTransportType.WebSockets;
+                options.SkipNegotiation = true;
+            }
+            options.Headers.Add("User-Agent", "Mozilla/5.0");
+            options.Cookies.Add(App.AuthCookie);
+        }).Build();
+
         private static readonly System.Windows.Forms.NotifyIcon notifyIcon1 = new()
         {
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location)
@@ -98,7 +111,8 @@ namespace AMWE_Administrator
                 _ = ClientHandlerConnection.On<List<ClientState>>("GetAllClients", UpdateClients);
                 _ = ClientHandlerConnection.On<ClientState>("OnUserAuth", AddClient);
                 _ = ClientHandlerConnection.On<ClientState>("OnUserLeft", DeleteClient);
-                _ = ClientHandlerConnection.On<uint, string>("EnhanceControlForUser", EnhanceClientControl);
+                _ = ClientHandlerConnection.On<uint>("EnhanceControlForUser", EnhanceClientControl);
+                _ = ClientHandlerConnection.On<uint>("LoosenControlForUser", LoosenClientControl);
                 ClientHandlerConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -142,6 +156,7 @@ namespace AMWE_Administrator
                 {
                     await Task.Run(() => ChangeWorkdayValue(x));
                 }));
+                _ = ReportHandleConnection.On<TimeSpan>("SetBaseSendingTime", ChangeReportPollingTime);
                 ReportHandleConnection.Closed += async (error) =>
                 {
                     ExceptionHandler.RegisterNew(error, false);
@@ -255,6 +270,44 @@ namespace AMWE_Administrator
                   });
                 #endregion
 
+                #region Configure AdminSystem Connection
+                AdminSystemConnection.ServerTimeout = TimeSpan.FromDays(2);
+                _ = AdminSystemConnection.On<string>("Log", ServerLogInfo);
+                AdminSystemConnection.Closed += async (error) =>
+                {
+                    ExceptionHandler.RegisterNew(error, false);
+                    try
+                    {
+                        await AdminSystemConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
+                };
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await AdminSystemConnection.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        ExceptionHandler.RegisterNew(ex);
+                        await Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                            mConnect.IsEnabled = true;
+                        }));
+                    }
+                });
+                #endregion
+
                 _ = Dispatcher.BeginInvoke(new Action(() =>
                   {
                       notifyIcon1.Visible = true;
@@ -291,26 +344,45 @@ namespace AMWE_Administrator
             }
         }
 
-        private async void EnhanceClientControl(uint clientId, string admin)
+        private async void ChangeReportPollingTime(TimeSpan interval)
         {
-            var a = clientStates.Find(x => x.Client.Id == clientId);
-            a.IsEnhanced = true;
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ReportPollingInterval = interval;
+                mReportPolling.Header = $"Опрос отчетов происходит каждые {interval.TotalMinutes} минут";
+            }));
+        }
+
+        private async void ServerLogInfo(string message)
+        {
             await Dispatcher.BeginInvoke(new Action(async () =>
             {
                 TextBlock textBlock = new()
                 {
-                    Text = $"({DateTime.Now.ToShortTimeString()}) Администратор {admin} усилил контроль за {a.Client.Nameofpc} // ID: {clientId}",
+                    Text = $"({DateTime.Now.ToShortTimeString()}) (Server): {message}",
                     Foreground = App.FontColor
                 };
                 textBlock.MouseEnter += Notification_GotMouseCapture;
                 textBlock.MouseLeave += Notification_LostMouseCapture;
                 Notification notification = new LogNotification()
                 {
-                    Name = $"EnhanceLog{DateTime.Now.Ticks}",
+                    Name = $"AdmLog{DateTime.Now.Ticks}",
                     NotifyBlock = textBlock
                 };
                 await Task.Run(() => AddNotification(notification));
             }));
+        }
+
+        private void EnhanceClientControl(uint clientId)
+        {
+            var a = clientStates.Find(x => x.Client.Id == clientId);
+            a.IsEnhanced = true;
+        }
+
+        private void LoosenClientControl(uint clientId)
+        {
+            var a = clientStates.Find(x => x.Client.Id == clientId);
+            a.IsEnhanced = false;
         }
 
         private async void DeleteChat(uint id)
@@ -547,6 +619,7 @@ namespace AMWE_Administrator
                 if (client != null)
                 {
                     ClientState oldState = clientStates.Find(x => x.Client.Id == client.Id);
+                    oldState.IsOnline = false;
                     oldState.LastLogoutDateTime = clientState.LastLogoutDateTime;
                     OnUserDisconnected?.Invoke(client);
                     await Dispatcher.BeginInvoke((Action)(() =>
@@ -609,21 +682,28 @@ namespace AMWE_Administrator
             Client client = сurrentclients.Find(x => x.Id == id);
             await Dispatcher.BeginInvoke((Action)(async () =>
             {
-                Chat chat = new(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
-                chats.Add(chat);
-                TextBlock textBlock = new()
+                try
                 {
-                    Text = $"({DateTime.Now.ToShortTimeString()}) Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
-                    Foreground = App.FontColor
-                };
-                textBlock.MouseEnter += Notification_GotMouseCapture;
-                textBlock.MouseLeave += Notification_LostMouseCapture;
-                Notification notification = new LogNotification()
+                    Chat chat = new(ChatSystemConnection, await ChatSystemConnection.InvokeAsync<uint>("OpenChat", id), client);
+                    chats.Add(chat);
+                    TextBlock textBlock = new()
+                    {
+                        Text = $"({DateTime.Now.ToShortTimeString()}) Мы ожидаем ответа на открытие чата от {id} / {client.Nameofpc}",
+                        Foreground = App.FontColor
+                    };
+                    textBlock.MouseEnter += Notification_GotMouseCapture;
+                    textBlock.MouseLeave += Notification_LostMouseCapture;
+                    Notification notification = new LogNotification()
+                    {
+                        Name = $"ChatWait{id}",
+                        NotifyBlock = textBlock
+                    };
+                    AddNotification(notification);
+                }
+                catch (Exception ex)
                 {
-                    Name = $"ChatWait{id}",
-                    NotifyBlock = textBlock
-                };
-                AddNotification(notification);
+                    ExceptionHandler.RegisterNew(ex);
+                }
             }));
         }
 
@@ -689,12 +769,12 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = MessageBox.Show($"Client Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nChat System: {ChatSystemConnection.State} [{await ChatSystemConnection.InvokeAsync<string>("GetTransportType")}]\nScreen Transfer: {ScreenSystemConnection.State} [{await ScreenSystemConnection.InvokeAsync<string>("GetTransportType")}]");
+                _ = MessageBox.Show($"Admin Logging System: {AdminSystemConnection.State} [{await AdminSystemConnection.InvokeAsync<string>("GetTransportType")}]\nClient Listener: {ClientHandlerConnection.State} [{await ClientHandlerConnection.InvokeAsync<string>("GetTransportType")}]\nReport Listener: {ReportHandleConnection.State} [{await ReportHandleConnection.InvokeAsync<string>("GetTransportType")}]\nChat System: {ChatSystemConnection.State} [{await ChatSystemConnection.InvokeAsync<string>("GetTransportType")}]\nScreen Transfer: {ScreenSystemConnection.State} [{await ScreenSystemConnection.InvokeAsync<string>("GetTransportType")}]");
             }
             catch (Exception ex)
             {
                 ExceptionHandler.RegisterNew(ex, false);
-                _ = MessageBox.Show($"Client Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nChat System: {ChatSystemConnection.State}\n Screen Transfer: {ScreenSystemConnection.State}");
+                _ = MessageBox.Show($"Admin Logging System: {AdminSystemConnection.State}\nClient Listener: {ClientHandlerConnection.State}\nReport Listener: {ReportHandleConnection.State}\nChat System: {ChatSystemConnection.State}\n Screen Transfer: {ScreenSystemConnection.State}");
             }
         }
 
@@ -753,7 +833,7 @@ namespace AMWE_Administrator
         {
             try
             {
-                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.4.2022.1202\nAMWE RealTime server version 1.3.2022.0902\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
+                _ = MessageBox.Show($"Assistant in Monitoring the Work of Employees Administrator\nVersion 1.5.2022.2102\nAMWE RealTime server version 1.4.2022.2102\nMade by Zerumi (Discord: Zerumi#4666)\nGitHub: https://github.com/Zerumi");
             }
             catch (Exception ex)
             {
@@ -933,7 +1013,24 @@ namespace AMWE_Administrator
             {
                 try
                 {
-                    await ChatSystemConnection.StartAsync();
+                    await ScreenSystemConnection.StartAsync();
+                }
+                catch (Exception ex)
+                {
+                    ExceptionHandler.RegisterNew(ex);
+                    await Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        mConnect.Header = $"Отключено от {App.ServerAddress}. Нажмите для переподключения.";
+                        mConnect.IsEnabled = true;
+                    }));
+                    return;
+                }
+            }
+            if (AdminSystemConnection.State == HubConnectionState.Disconnected)
+            {
+                try
+                {
+                    await AdminSystemConnection.StartAsync();
                 }
                 catch (Exception ex)
                 {
@@ -1003,7 +1100,7 @@ namespace AMWE_Administrator
                 uint id = uint.Parse((e.Source as FrameworkElement).Name.Remove(0, 2));
                 Client client = allclients.Find(x => x.Id == id);
 
-                UserReports userReports = new(client, !(сurrentclients.IndexOf(client) == -1));
+                UserReports userReports = new(client);
                 userReports.Show();
             }
             catch (Exception ex)
@@ -1030,14 +1127,20 @@ namespace AMWE_Administrator
             }
         }
 
+        private void mReportPolling_Click(object sender, RoutedEventArgs e)
+        {
+            TimeSetter timeSetter = new TimeSetter(ReportPollingInterval);
+            timeSetter.Show();
+        }
+
+        private async void MenuDiagnostic_GetServerInfo(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show(await AdminSystemConnection.InvokeAsync<string>("GetServerInfo"));
+        }
+
         public void Dispose()
         {
             GC.SuppressFinalize(this);
-        }
-
-        private void mReportPolling_Click(object sender, RoutedEventArgs e)
-        {
-            // 1.4.2 change polling interval
         }
     }
 }

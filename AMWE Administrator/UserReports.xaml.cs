@@ -27,7 +27,7 @@ namespace AMWE_Administrator
         private readonly List<Report> userReports;
         private readonly Timer timer;
 
-        public UserReports(Client client, bool IsUserConnected)
+        public UserReports(Client client)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace AMWE_Administrator
                 lRepCount.Content = $"Количество отчетов: {userReports.Count}";
                 lAvgMark.Content = $"Средняя оценка: {Math.Round(avgmark, 2)} ({Math.Round(avgmark, 5)})";
 
-                if (IsUserConnected)
+                if (clientState.IsOnline)
                 {
                     DateTime a = default;
                     Task.Run(async () =>
@@ -192,7 +192,6 @@ namespace AMWE_Administrator
                         lUserInfo.Content += " (Не в сети)";
                         lOnlineStatus.Content = $"Был в сети с {clientState.LastLoginDateTime.ToLongTimeString()} по {clientState.LastLogoutDateTime.ToLongTimeString()}";
                         bScreen.IsEnabled = false;
-                        // save screen button now opens explorer / ! \
                     }));
                 }
             }
@@ -287,6 +286,22 @@ namespace AMWE_Administrator
             {
                 _ = MessageBox.Show(ex.ToString());
             }
+        }
+
+        private void LastReport(object sender, RoutedEventArgs e)
+        {
+            ReportWindow reportWindow = new ReportWindow(userReports?.Last());
+            reportWindow?.Show();
+        }
+
+        private void Ignore(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Warnings(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

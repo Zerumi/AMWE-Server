@@ -27,6 +27,7 @@ namespace AMWE_Administrator
         private string sWarnedSites;
 
         private readonly Client client;
+        private readonly ClientState state;
 
         public ReportWindow(Report report)
         {
@@ -35,6 +36,7 @@ namespace AMWE_Administrator
                 InitializeComponent();
 
                 client = report.Client;
+                state = MainWindow.clientStates.Find(x => x.Client.Id == client.Id);
 
                 Grid.Background = App.MainColor;
                 gKeyboard.Background = App.SecondColor;
@@ -426,6 +428,14 @@ namespace AMWE_Administrator
                         WarnActivityTab.Visibility = Visibility.Collapsed;
                         return;
                     }
+                    if (state.IsEnhanced)
+                    {
+                        bEnhanceControl.Content = "Ослабить контроль";
+                    }
+                    else
+                    {
+                        bEnhanceControl.Content = "Усилить контроль";
+                    }
                     foreach (CheckModel item in report.SiteIntersection ?? new List<CheckModel>())
                     {
                         sWarnedSites += $"{item.Transcription} - {item.Content}\n";
@@ -450,13 +460,28 @@ namespace AMWE_Administrator
 
         private void bMoreAboutUser_Click(object sender, RoutedEventArgs e)
         {
-            UserReports userReports = new(client, MainWindow.clientStates.Find(x => x.Client.Id == client.Id).IsOnline);
+            UserReports userReports = new(client);
             userReports.Show();
         }
 
         private async void bEnhanceControl_Click(object sender, RoutedEventArgs e)
         {
-            await MainWindow.ReportHandleConnection.SendAsync("EnhanceControl", client.Id);
+            if (!state.IsEnhanced)
+            {
+                await MainWindow.ReportHandleConnection.InvokeAsync("EnhanceControl", client.Id);
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    bEnhanceControl.Content = "Ослабить контроль";
+                }));
+            }
+            else
+            {
+                await MainWindow.ReportHandleConnection.InvokeAsync("LoosenControl", client.Id);
+                await Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    bEnhanceControl.Content = "Усилить контроль";
+                }));
+            }
         }
 
         private async void bOpenChat_Click(object sender, RoutedEventArgs e)
@@ -466,8 +491,8 @@ namespace AMWE_Administrator
 
         private void bIgnore_Click(object sender, RoutedEventArgs e)
         {
-            ClientState a = MainWindow.clientStates.Find(x => x.Client.Id == client.Id);
-            a.IgnoreWarning = true;
+            state.IgnoreWarning = !state.IgnoreWarning;
+            bIgnore.Content = state.IgnoreWarning ? "Оповещать" : "Игнорировать";
         }
 
         private void bSettings_Click(object sender, RoutedEventArgs e)
