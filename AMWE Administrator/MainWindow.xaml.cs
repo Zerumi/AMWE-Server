@@ -349,7 +349,7 @@ namespace AMWE_Administrator
             await Dispatcher.BeginInvoke(new Action(() =>
             {
                 ReportPollingInterval = interval;
-                mReportPolling.Header = $"Опрос отчетов происходит каждые {interval.TotalMinutes} минут";
+                mReportPolling.Header = $"Опрос отчетов происходит {Parser.GetDeclension(Convert.ToInt32(interval.TotalMinutes), "каждую", "каждые", "каждые")} {interval.TotalMinutes} {Parser.GetDeclension(Convert.ToInt32(interval.TotalMinutes), "минуту", "минуты", "минут")}";
             }));
         }
 
@@ -435,7 +435,7 @@ namespace AMWE_Administrator
                     return;
                 }
 
-                if (App.CheckReports)
+                if (App.CheckReports && !clientStates.Find(x => x.Client.Id == report.Client.Id).IgnoreWarning)
                 {
                     if (App.CheckApps)
                     {

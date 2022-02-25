@@ -61,6 +61,9 @@ namespace AMWE_Administrator
                     obj.Foreground = App.FontColor;
                 }
 
+                bLastReport.Background = App.ButtonColor;
+                bLastReport.Foreground = App.FontColor;
+
                 clientState = MainWindow.clientStates.Find(x => x.Client.Id == client.Id);
 
                 UserInWindow = client;
@@ -203,7 +206,7 @@ namespace AMWE_Administrator
 
         private void Reportbutton_Click(object sender, RoutedEventArgs e)
         {
-            ReportWindow reportWindow = new(userReports[spReports.Children.IndexOf(e.Source as UIElement)]);
+            ReportWindow reportWindow = new(userReports[spReports.Children.IndexOf(e.Source as UIElement) - 1]);
             reportWindow.Show();
         }
 
