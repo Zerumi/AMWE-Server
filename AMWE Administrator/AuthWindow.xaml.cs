@@ -160,7 +160,7 @@ namespace AMWE_Administrator
 
                     default:
                         {
-                            _ = MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать: {authresult.GetType()}");
+                            _ = MessageBox.Show($"Мы получили странный объект, с которым не знаем, что делать: {authresult?.GetType()}");
 
                             break;
                         }

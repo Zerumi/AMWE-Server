@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AMWE_RealTime_Server.Hubs
 {
-    [Authorize(Roles=Role.GlobalAdminRole)]
+    [Authorize(Roles = Role.GlobalAdminRole)]
     public class AdminSystemHub : Hub
     {
         static uint count = 0;
@@ -28,7 +28,7 @@ namespace AMWE_RealTime_Server.Hubs
 
         public string GetServerInfo()
         {
-            string info = $"AMWE Main Server by Zerumi\nКоличество администраторов в сети: {count}\nЗапущен на базе {Environment.OSVersion} // {Environment.MachineName} (Процессоров: {Environment.ProcessorCount})\nАптайм:{new TimeSpan(Environment.TickCount)}\n64bit: {Environment.Is64BitOperatingSystem}, {Environment.Is64BitProcess}\nРабочий набор:{Environment.WorkingSet / 8 / 1024.0d / 1024.0d} MB";
+            string info = $"AMWE Main Server by Zerumi\nКоличество администраторов в сети: {count}\nЗапущен на базе {Environment.OSVersion} // {Environment.MachineName}\nЗапуск: {new TimeSpan(Environment.TickCount)} (Процессоров: {Environment.ProcessorCount})\n64bit: {Environment.Is64BitOperatingSystem}, {Environment.Is64BitProcess}\nРабочий набор:{Environment.WorkingSet / 8 / 1024.0d / 1024.0d} MB";
             return info;
         }
 

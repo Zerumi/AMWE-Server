@@ -19,10 +19,11 @@ namespace AMWE_RealTime_Server.Models
         public int PressingCount { get; set; }
         public bool IsMouseCoordChanged { get; set; }
 
-        public int ProcessChangedCount { get; set; }
+        public string CurrentProccess { get; set; }
         public ICollection<string> OldProcesses { get; set; }
         public ICollection<string> LastProcesses { get; set; }
 
+        public string MainBrowser { get; set; }
         public ICollection<Site> CurrentSites { get; set; }
 
         public Uri Server { get; set; }
@@ -31,6 +32,7 @@ namespace AMWE_RealTime_Server.Models
 
     public class Site
     {
+        public string Browser { get; set; }
         public Uri SiteUri { get; set; }
         public string Header { get; set; }
     }

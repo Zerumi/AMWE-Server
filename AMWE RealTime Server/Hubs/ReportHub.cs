@@ -19,7 +19,7 @@ namespace AMWE_RealTime_Server.Hubs
     public class ReportHub : Hub
     {
         static bool WorkdayValue = false;
-        static TimeSpan BaseRepInterval = new TimeSpan(0,1,0);
+        static TimeSpan BaseRepInterval = new TimeSpan(0, 1, 0);
 
         private readonly ILogger _logger;
 

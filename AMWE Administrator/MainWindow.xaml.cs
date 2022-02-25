@@ -430,7 +430,6 @@ namespace AMWE_Administrator
             {
                 if (report == null)
                 {
-                    // cancel this report
                     _ = MessageBox.Show("(17.2) Получен пустой отчет. Мы даже не знаем, от кого он :/\nВозможно на API совершена атака.");
                     return;
                 }
