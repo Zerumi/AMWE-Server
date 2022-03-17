@@ -7,14 +7,20 @@
 <h3>@ViewData["Title"]</h3>
 
 <body>
+    <div class="Outdated">
+        <p><h3>/!\ Версии для загрузки являются устаревшими и могут не работать на официальном сервере AMWE</h3></p>
+    </div>
     <div class="Download">
-        <p><a href="~/Download/GUI.zip">Скачать AMWE Administrator v.1.2</a> (<a href="~/Download/GUI (x86).zip">Для x86</a>)</p>
-        <p>Для работы внутри сети требуется окружение с поддержкой SignalR. Готовый вариант серверного скрипта на ASP.NET Core 2.1 (который используется на внутренней сети AMWE) <a href="~/Download/Server.zip">доступен здесь</a></p>
-        <p>Клиент для внутренней сети <a href="~/Download/Release1.1.1.win7.patch.zip">доступен здесь</a></p>
+        <p><a href="~/download/GUI.zip">Скачать AMWE Administrator v.1.2</a> (<a href="~/download/GUI (x86).zip">Для x86</a>)</p>
+        <p>
+            Для работы внутри сети требуется окружение с поддержкой SignalR. Готовый вариант серверного скрипта на ASP.NET Core 2.1 <a href="~/download/Server.zip">доступен здесь</a><br />
+            <strong>Обратите внимание, что Microsoft <a href="https://devblogs.microsoft.com/dotnet/net-core-2-1-will-reach-end-of-support-on-august-21-2021/#:~:text=NET%20Core%202.1%20will%20be,technical%20support%20for%20this%20version.">больше не поддерживает .NET Core 2.1</a></strong>
+        </p>
+        <p>Клиент для внутренней сети <a href="~/download/Release1.1.1.win7.patch.zip">доступен здесь</a></p>
     </div>
     <div class="Reqs">
         <p><strong>Системные требования:</strong><br /></p>
-        <div class="Client_Reqs">
+        <div class="ClientReqs">
             <p>
                 Для клиента:
                 <br />OS: Windows 7 SP1 и выше
