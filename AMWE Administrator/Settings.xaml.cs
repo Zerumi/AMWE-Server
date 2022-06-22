@@ -90,7 +90,7 @@ namespace AMWE_Administrator
 
         private void BitArray_OnRemove(object sender, EventArgs e)
         {
-            if (BitArray.Count - 1 == 0)
+            if (BitArray.Count == 0)
             {
                 lbRestartRequired.Visibility = Visibility.Hidden;
             }
@@ -145,14 +145,14 @@ namespace AMWE_Administrator
             App.CheckSites = cbCheckSites.IsChecked.GetValueOrDefault(true);
             ConfigurationRequest.WriteValueByKey("CheckSites", Convert.ToString(cbCheckSites.IsChecked.GetValueOrDefault(true)));
 
+            ConfigurationRequest.SaveCheckModels();
+
             if (lbRestartRequired.Visibility == Visibility.Visible)
             {
                 System.Windows.Forms.Application.Restart();
 
                 Environment.Exit(0);
             }
-
-            ConfigurationRequest.SaveCheckModels();
 
             Close();
         }
@@ -270,6 +270,49 @@ namespace AMWE_Administrator
         private void CbCheckSites_Unchecked(object sender, RoutedEventArgs e)
         {
             lbSitesToCheck.IsEnabled = false;
+        }
+
+        private async void bRemoveApp_Click(object sender, RoutedEventArgs e)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                string Name = $"cbA{lbAppsToCheck.SelectedIndex + 1}";
+                CheckModel checkModel = App.AppsToCheck.Find(x => x.FrameworkName == Name);
+                _ = App.AppsToCheck.Remove(checkModel);
+                lbAppsToCheck.Items.Remove(WinHelper.FindChild<CheckBox>(lbAppsToCheck, Name));
+                bRemoveApp.Opacity = 0.0d;
+            }));
+        }
+
+        private async void bRemoveSite_Click(object sender, RoutedEventArgs e)
+        {
+            await Dispatcher.BeginInvoke(new Action(() =>
+            {
+                string Name = $"cbS{lbSitesToCheck.SelectedIndex + 1}";
+                CheckModel checkModel = App.SitesToCheck.Find(x => x.FrameworkName == Name);
+                _ = App.SitesToCheck.Remove(checkModel);
+                lbSitesToCheck.Items.Remove(WinHelper.FindChild<CheckBox>(lbSitesToCheck, Name));
+                bRemoveSite.Opacity = 0.0d;
+            }));
+        }
+
+        private void lbAppsToCheck_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bRemoveApp.Opacity = 1.0d;
+        }
+
+        private void lbSitesToCheck_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bRemoveSite.Opacity = 1.0d;
+        }
+        private void lbAppsToCheck_LostFocus(object sender, RoutedEventArgs e)
+        {
+            bRemoveApp.Opacity = 0.0d;
+        }
+
+        private void lbSitesToCheck_LostFocus(object sender, RoutedEventArgs e)
+        {
+            bRemoveSite.Opacity = 0.0d;
         }
     }
 }

@@ -91,11 +91,13 @@
                                     <RowDefinition Height="35"/>
                                 </Grid.RowDefinitions>
                                 <CheckBox x:Name="cbCheckApps" Content="Проверять отчеты на следующие программы:" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" Width="317" Height="20" Checked="CbCheckApps_Checked" Unchecked="CbCheckApps_Unchecked"/>
-                                <ListBox x:Name="lbAppsToCheck" Margin="10,0,30,0" Grid.Row="1" BorderThickness="1" IsEnabled="False"/>
+                                <ListBox x:Name="lbAppsToCheck" Margin="10,0,30,0" Grid.Row="1" BorderThickness="1" IsEnabled="False" SelectionChanged="lbAppsToCheck_SelectionChanged" LostFocus="lbAppsToCheck_LostFocus"/>
                                 <Button x:Name="bAddApp" Content="Добавить в список..." Grid.Row="2" Margin="0,10,202,0" Click="BAddApp_Click"/>
                                 <CheckBox x:Name="cbCheckSites" Content="Проверять отчеты на следующие сайты:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="317" Height="20" Grid.Row="3" Checked="CbCheckSites_Checked" Unchecked="CbCheckSites_Unchecked"/>
-                                <ListBox x:Name="lbSitesToCheck" Margin="10,0,30,0" Grid.Row="4" BorderThickness="1" IsEnabled="False"/>
+                                <ListBox x:Name="lbSitesToCheck" Margin="10,0,30,0" Grid.Row="4" BorderThickness="1" IsEnabled="False" SelectionChanged="lbSitesToCheck_SelectionChanged" LostFocus="lbSitesToCheck_LostFocus"/>
                                 <Button x:Name="bAddSite" Content="Добавить в список..." Grid.Row="5" Margin="0,10,202,0" Click="BAddSite_Click"/>
+                                <Button x:Name="bRemoveApp" Content="Убрать из списка" Grid.Row="2" Margin="207,10,10,0" Click="bRemoveApp_Click" Opacity="0"/>
+                                <Button x:Name="bRemoveSite" Content="Убрать из списка" Grid.Row="5" Margin="207,10,10,0" Click="bRemoveSite_Click" Opacity="0"/>
                             </Grid>
                         </ScrollViewer>
                     </Grid>
