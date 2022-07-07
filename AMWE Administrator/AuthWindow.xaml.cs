@@ -1,6 +1,7 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using m3md2;
 using ReportHandler.Version;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace AMWE_Administrator
@@ -23,6 +25,31 @@ namespace AMWE_Administrator
         public AuthWindow()
         {
             InitializeComponent();
+            grid.Background = App.MainColor;
+            foreach (Label a in WinHelper.FindVisualChildren<Label>(grid))
+            {
+                a.Foreground = App.FontColor;
+            }
+            foreach (TextBox a in WinHelper.FindVisualChildren<TextBox>(grid))
+            {
+                a.Background = App.SecondColor;
+                a.Foreground = App.FontColor;
+            }
+            foreach (PasswordBox a in WinHelper.FindVisualChildren<PasswordBox>(grid))
+            {
+                a.Background = App.SecondColor;
+                a.Foreground = App.FontColor;
+            }
+            foreach (Button a in WinHelper.FindVisualChildren<Button>(grid))
+            {
+                a.Background = App.ButtonColor;
+                a.Foreground = App.FontColor;
+            }
+            foreach (CheckBox a in WinHelper.FindVisualChildren<CheckBox>(grid))
+            {
+                a.Background = App.SecondColor;
+                a.Foreground = App.FontColor;
+            }
         }
 
         public static object AuthUser(string[] authdata, out Cookie cookie)

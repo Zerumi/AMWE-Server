@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AMWE_Administrator"
         mc:Ignorable="d"
-        Title="TimeSetter" Height="190" Width="428">
+        Title="AMWE Administrator" Height="190" Width="428">
     <Grid>
         <Ellipse x:Name="eMinute" HorizontalAlignment="Left" Margin="10,10,0,0" Stroke="Black" StrokeThickness="2" Width="120" Height="120" VerticalAlignment="Top"/>
         <Line x:Name="lMinute" X1="0" Y1="5" X2="0" Y2="60" Stroke="Black" StrokeThickness="1.5" Margin="70,10,0,0" HorizontalAlignment="Left" Width="1" Height="120" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5">

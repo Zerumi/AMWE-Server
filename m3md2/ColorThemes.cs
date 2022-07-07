@@ -141,6 +141,37 @@ namespace m3md2
                     (Color)ColorConverter.ConvertFromString("#009fa2"), // 0.9
                     (Color)ColorConverter.ConvertFromString("#00b7b3") // 1.0
                 }
+            },
+            new ColorTheme()
+            {
+                Name = "Skyfly",
+                Colors = new Color[]
+                {
+                    Colors.AliceBlue, // main color
+                    Colors.Azure, // second color
+                    Color.FromRgb(0,0,0), // font color
+                    Color.FromRgb(244,240,255), // third color
+                    Color.FromRgb(67,181,129), // green color
+                    Color.FromRgb(240,71,71), // red color
+                    SystemColors.ControlColor, // control color
+                    Color.FromRgb(67, 210, 157), // linechart color
+                    Color.FromRgb(0,0,0), // border color
+                    SystemColors.ControlColor, // button color
+                    Colors.LightGray // ButtonHighlight
+                },
+                ReportGradient = new Color[]
+                {
+                    (Color)ColorConverter.ConvertFromString("#C0ff0000"), // 0.1
+                    (Color)ColorConverter.ConvertFromString("#C0ff4000"), // 0.2
+                    (Color)ColorConverter.ConvertFromString("#C0ff8000"), // 0.3
+                    (Color)ColorConverter.ConvertFromString("#C0ffc000"), // 0.4
+                    (Color)ColorConverter.ConvertFromString("#C0ffff00"), // 0.5
+                    (Color)ColorConverter.ConvertFromString("#C0c0ff00"), // 0.6
+                    (Color)ColorConverter.ConvertFromString("#C0a0ff00"), // 0.7
+                    (Color)ColorConverter.ConvertFromString("#C080ff00"), // 0.8
+                    (Color)ColorConverter.ConvertFromString("#C060ff00"), // 0.9
+                    (Color)ColorConverter.ConvertFromString("#C020ff00") // 1.0
+                }
             }
         };
     }
