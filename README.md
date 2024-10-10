@@ -47,6 +47,6 @@ https://github.com/user-attachments/assets/d3340799-e103-456f-a850-620901a9ba31
 
 ## How to run?
 
-Download the binaries of [client](https://github.com/plmlkff/HttpClientWpf/releases/tag/v1.3.200222) and administrator (see Releases). Unfortunately, without rebuilding client project there is impossible to switch server address, so, here is demo network credentials:
+Download the binaries of [client](https://github.com/plmlkff/HttpClientWpf/releases/tag/v1.3.200222) and administrator (see Releases). Unfortunately, without rebuilding client project it is impossible to switch server address, so, here is demo network credentials:
 - Server address: http://amwe-server.glitch.me/
 - Server password: Contact Telegram @zerumi
