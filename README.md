@@ -7,7 +7,7 @@ Project page: http://amwe.glitch.me
 ## What is this?
 Assistant in Monitoring the Work of Employees (AMWE) is a project created to help monitor employees working remotely and in the office. It was developed in connection with the COVID-19 pandemic.
 
-This project awarded 50.000₽ in MITP PhysTech Lycieum Start to Innovate 2022 conference as best Tech Startup Idea.
+This project awarded 50.000₽ in MIPT PhysTech Lycieum Start to Innovate 2022 conference as best Tech Startup Idea.
 
 Project capabilities:
 
