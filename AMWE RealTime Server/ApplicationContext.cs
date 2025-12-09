@@ -2,7 +2,7 @@
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+using AMWE_RealTime_Server.Models;
 
 namespace AMWE_RealTime_Server
 {
@@ -11,6 +11,9 @@ namespace AMWE_RealTime_Server
         public bool WorkdayValue = false;
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
+
+        public DbSet<Client> GlobalClientsList { get; set; }
+        
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
@@ -26,29 +29,5 @@ namespace AMWE_RealTime_Server
             modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole, devRole });
             base.OnModelCreating(modelBuilder);
         }
-    }
-
-    public class Role
-    {
-        public const string GlobalAdminRole = "admin";
-        public const string GlobalUserRole = "user";
-        public const string GlobalAdminGroup = "Admin";
-        public const string GlobalUserGroup = "User";
-        public const string GlobalDeveloperRole = "developer";
-
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<User> Users { get; set; }
-        public Role()
-        {
-            Users = new List<User>();
-        }
-    }
-    public class User
-    {
-        public int Id { get; set; }
-
-        public int? RoleId { get; set; }
-        public Role Role { get; set; }
     }
 }

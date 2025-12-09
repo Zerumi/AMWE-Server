@@ -1,7 +1,9 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
 using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -10,7 +12,7 @@ namespace AMWE_RealTime_Server
 {
     public class Program
     {
-        public static void Main()
+        public static void Main(String[] args)
         {
             var webHost = new WebHostBuilder()
       .UseKestrel()
@@ -25,15 +27,19 @@ namespace AMWE_RealTime_Server
       })
       .ConfigureLogging((hostingContext, logging) =>
       {
-              // Requires `using Microsoft.Extensions.Logging;`
-              logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+          // Requires `using Microsoft.Extensions.Logging;`
+          logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
           logging.AddConsole();
           logging.AddDebug();
           logging.AddEventSourceLogger();
       })
       .UseStartup<Startup>()
       .Build();
-
+            if (args.Contains("--ef"))
+            {
+                // EF требует DbContext, но мы не запускаем сервер
+                return;
+            }
             webHost.Run();
         }
     }

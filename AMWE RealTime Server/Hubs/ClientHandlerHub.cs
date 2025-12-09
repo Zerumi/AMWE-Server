@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
+using AMWE_RealTime_Server.Models;
 
 namespace AMWE_RealTime_Server.Hubs
 {

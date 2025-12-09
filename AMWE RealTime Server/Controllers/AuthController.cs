@@ -24,11 +24,13 @@ namespace AMWE_RealTime_Server.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IHubContext<ClientHandlerHub> _hubContext;
+        private readonly ApplicationContext _context;
 
-        public AuthController(IHubContext<ClientHandlerHub> hubContext)
+        public AuthController(IHubContext<ClientHandlerHub> hubContext, ApplicationContext context)
         {
             StaticVariables.svControllers.Add(this);
             _hubContext = hubContext;
+            _context = context;
         }
 
         public static uint GlobalClientId = 0;
@@ -68,6 +70,8 @@ namespace AMWE_RealTime_Server.Controllers
                 GlobalClientStatesList.Add(clientState);
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", clientState);
                 GlobalClientId++;
+                _context.GlobalClientsList.Add(client);
+                await  _context.SaveChangesAsync();
                 return client;
             }
             else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
@@ -112,6 +116,8 @@ namespace AMWE_RealTime_Server.Controllers
                 a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
                 GlobalClientsList.Remove(GlobalClientsList.Find(x => x.Id == a.Client.Id));
+                _context.GlobalClientsList.Remove(_context.GlobalClientsList.Find(a.Client.Id));
+                await _context.SaveChangesAsync();
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
             return NoContent();
