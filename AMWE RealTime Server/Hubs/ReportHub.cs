@@ -25,14 +25,16 @@ namespace AMWE_RealTime_Server.Hubs
 
         private readonly IHubContext<ClientHandlerHub> _hubContext;
         private readonly IHubContext<AdminSystemHub> _AdmHubContext;
+        private readonly ApplicationContext _context;
 
         public static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
 
-        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> AdmHubContext)
+        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> AdmHubContext, ApplicationContext context)
         {
             _logger = logger;
             _hubContext = hubContext;
             _AdmHubContext = AdmHubContext;
+            _context = context;
         }
 
         public override async Task OnConnectedAsync()
@@ -110,7 +112,7 @@ namespace AMWE_RealTime_Server.Hubs
         public async void EnhanceControl(uint clientID)
         {
             string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
-            var x = AuthController.GlobalClientStatesList.Find(x => x.Client.Id == clientID);
+            var x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
             if (!x.IsEnhanced)
             {
                 x.IsEnhanced = true;
@@ -126,7 +128,7 @@ namespace AMWE_RealTime_Server.Hubs
         public async void LoosenControl(uint clientID)
         {
             string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
-            var x = AuthController.GlobalClientStatesList.Find(x => x.Client.Id == clientID);
+            var x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
             if (x.IsEnhanced)
             {
                 x.IsEnhanced = false;

@@ -19,9 +19,12 @@ namespace AMWE_RealTime_Server.Hubs
     {
         private readonly ILogger _logger;
 
-        public UserToAdminChatHub(ILogger<UserToAdminChatHub> logger)
+        private readonly ApplicationContext _context;
+
+        public UserToAdminChatHub(ILogger<UserToAdminChatHub> logger, ApplicationContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         private static readonly List<ChatState> chatStates = new List<ChatState>();
@@ -67,7 +70,7 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 ID = ChatId++,
                 AdminConnectionID = Context.ConnectionId,
-                User = AuthController.GlobalClientsList.Find(x => x.Id == ClientID),
+                User = _context.GlobalClientsList.First(x => x.Id == ClientID),
                 IsAccepted = false
             };
             chatStates.Add(chatState);

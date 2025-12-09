@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AMWE_RealTime_Server.Hubs;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace AMWE_RealTime_Server.Controllers
 {
@@ -33,11 +35,7 @@ namespace AMWE_RealTime_Server.Controllers
             _context = context;
         }
 
-        public static uint GlobalClientId = 0;
-
         public static List<Client> GlobalClientsList = new List<Client>();
-        public static List<ClientState> GlobalClientStatesList = new List<ClientState>();
-        public static Dictionary<uint, ClaimsPrincipal> GlobalUsersList = new Dictionary<uint, ClaimsPrincipal>();
 
         [HttpPost]
         [AllowAnonymous]
@@ -47,7 +45,7 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {GlobalClientId}/" + authdata[0]),
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {_context.GlobalClientsList.Max(c => c.Id) + 1}/" + authdata[0]),
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
@@ -65,12 +63,13 @@ namespace AMWE_RealTime_Server.Controllers
                     IsOnline = true,
                     LastLoginDateTime = DateTime.Now
                 };
-                GlobalUsersList.Add(client.Id, user);
-                GlobalClientsList.Add(client);
-                GlobalClientStatesList.Add(clientState);
+                //GlobalUsersList.Add(client.Id, user);
+                //GlobalClientsList.Add(client);
+                //GlobalClientStatesList.Add(clientState);
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", clientState);
                 GlobalClientId++;
                 _context.GlobalClientsList.Add(client);
+                _context.GlobalClientStatesList.Add(clientState);
                 await  _context.SaveChangesAsync();
                 return client;
             }
@@ -109,14 +108,17 @@ namespace AMWE_RealTime_Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Logout(uint id)
         {
-            ClientState a = GlobalClientStatesList.Find(x => x.Client.Id == id);
+            ClientState a = _context.GlobalClientStatesList
+            .Include(a => a.Client)
+            .FirstOrDefault(x => x.Client.Id == id);
+            
             if (a != null)
             {
                 a.IsOnline = false;
                 a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
-                GlobalClientsList.Remove(GlobalClientsList.Find(x => x.Id == a.Client.Id));
-                _context.GlobalClientsList.Remove(_context.GlobalClientsList.Find(a.Client.Id));
+                // GlobalClientsList.Remove(GlobalClientsList.Find(x => x.Id == a.Client.Id));
+                // _context.GlobalClientsList.Remove(_context.GlobalClientsList.Find(a.Client.Id));
                 await _context.SaveChangesAsync();
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }

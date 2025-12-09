@@ -13,9 +13,16 @@ namespace AMWE_RealTime_Server.Hubs
     [Authorize(Roles = Role.GlobalAdminRole)]
     public class ClientHandlerHub : Hub
     {
+        private readonly ApplicationContext _context;
+
+        public ClientHandlerHub(ApplicationContext context)
+        {
+            _context = context;
+        }
+
         public override async Task OnConnectedAsync()
         {
-            await Clients.Caller.SendAsync("GetAllClients", AuthController.GlobalClientStatesList);
+            await Clients.Caller.SendAsync("GetAllClients", _context.GlobalClientStatesList);
             await base.OnConnectedAsync();
         }
 

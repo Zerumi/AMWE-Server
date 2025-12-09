@@ -7,6 +7,7 @@ namespace AMWE_RealTime_Server.Models
 {
     public class ClientState
     {
+        public int Id { get; set; }
         public Client Client { get; set; }
         public bool IsOnline { get; set; }
         public bool IsEnhanced { get; set; }
