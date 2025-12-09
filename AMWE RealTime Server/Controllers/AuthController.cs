@@ -45,7 +45,7 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {_context.GlobalClientsList.Max(c => c.Id) + 1}/" + authdata[0]),
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {(_context.GlobalClientsList.Count() > 0 ? _context.GlobalClientsList.Max(c => c.Id) + 1 : 1)}/" + authdata[0]),
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
@@ -54,7 +54,7 @@ namespace AMWE_RealTime_Server.Controllers
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, user);
                 Client client = new Client()
                 {
-                    Id = GlobalClientId,
+                    Id = _context.GlobalClientsList.Count() > 0 ? _context.GlobalClientsList.Max(c => c.Id) + 1 : 1,
                     Nameofpc = authdata[0]
                 };
                 ClientState clientState = new ClientState()
@@ -67,7 +67,6 @@ namespace AMWE_RealTime_Server.Controllers
                 //GlobalClientsList.Add(client);
                 //GlobalClientStatesList.Add(clientState);
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", clientState);
-                GlobalClientId++;
                 _context.GlobalClientsList.Add(client);
                 _context.GlobalClientStatesList.Add(clientState);
                 await  _context.SaveChangesAsync();
