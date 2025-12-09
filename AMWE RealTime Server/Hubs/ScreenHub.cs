@@ -64,7 +64,6 @@ namespace AMWE_RealTime_Server.Hubs
                 });
                 await Clients.Group($"ID {client.Id}/" + client.Nameofpc).SendAsync("RequestScreen", screenType);
                 _logger.LogInformation($"Отправился запрос на скриншот {screenType} у {client.Id} / {client.Nameofpc}");
-
             }
             catch (Exception ex)
             {

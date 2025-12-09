@@ -45,8 +45,8 @@ namespace AMWE_RealTime_Server.Controllers
             {
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {GlobalClientId}/" + authdata[0]),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {GlobalClientId}/" + authdata[0]),
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
@@ -79,8 +79,8 @@ namespace AMWE_RealTime_Server.Controllers
                 //}
                 var claims = new List<Claim>
                 {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalAdminRole)
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalAdminRole)
                 };
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                     ClaimsIdentity.DefaultRoleClaimType);
@@ -116,44 +116,5 @@ namespace AMWE_RealTime_Server.Controllers
             }
             return NoContent();
         }
-
-        public static VerifyVersion[] adminversions = new VerifyVersion[]
-            {
-                new VerifyVersion()
-                {
-                    Version = "0.6.0.0",
-                    IsNotSupported = false,
-                    IsLatest = true,
-                    IsUpdateNeeded = false,
-                    Rephandler = new List<string> {"1.0.0.0"},
-                    M3md2 = new List<string> {"1.4.1.0"},
-                    M3md2_startup = new List<string> {"1.3.1.0"}
-                },
-                new VerifyVersion()
-                {
-                    Version = "1.0.0.0",
-                    IsNotSupported = true,
-                    IsLatest = false,
-                    IsUpdateNeeded = false,
-                    Rephandler = new List<string> {"1.0.0.0"},
-                    M3md2 = new List<string> {"1.4.1.0"},
-                    M3md2_startup = new List<string> {"1.3.1.0"}
-                }
-            };
-
-
-        public static VerifyVersion[] userversions = new VerifyVersion[]
-            {
-                new VerifyVersion()
-                {
-                    Version = "1.0.0.0",
-                    IsNotSupported = false,
-                    IsLatest = false,
-                    IsUpdateNeeded = false,
-                    Rephandler = new List<string> {"2.1.0.0"},
-                    M3md2 = new List<string> {"1.4.1.0"},
-                    M3md2_startup = new List<string> {"1.3.1.0"}
-                }
-            };
     }
 }
