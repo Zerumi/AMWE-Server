@@ -63,9 +63,6 @@ namespace AMWE_RealTime_Server.Controllers
                     IsOnline = true,
                     LastLoginDateTime = DateTime.Now
                 };
-                //GlobalUsersList.Add(client.Id, user);
-                //GlobalClientsList.Add(client);
-                //GlobalClientStatesList.Add(clientState);
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", clientState);
                 _context.GlobalClientsList.Add(client);
                 _context.GlobalClientStatesList.Add(clientState);
@@ -74,11 +71,6 @@ namespace AMWE_RealTime_Server.Controllers
             }
             else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
             {
-                //VerifyVersion version = Array.Find(adminversions, x => x.version == authdata[2]);
-                //if (version.isNotSupported || !version.rephandler.Contains(authdata[3]) || !version.m3md2.Contains(authdata[4]) || !version.m3md2_startup.Contains(authdata[5]))
-                //{
-                //    return Redirect("~/api/update/latest/admin");
-                //}
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
@@ -116,8 +108,6 @@ namespace AMWE_RealTime_Server.Controllers
                 a.IsOnline = false;
                 a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
-                // GlobalClientsList.Remove(GlobalClientsList.Find(x => x.Id == a.Client.Id));
-                // _context.GlobalClientsList.Remove(_context.GlobalClientsList.Find(a.Client.Id));
                 await _context.SaveChangesAsync();
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
