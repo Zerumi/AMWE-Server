@@ -8,5 +8,15 @@ namespace AMWE_RealTime_Server.Models {
 
         public int? RoleId { get; set; }
         public Role Role { get; set; }
+
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public PasswordType PasswordType { get; set; }
+    }
+
+    public enum PasswordType
+    {
+        LegacyAESEncrypted = 1,
+        HashedBCrypt = 2
     }
 }

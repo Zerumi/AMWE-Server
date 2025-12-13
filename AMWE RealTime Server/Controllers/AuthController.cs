@@ -67,29 +67,30 @@ namespace AMWE_RealTime_Server.Controllers
                 await  _context.SaveChangesAsync();
                 return client;
             }
-            else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"password.txt")).ReadToEnd())
+            else
             {
-                var claims = new List<Claim>
+                var user = _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefault(u => u.Username == authdata[0]);
+
+                if (user == null)
+                    return false;  
+
+                if (user.PasswordType == PasswordType.LegacyAESEncrypted && Encryption.Decrypt(user.Password) == Encryption.Decrypt(authdata[1]))
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalAdminRole)
-                };
-                ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-                return true;
-            }
-            else if (Encryption.Decrypt(authdata[1]) == new StreamReader(System.IO.File.OpenRead(@"devpassword.txt")).ReadToEnd())
-            {
-                var claims = new List<Claim>
-                {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalDeveloperRole)
-                };
-                ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-                return "Developer";
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
+                    };
+                    ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
+                        ClaimsIdentity.DefaultRoleClaimType);
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+                    
+                    if (user.Role.Name == Role.GlobalDeveloperRole)
+                        return "Developer";
+                    else return true;
+                }
             }
             return false;
         }

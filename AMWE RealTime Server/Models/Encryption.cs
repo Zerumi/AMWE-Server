@@ -9,16 +9,9 @@ namespace AMWE_RealTime_Server.Models
 {
     public class Encryption
     {
-        // you must create code and write them to project folder\cryptcode.txt
         private static string loadcode()
         {
-            string code = null;
-            var stream = File.OpenRead(@"cryptcode.txt");
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                code = reader.ReadToEnd();
-            }
-            return code;
+            return Environment.GetEnvironmentVariable("Security__Legacy_Crypt_Code") ?? throw new Exception("Crypt code not found in environment variables");
         }
         private static string passPhrase = loadcode();
 
