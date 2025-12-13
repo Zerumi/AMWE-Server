@@ -1,8 +1,8 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
+
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AMWE_RealTime_Server.Migrations
 {
@@ -12,7 +12,7 @@ namespace AMWE_RealTime_Server.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "GlobalClientStatesList",
                 columns: table => new
                 {
@@ -26,15 +26,15 @@ namespace AMWE_RealTime_Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GlobalClientStatesList", x => x.Id);
-                    table.ForeignKey(
+                    _ = table.PrimaryKey("PK_GlobalClientStatesList", x => x.Id);
+                    _ = table.ForeignKey(
                         name: "FK_GlobalClientStatesList_GlobalClientsList_ClientId",
                         column: x => x.ClientId,
                         principalTable: "GlobalClientsList",
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateIndex(
+            _ = migrationBuilder.CreateIndex(
                 name: "IX_GlobalClientStatesList_ClientId",
                 table: "GlobalClientStatesList",
                 column: "ClientId");
@@ -43,7 +43,7 @@ namespace AMWE_RealTime_Server.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "GlobalClientStatesList");
         }
     }

@@ -3,12 +3,13 @@
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+
 using AMWE_RealTime_Server.Hubs;
 using AMWE_RealTime_Server.Models;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -30,7 +31,7 @@ namespace AMWE_RealTime_Server.Controllers
 
         public AuthController(IHubContext<ClientHandlerHub> hubContext, ApplicationContext context)
         {
-            StaticVariables.svControllers.Add(this);
+            StaticVariables.SvControllers.Add(this);
             _hubContext = hubContext;
             _context = context;
         }
@@ -41,7 +42,7 @@ namespace AMWE_RealTime_Server.Controllers
         {
             if (authdata[1] == "user")
             {
-                var claims = new List<Claim>
+                List<Claim> claims = new List<Claim>
                 {
                     new Claim(ClaimsIdentity.DefaultNameClaimType, $"ID {(_context.GlobalClientsList.Count() > 0 ? _context.GlobalClientsList.Max(c => c.Id) + 1 : 1)}/" + authdata[0]),
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, Role.GlobalUserRole)
@@ -62,23 +63,25 @@ namespace AMWE_RealTime_Server.Controllers
                     LastLoginDateTime = DateTime.Now
                 };
                 await _hubContext.Clients.All.SendAsync("OnUserAuth", clientState);
-                _context.GlobalClientsList.Add(client);
-                _context.GlobalClientStatesList.Add(clientState);
-                await  _context.SaveChangesAsync();
+                _ = _context.GlobalClientsList.Add(client);
+                _ = _context.GlobalClientStatesList.Add(clientState);
+                _ = await _context.SaveChangesAsync();
                 return client;
             }
             else
             {
-                var user = _context.Users
+                User user = _context.Users
                     .Include(u => u.Role)
                     .FirstOrDefault(u => u.Username == authdata[0]);
 
                 if (user == null)
-                    return false;  
+                {
+                    return false;
+                }
 
                 if (user.PasswordType == PasswordType.LegacyAESEncrypted && Encryption.Decrypt(user.Password) == Encryption.Decrypt(authdata[1]))
                 {
-                    var claims = new List<Claim>
+                    List<Claim> claims = new List<Claim>
                     {
                         new Claim(ClaimsIdentity.DefaultNameClaimType, authdata[0]),
                         new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
@@ -86,10 +89,8 @@ namespace AMWE_RealTime_Server.Controllers
                     ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
                         ClaimsIdentity.DefaultRoleClaimType);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-                    
-                    if (user.Role.Name == Role.GlobalDeveloperRole)
-                        return "Developer";
-                    else return true;
+
+                    return user.Role.Name == Role.GlobalDeveloperRole ? "Developer" : (dynamic)true;
                 }
             }
             return false;
@@ -101,13 +102,13 @@ namespace AMWE_RealTime_Server.Controllers
             ClientState a = _context.GlobalClientStatesList
             .Include(a => a.Client)
             .FirstOrDefault(x => x.Client.Id == id);
-            
+
             if (a != null)
             {
                 a.IsOnline = false;
                 a.LastLogoutDateTime = DateTime.Now;
                 await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
-                await _context.SaveChangesAsync();
+                _ = await _context.SaveChangesAsync();
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
             return NoContent();

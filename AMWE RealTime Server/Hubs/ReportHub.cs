@@ -1,16 +1,18 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+
 using AMWE_RealTime_Server.Models;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -20,16 +22,16 @@ namespace AMWE_RealTime_Server.Hubs
         private readonly ILogger _logger;
 
         private readonly IHubContext<ClientHandlerHub> _hubContext;
-        private readonly IHubContext<AdminSystemHub> _AdmHubContext;
+        private readonly IHubContext<AdminSystemHub> _admHubContext;
         private readonly ApplicationContext _context;
 
-        public static readonly Dictionary<string, Client> connectedClients = new Dictionary<string, Client>();
+        public static readonly Dictionary<string, Client> ConnectedClients = new Dictionary<string, Client>();
 
-        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> AdmHubContext, ApplicationContext context)
+        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> admHubContext, ApplicationContext context)
         {
             _logger = logger;
             _hubContext = hubContext;
-            _AdmHubContext = AdmHubContext;
+            _admHubContext = admHubContext;
             _context = context;
         }
 
@@ -39,15 +41,15 @@ namespace AMWE_RealTime_Server.Hubs
             _logger.LogInformation(logMsg);
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
-                await _AdmHubContext.Clients.All.SendAsync("Log", $"Администратор {Context.User.Identity.Name} вошел в сеть");
+                await _admHubContext.Clients.All.SendAsync("Log", $"Администратор {Context.User.Identity.Name} вошел в сеть");
                 await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
             }
             else if (Context.User.IsInRole(Role.GlobalUserRole))
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
-                uint id = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3));
-                string nameofpc = Context.User.Identity.Name.Substring(Context.User.Identity.Name.IndexOf('/'));
-                connectedClients.Add(Context.ConnectionId, new Client() { Id = id, Nameofpc = nameofpc });
+                uint id = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/")[3..]);
+                string nameofpc = Context.User.Identity.Name[Context.User.Identity.Name.IndexOf('/')..];
+                ConnectedClients.Add(Context.ConnectionId, new Client() { Id = id, Nameofpc = nameofpc });
             }
             await Clients.Caller.SendAsync("SetWorkday", _context.ReportHubState.First().WorkdayValue);
             await Clients.Caller.SendAsync("SetBaseSendingTime", _context.ReportHubState.First().BaseRepInterval);
@@ -61,14 +63,14 @@ namespace AMWE_RealTime_Server.Hubs
             if (Context.User.IsInRole(Role.GlobalAdminRole))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalAdminGroup);
-                await _AdmHubContext.Clients.All.SendAsync("Log", $"Администратор {Context.User.Identity.Name} вышел из сети");
+                await _admHubContext.Clients.All.SendAsync("Log", $"Администратор {Context.User.Identity.Name} вышел из сети");
             }
             else if (Context.User.IsInRole(Role.GlobalUserRole))
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
-                connectedClients.TryGetValue(Context.ConnectionId, out Client client);
-                await StaticVariables.svControllers.FirstOrDefault()?.Logout(client.Id);
-                connectedClients.Remove(Context.ConnectionId);
+                _ = ConnectedClients.TryGetValue(Context.ConnectionId, out Client client);
+                _ = await StaticVariables.SvControllers.FirstOrDefault()?.Logout(client.Id);
+                _ = ConnectedClients.Remove(Context.ConnectionId);
             }
             await base.OnDisconnectedAsync(exception);
         }
@@ -86,9 +88,9 @@ namespace AMWE_RealTime_Server.Hubs
         public async void SetWorkdayValue(bool value)
         {
             _context.ReportHubState.First().WorkdayValue = value;
-            await _context.SaveChangesAsync();
+            _ = await _context.SaveChangesAsync();
             string logMsg = $"Администратор {Context.User.Identity.Name} изменил состояние рабочего дня на {value}";
-            await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+            await _admHubContext.Clients.All.SendAsync("Log", logMsg);
             _logger.LogInformation(logMsg);
             await Clients.All.SendAsync("SetWorkday", value);
         }
@@ -97,27 +99,27 @@ namespace AMWE_RealTime_Server.Hubs
         public async void ShutdownAllConnections()
         {
             await Clients.Group(Role.GlobalUserGroup).SendAsync("ShutdownHubConnection");
-            var list = _context.GlobalClientStatesList.Where(x => x.IsOnline);
-            var a = list.Count();
-            var b = list.Select(x => x.Client.Id).ToArray();
+            IQueryable<ClientState> list = _context.GlobalClientStatesList.Where(x => x.IsOnline);
+            int a = list.Count();
+            uint[] b = list.Select(x => x.Client.Id).ToArray();
             for (uint i = 0; i < a; i++)
             {
-                await StaticVariables.svControllers.FirstOrDefault()?.Logout(b[i]);
+                _ = await StaticVariables.SvControllers.FirstOrDefault()?.Logout(b[i]);
             }
         }
 
         [Authorize(Roles = Role.GlobalAdminRole)]
         public async void EnhanceControl(uint clientID)
         {
-            string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
-            var x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
+            string address = ConnectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
+            ClientState x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
             if (!x.IsEnhanced)
             {
                 x.IsEnhanced = true;
                 await Clients.Client(address).SendAsync("EnhanceControl");
                 string logMsg = $"Администратор {Context.User.Identity.Name} усилил контроль за сотрудником {clientID}: {x.Client.Nameofpc}";
                 _logger.LogInformation(logMsg);
-                await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+                await _admHubContext.Clients.All.SendAsync("Log", logMsg);
                 await _hubContext.Clients.All.SendAsync("EnhanceControlForUser", clientID);
             }
         }
@@ -125,14 +127,14 @@ namespace AMWE_RealTime_Server.Hubs
         [Authorize(Roles = Role.GlobalAdminRole)]
         public async void LoosenControl(uint clientID)
         {
-            string address = connectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
-            var x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
+            string address = ConnectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
+            ClientState x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
             if (x.IsEnhanced)
             {
                 x.IsEnhanced = false;
                 await Clients.Client(address).SendAsync("LoosenControl");
                 string logMsg = $"Администратор {Context.User.Identity.Name} ослабил контроль за сотрудником {clientID}: {x.Client.Nameofpc}";
-                await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+                await _admHubContext.Clients.All.SendAsync("Log", logMsg);
                 _logger.LogInformation(logMsg);
                 await _hubContext.Clients.All.SendAsync("LoosenControlForUser", clientID);
             }
@@ -143,10 +145,10 @@ namespace AMWE_RealTime_Server.Hubs
         {
             await Clients.All.SendAsync("SetBaseSendingTime", timeSpan);
             string logMsg = $"Администратор {Context.User.Identity.Name} изменил базовый интервал опроса отчетов с {_context.ReportHubState.First().BaseRepInterval} до {timeSpan}";
-            await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
+            await _admHubContext.Clients.All.SendAsync("Log", logMsg);
             _logger.LogInformation(logMsg);
             _context.ReportHubState.First().BaseRepInterval = timeSpan;
-            await _context.SaveChangesAsync();
+            _ = await _context.SaveChangesAsync();
         }
 
         public TimeSpan GetBaseReportPollingInterval()

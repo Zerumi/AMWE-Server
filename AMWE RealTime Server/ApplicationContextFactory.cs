@@ -7,9 +7,9 @@ namespace AMWE_RealTime_Server
     {
         public ApplicationContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
+            DbContextOptionsBuilder<ApplicationContext> optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
 
-            optionsBuilder.UseNpgsql("Host=localhost;Port=55432;Database=postgres;Username=postgres;Password=changeit");
+            _ = optionsBuilder.UseNpgsql("Host=localhost;Port=55432;Database=postgres;Username=postgres;Password=changeit");
 
             return new ApplicationContext(optionsBuilder.Options);
         }

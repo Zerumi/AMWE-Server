@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -12,26 +13,26 @@ namespace AMWE_RealTime_Server
 {
     public class Program
     {
-        public static void Main(String[] args)
+        public static void Main(string[] args)
         {
-            var webHost = new WebHostBuilder()
+            IWebHost webHost = new WebHostBuilder()
       .UseKestrel()
       .UseContentRoot(Directory.GetCurrentDirectory())
       .ConfigureAppConfiguration((hostingContext, config) =>
       {
-          var env = hostingContext.HostingEnvironment;
-          config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+          IWebHostEnvironment env = hostingContext.HostingEnvironment;
+          _ = config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json",
                     optional: true, reloadOnChange: true);
-          config.AddEnvironmentVariables();
+          _ = config.AddEnvironmentVariables();
       })
       .ConfigureLogging((hostingContext, logging) =>
       {
           // Requires `using Microsoft.Extensions.Logging;`
-          logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-          logging.AddConsole();
-          logging.AddDebug();
-          logging.AddEventSourceLogger();
+          _ = logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+          _ = logging.AddConsole();
+          _ = logging.AddDebug();
+          _ = logging.AddEventSourceLogger();
       })
       .UseStartup<Startup>()
       .Build();

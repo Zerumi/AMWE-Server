@@ -1,9 +1,11 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
-using Microsoft.EntityFrameworkCore;
-using AMWE_RealTime_Server.Models;
 using System;
+
+using AMWE_RealTime_Server.Models;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace AMWE_RealTime_Server
 {
@@ -27,25 +29,25 @@ namespace AMWE_RealTime_Server
             Role userRole = new Role { Id = 2, Name = Role.GlobalUserRole };
             Role devRole = new Role { Id = 3, Name = Role.GlobalDeveloperRole };
 
-            modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole, devRole });
+            _ = modelBuilder.Entity<Role>().HasData(new Role[] { adminRole, userRole, devRole });
 
-            modelBuilder.Entity<ClientState>()
+            _ = modelBuilder.Entity<ClientState>()
                 .Property(e => e.LastLoginDateTime)
                 .HasConversion(
                     v => v.ToUniversalTime(),
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                 );
-            modelBuilder.Entity<ClientState>()
+            _ = modelBuilder.Entity<ClientState>()
                 .Property(e => e.LastLogoutDateTime)
                 .HasConversion(
                     v => v.ToUniversalTime(),
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                     );
 
-            modelBuilder.Entity<ReportHubState>()
+            _ = modelBuilder.Entity<ReportHubState>()
                     .HasKey(x => x.Id);
 
-            modelBuilder.Entity<ReportHubState>()
+            _ = modelBuilder.Entity<ReportHubState>()
                 .HasData(new ReportHubState
                 {
                     Id = true,

@@ -1,16 +1,17 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
-using AMWE_RealTime_Server.Controllers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using AMWE_RealTime_Server.Models;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -27,7 +28,7 @@ namespace AMWE_RealTime_Server.Hubs
             _context = context;
         }
 
-        private static readonly List<ChatState> chatStates = new List<ChatState>();
+        private static readonly List<ChatState> ChatStates = new List<ChatState>();
 
         public override async Task OnConnectedAsync()
         {
@@ -60,45 +61,45 @@ namespace AMWE_RealTime_Server.Hubs
             return Context.Features.Get<IHttpTransportFeature>().TransportType.ToString();
         }
 
-        private static uint ChatId = 0;
+        private static uint s_chatId = 0;
 
         [Authorize(Roles = Role.GlobalAdminRole)]
-        public async Task<uint> OpenChat(uint ClientID)
+        public async Task<uint> OpenChat(uint clientID)
         {
             _logger.LogInformation($"Вызван OpenChat от {Context.User.Identity.Name}");
             ChatState chatState = new ChatState()
             {
-                ID = ChatId++,
+                ID = s_chatId++,
                 AdminConnectionID = Context.ConnectionId,
-                User = _context.GlobalClientsList.First(x => x.Id == ClientID),
+                User = _context.GlobalClientsList.First(x => x.Id == clientID),
                 IsAccepted = false
             };
-            chatStates.Add(chatState);
+            ChatStates.Add(chatState);
             await Clients.Group($"ID {chatState.User.Id}/" + chatState.User.Nameofpc).SendAsync("OpenChat", chatState.ID);
-            _logger.LogInformation($"Создан ChatState с ID {ChatId} / {chatState.ID}");
+            _logger.LogInformation($"Создан ChatState с ID {s_chatId} / {chatState.ID}");
             return chatState.ID;
         }
 
         [Authorize(Roles = Role.GlobalUserRole)]
-        public async Task AcceptChat(uint ChatID)
+        public async Task AcceptChat(uint chatID)
         {
-            _logger.LogInformation($"Вызван AcceptChat {ChatID} от {Context.User.Identity.Name}");
-            var chat = chatStates.Find(x => x.ID == ChatID);
-            _logger.LogInformation($"Найденный объект: {chat} в {chatStates.Count} {chatStates.First()}");
-            if (uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3)) == chat.User.Id)
+            _logger.LogInformation($"Вызван AcceptChat {chatID} от {Context.User.Identity.Name}");
+            ChatState chat = ChatStates.Find(x => x.ID == chatID);
+            _logger.LogInformation($"Найденный объект: {chat} в {ChatStates.Count} {ChatStates.First()}");
+            if (uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/")[3..]) == chat.User.Id)
             {
                 _logger.LogInformation($"Проверка пройдена, создается чат...");
                 chat.IsAccepted = true;
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"Chat {ChatID}");
-                await Groups.AddToGroupAsync(chat.AdminConnectionID, $"Chat {ChatID}");
-                await Clients.Group($"Chat {ChatID}").SendAsync("AcceptChatID", ChatID);
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"Chat {chatID}");
+                await Groups.AddToGroupAsync(chat.AdminConnectionID, $"Chat {chatID}");
+                await Clients.Group($"Chat {chatID}").SendAsync("AcceptChatID", chatID);
             }
         }
 
-        public async Task SendMessageToChat(uint ChatID, string Message)
+        public async Task SendMessageToChat(uint chatID, string message)
         {
-            _logger.LogInformation($"Отправлено сообщение в чат {ChatID} от {Context.User.Identity.Name} // {Message}");
-            var chat = chatStates.Find(x => x.ID == ChatID);
+            _logger.LogInformation($"Отправлено сообщение в чат {chatID} от {Context.User.Identity.Name} // {message}");
+            ChatState chat = ChatStates.Find(x => x.ID == chatID);
             string user;
             bool check;
             if (Context.ConnectionId == chat.AdminConnectionID)
@@ -108,29 +109,26 @@ namespace AMWE_RealTime_Server.Hubs
             }
             else
             {
-                check = uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3)) == chat.User.Id;
+                check = uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/")[3..]) == chat.User.Id;
                 user = chat.User.Nameofpc;
             }
             if (chat.IsAccepted && check)
             {
-                await Clients.Group($"Chat {ChatID}").SendAsync("ReceiveMessage", ChatID, Message, user, DateTime.Now);
+                await Clients.Group($"Chat {chatID}").SendAsync("ReceiveMessage", chatID, message, user, DateTime.Now);
             }
         }
 
-        public async Task CloseChat(uint ChatID)
+        public async Task CloseChat(uint chatID)
         {
             _logger.LogInformation($"Вызван CloseChat от {Context.User.Identity.Name}");
-            var chat = chatStates.Find(x => x.ID == ChatID);
-            bool check;
-            if (Context.ConnectionId == chat.AdminConnectionID)
-                check = true;
-            else
-                check = uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3)) == chat.User.Id;
+            ChatState chat = ChatStates.Find(x => x.ID == chatID);
+            bool check = Context.ConnectionId == chat.AdminConnectionID
+|| uint.Parse(Context.User.Identity.Name.GetUntilOrEmpty("/")[3..]) == chat.User.Id;
             if (check)
             {
-                _logger.LogInformation($"CloseDeleteChat вызыван у чата {ChatID}");
-                await Clients.Group($"Chat {ChatID}").SendAsync("CloseDeleteChat", ChatID);
-                _ = chatStates.Remove(chat);
+                _logger.LogInformation($"CloseDeleteChat вызыван у чата {chatID}");
+                await Clients.Group($"Chat {chatID}").SendAsync("CloseDeleteChat", chatID);
+                _ = ChatStates.Remove(chat);
             }
         }
     }
@@ -139,17 +137,17 @@ namespace AMWE_RealTime_Server.Hubs
     {
         public static string GetUntilOrEmpty(this string text, string stopAt = "-")
         {
-            if (!String.IsNullOrWhiteSpace(text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
                 int charLocation = text.IndexOf(stopAt, StringComparison.Ordinal);
 
                 if (charLocation > 0)
                 {
-                    return text.Substring(0, charLocation);
+                    return text[..charLocation];
                 }
             }
 
-            return String.Empty;
+            return string.Empty;
         }
     }
 }

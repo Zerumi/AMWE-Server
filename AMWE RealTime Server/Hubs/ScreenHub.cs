@@ -1,15 +1,17 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
-using AMWE_RealTime_Server.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Connections.Features;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using AMWE_RealTime_Server.Models;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Connections.Features;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -18,7 +20,7 @@ namespace AMWE_RealTime_Server.Hubs
     {
         private readonly ILogger _logger;
 
-        private static readonly List<ScreenState> screenTransfer = new List<ScreenState>();
+        private static readonly List<ScreenState> ScreenTransfer = new List<ScreenState>();
 
         public ScreenHub(ILogger<Screen> logger)
         {
@@ -56,7 +58,7 @@ namespace AMWE_RealTime_Server.Hubs
         {
             try
             {
-                screenTransfer.Add(new ScreenState()
+                ScreenTransfer.Add(new ScreenState()
                 {
                     Cid = client.Id,
                     Adm = Context.ConnectionId,
@@ -74,13 +76,13 @@ namespace AMWE_RealTime_Server.Hubs
         [Authorize(Roles = Role.GlobalUserRole)]
         public async void TransferScreen(Screen screen, ScreenType type)
         {
-            uint cid = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/").Substring(3));
-            var AdmIds = screenTransfer.FindAll(x => x.Cid == cid && x.Type == type);
-            _logger.LogInformation($"Клиент {cid} ответил на запрос {type} у одного или нескольких администраторов ({AdmIds.Count})");
-            foreach (ScreenState a in AdmIds)
+            uint cid = Convert.ToUInt32(Context.User.Identity.Name.GetUntilOrEmpty("/")[3..]);
+            List<ScreenState> admIds = ScreenTransfer.FindAll(x => x.Cid == cid && x.Type == type);
+            _logger.LogInformation($"Клиент {cid} ответил на запрос {type} у одного или нескольких администраторов ({admIds.Count})");
+            foreach (ScreenState a in admIds)
             {
-                await Clients.Client(a.Adm).SendAsync("NewScreen", screen, ReportHub.connectedClients.FirstOrDefault(x => x.Value.Id == cid).Value, type);
-                _ = screenTransfer.Remove(a);
+                await Clients.Client(a.Adm).SendAsync("NewScreen", screen, ReportHub.ConnectedClients.FirstOrDefault(x => x.Value.Id == cid).Value, type);
+                _ = ScreenTransfer.Remove(a);
             }
         }
 

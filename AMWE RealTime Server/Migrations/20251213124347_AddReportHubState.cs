@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AMWE_RealTime_Server.Migrations
 {
@@ -11,7 +10,7 @@ namespace AMWE_RealTime_Server.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "ReportHubState",
                 columns: table => new
                 {
@@ -19,12 +18,9 @@ namespace AMWE_RealTime_Server.Migrations
                     WorkdayValue = table.Column<bool>(type: "boolean", nullable: false),
                     BaseRepInterval = table.Column<TimeSpan>(type: "interval", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReportHubState", x => x.Id);
-                });
+                constraints: table => table.PrimaryKey("PK_ReportHubState", x => x.Id));
 
-            migrationBuilder.InsertData(
+            _ = migrationBuilder.InsertData(
                 table: "ReportHubState",
                 columns: new[] { "Id", "BaseRepInterval", "WorkdayValue" },
                 values: new object[] { true, new TimeSpan(0, 0, 1, 0, 0), false });
@@ -33,7 +29,7 @@ namespace AMWE_RealTime_Server.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "ReportHubState");
         }
     }

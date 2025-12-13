@@ -1,18 +1,20 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using System.Threading.Tasks;
+
+using AMWE_RealTime_Server.Models;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Threading.Tasks;
-using AMWE_RealTime_Server.Models;
 
 namespace AMWE_RealTime_Server.Hubs
 {
-    [Authorize(Roles=Role.GlobalAdminRole)]
+    [Authorize(Roles = Role.GlobalAdminRole)]
     public class DiagnoseHub : Hub
     {
         public override async Task OnConnectedAsync()
         {
-            double ConnectedTime = DateTime.Now.ToUniversalTime().Subtract(
+            double connectedTime = DateTime.Now.ToUniversalTime().Subtract(
     new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
     ).TotalMilliseconds;
             if (Context.User.IsInRole(Role.GlobalAdminRole))
@@ -23,7 +25,7 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
             }
-            await Clients.Caller.SendAsync("Connected", ConnectedTime);
+            await Clients.Caller.SendAsync("Connected", connectedTime);
             await base.OnConnectedAsync();
         }
 

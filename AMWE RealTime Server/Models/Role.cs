@@ -3,7 +3,8 @@
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
 using System.Collections.Generic;
 
-namespace AMWE_RealTime_Server.Models {
+namespace AMWE_RealTime_Server.Models
+{
     public class Role
     {
         public const string GlobalAdminRole = "admin";
