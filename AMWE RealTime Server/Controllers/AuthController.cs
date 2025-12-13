@@ -35,8 +35,6 @@ namespace AMWE_RealTime_Server.Controllers
             _context = context;
         }
 
-        public static List<Client> GlobalClientsList = new List<Client>();
-
         [HttpPost]
         [AllowAnonymous]
         public async Task<dynamic> Auth([FromBody] string[] authdata)

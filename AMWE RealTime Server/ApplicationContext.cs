@@ -13,6 +13,7 @@ namespace AMWE_RealTime_Server
         public DbSet<Role> Roles { get; set; }
         public DbSet<Client> GlobalClientsList { get; set; }
         public DbSet<ClientState> GlobalClientStatesList { get; set; }
+        public DbSet<ReportHubState> ReportHubState { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
@@ -40,6 +41,17 @@ namespace AMWE_RealTime_Server
                     v => v.ToUniversalTime(),
                     v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
                     );
+
+            modelBuilder.Entity<ReportHubState>()
+                    .HasKey(x => x.Id);
+
+            modelBuilder.Entity<ReportHubState>()
+                .HasData(new ReportHubState
+                {
+                    Id = true,
+                    WorkdayValue = false,
+                    BaseRepInterval = TimeSpan.FromMinutes(1)
+                });
 
             base.OnModelCreating(modelBuilder);
         }

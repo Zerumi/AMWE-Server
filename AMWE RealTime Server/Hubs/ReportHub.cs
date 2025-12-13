@@ -1,7 +1,6 @@
 ﻿// This code & software is licensed under the Creative Commons license. You can't use AMWE trademark 
 // You can use & improve this code by keeping this comments
 // (or by any other means, with saving authorship by Zerumi and PizhikCoder retained)
-using AMWE_RealTime_Server.Controllers;
 using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
@@ -18,9 +17,6 @@ namespace AMWE_RealTime_Server.Hubs
     [Authorize]
     public class ReportHub : Hub
     {
-        static bool WorkdayValue = false;
-        static TimeSpan BaseRepInterval = new TimeSpan(0, 1, 0);
-
         private readonly ILogger _logger;
 
         private readonly IHubContext<ClientHandlerHub> _hubContext;
@@ -53,8 +49,8 @@ namespace AMWE_RealTime_Server.Hubs
                 string nameofpc = Context.User.Identity.Name.Substring(Context.User.Identity.Name.IndexOf('/'));
                 connectedClients.Add(Context.ConnectionId, new Client() { Id = id, Nameofpc = nameofpc });
             }
-            await Clients.Caller.SendAsync("SetWorkday", WorkdayValue);
-            await Clients.Caller.SendAsync("SetBaseSendingTime", BaseRepInterval);
+            await Clients.Caller.SendAsync("SetWorkday", _context.ReportHubState.First().WorkdayValue);
+            await Clients.Caller.SendAsync("SetBaseSendingTime", _context.ReportHubState.First().BaseRepInterval);
             await base.OnConnectedAsync();
         }
 
@@ -89,7 +85,8 @@ namespace AMWE_RealTime_Server.Hubs
         [Authorize(Roles = Role.GlobalAdminRole)]
         public async void SetWorkdayValue(bool value)
         {
-            WorkdayValue = value;
+            _context.ReportHubState.First().WorkdayValue = value;
+            await _context.SaveChangesAsync();
             string logMsg = $"Администратор {Context.User.Identity.Name} изменил состояние рабочего дня на {value}";
             await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
             _logger.LogInformation(logMsg);
@@ -100,8 +97,9 @@ namespace AMWE_RealTime_Server.Hubs
         public async void ShutdownAllConnections()
         {
             await Clients.Group(Role.GlobalUserGroup).SendAsync("ShutdownHubConnection");
-            var a = AuthController.GlobalClientsList.Count;
-            var b = AuthController.GlobalClientsList.Select(x => x.Id).ToArray();
+            var list = _context.GlobalClientStatesList.Where(x => x.IsOnline);
+            var a = list.Count();
+            var b = list.Select(x => x.Client.Id).ToArray();
             for (uint i = 0; i < a; i++)
             {
                 await StaticVariables.svControllers.FirstOrDefault()?.Logout(b[i]);
@@ -144,20 +142,21 @@ namespace AMWE_RealTime_Server.Hubs
         public async void UpdateReportPollingTime(TimeSpan timeSpan)
         {
             await Clients.All.SendAsync("SetBaseSendingTime", timeSpan);
-            string logMsg = $"Администратор {Context.User.Identity.Name} изменил базовый интервал опроса отчетов с {BaseRepInterval} до {timeSpan}";
+            string logMsg = $"Администратор {Context.User.Identity.Name} изменил базовый интервал опроса отчетов с {_context.ReportHubState.First().BaseRepInterval} до {timeSpan}";
             await _AdmHubContext.Clients.All.SendAsync("Log", logMsg);
             _logger.LogInformation(logMsg);
-            BaseRepInterval = timeSpan;
+            _context.ReportHubState.First().BaseRepInterval = timeSpan;
+            await _context.SaveChangesAsync();
         }
 
         public TimeSpan GetBaseReportPollingInterval()
         {
-            return BaseRepInterval;
+            return _context.ReportHubState.First().BaseRepInterval;
         }
 
         public bool GetWorkdayValue()
         {
-            return WorkdayValue;
+            return _context.ReportHubState.First().WorkdayValue;
         }
 
         public string GetTransportType()
