@@ -4,6 +4,7 @@
 using System;
 
 using AMWE_RealTime_Server.Hubs;
+using AMWE_RealTime_Server.Services;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -28,6 +29,8 @@ namespace AMWE_RealTime_Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            _ = services.AddScoped<AuthService>();
+
             _ = services.AddDbContext<ApplicationContext>(options => options.UseNpgsql(
                 Configuration.GetConnectionString("DefaultConnection")
             ));

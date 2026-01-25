@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Linq;
 
+using AMWE_RealTime_Server.Models;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -35,12 +37,14 @@ namespace AMWE_RealTime_Server
           _ = logging.AddEventSourceLogger();
       })
       .UseStartup<Startup>()
+      .UseUrls("http://0.0.0.0:59885")
       .Build();
             if (args.Contains("--ef"))
             {
                 // EF требует DbContext, но мы не запускаем сервер
                 return;
             }
+            _ = Encryption.Encrypt("aav15_");
             webHost.Run();
         }
     }

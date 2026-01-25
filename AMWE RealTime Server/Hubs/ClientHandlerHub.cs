@@ -8,6 +8,7 @@ using AMWE_RealTime_Server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace AMWE_RealTime_Server.Hubs
 {
@@ -23,7 +24,7 @@ namespace AMWE_RealTime_Server.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.Caller.SendAsync("GetAllClients", _context.GlobalClientStatesList);
+            await Clients.Caller.SendAsync("GetAllClients", await _context.GlobalClientStatesList.ToListAsync());
             await base.OnConnectedAsync();
         }
 

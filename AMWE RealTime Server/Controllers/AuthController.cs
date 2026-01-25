@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using AMWE_RealTime_Server.Hubs;
 using AMWE_RealTime_Server.Models;
+using AMWE_RealTime_Server.Services;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -28,12 +29,14 @@ namespace AMWE_RealTime_Server.Controllers
     {
         private readonly IHubContext<ClientHandlerHub> _hubContext;
         private readonly ApplicationContext _context;
+        private readonly AuthService _authService;
 
-        public AuthController(IHubContext<ClientHandlerHub> hubContext, ApplicationContext context)
+        public AuthController(IHubContext<ClientHandlerHub> hubContext, ApplicationContext context, AuthService authService)
         {
             StaticVariables.SvControllers.Add(this);
             _hubContext = hubContext;
             _context = context;
+            _authService = authService;
         }
 
         [HttpPost]
@@ -99,18 +102,8 @@ namespace AMWE_RealTime_Server.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Logout(uint id)
         {
-            ClientState a = _context.GlobalClientStatesList
-            .Include(a => a.Client)
-            .FirstOrDefault(x => x.Client.Id == id);
-
-            if (a != null)
-            {
-                a.IsOnline = false;
-                a.LastLogoutDateTime = DateTime.Now;
-                await _hubContext.Clients.All.SendAsync("OnUserLeft", a);
-                _ = await _context.SaveChangesAsync();
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            }
+            await _authService.LogoutAsync(id);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return NoContent();
         }
     }

@@ -8,10 +8,12 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 using AMWE_RealTime_Server.Models;
+using AMWE_RealTime_Server.Services;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace AMWE_RealTime_Server.Hubs
@@ -24,15 +26,17 @@ namespace AMWE_RealTime_Server.Hubs
         private readonly IHubContext<ClientHandlerHub> _hubContext;
         private readonly IHubContext<AdminSystemHub> _admHubContext;
         private readonly ApplicationContext _context;
+        private readonly AuthService _authService;
 
         public static readonly Dictionary<string, Client> ConnectedClients = new Dictionary<string, Client>();
 
-        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> admHubContext, ApplicationContext context)
+        public ReportHub(ILogger<ReportHub> logger, IHubContext<ClientHandlerHub> hubContext, IHubContext<AdminSystemHub> admHubContext, ApplicationContext context, AuthService authService)
         {
             _logger = logger;
             _hubContext = hubContext;
             _admHubContext = admHubContext;
             _context = context;
+            _authService = authService;
         }
 
         public override async Task OnConnectedAsync()
@@ -51,8 +55,8 @@ namespace AMWE_RealTime_Server.Hubs
                 string nameofpc = Context.User.Identity.Name[Context.User.Identity.Name.IndexOf('/')..];
                 ConnectedClients.Add(Context.ConnectionId, new Client() { Id = id, Nameofpc = nameofpc });
             }
-            await Clients.Caller.SendAsync("SetWorkday", _context.ReportHubState.First().WorkdayValue);
-            await Clients.Caller.SendAsync("SetBaseSendingTime", _context.ReportHubState.First().BaseRepInterval);
+            await Clients.Caller.SendAsync("SetWorkday", (await _context.ReportHubState.FirstAsync()).WorkdayValue);
+            await Clients.Caller.SendAsync("SetBaseSendingTime", (await _context.ReportHubState.FirstAsync()).BaseRepInterval);
             await base.OnConnectedAsync();
         }
 
@@ -69,14 +73,14 @@ namespace AMWE_RealTime_Server.Hubs
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, Role.GlobalUserGroup);
                 _ = ConnectedClients.TryGetValue(Context.ConnectionId, out Client client);
-                _ = await StaticVariables.SvControllers.FirstOrDefault()?.Logout(client.Id);
+                await _authService.LogoutAsync(client.Id);
                 _ = ConnectedClients.Remove(Context.ConnectionId);
             }
             await base.OnDisconnectedAsync(exception);
         }
 
         [Authorize(Roles = Role.GlobalUserRole)]
-        public async void SendReport(Report report)
+        public async Task SendReport(Report report)
         {
             report.Server = new Uri($"{Context.GetHttpContext().Request.Scheme}://{Context.GetHttpContext().Request.Host}{Context.GetHttpContext().Request.Path}{Context.GetHttpContext().Request.QueryString}");
             report.Timestamp = DateTime.UtcNow;
@@ -85,7 +89,7 @@ namespace AMWE_RealTime_Server.Hubs
         }
 
         [Authorize(Roles = Role.GlobalAdminRole)]
-        public async void SetWorkdayValue(bool value)
+        public async Task SetWorkdayValue(bool value)
         {
             _context.ReportHubState.First().WorkdayValue = value;
             _ = await _context.SaveChangesAsync();
@@ -96,7 +100,7 @@ namespace AMWE_RealTime_Server.Hubs
         }
 
         [Authorize(Roles = Role.GlobalAdminRole)]
-        public async void ShutdownAllConnections()
+        public async Task ShutdownAllConnections()
         {
             await Clients.Group(Role.GlobalUserGroup).SendAsync("ShutdownHubConnection");
             IQueryable<ClientState> list = _context.GlobalClientStatesList.Where(x => x.IsOnline);
@@ -109,7 +113,7 @@ namespace AMWE_RealTime_Server.Hubs
         }
 
         [Authorize(Roles = Role.GlobalAdminRole)]
-        public async void EnhanceControl(uint clientID)
+        public async Task EnhanceControl(uint clientID)
         {
             string address = ConnectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
             ClientState x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
@@ -125,7 +129,7 @@ namespace AMWE_RealTime_Server.Hubs
         }
 
         [Authorize(Roles = Role.GlobalAdminRole)]
-        public async void LoosenControl(uint clientID)
+        public async Task LoosenControl(uint clientID)
         {
             string address = ConnectedClients.FirstOrDefault(x => x.Value.Id == clientID).Key;
             ClientState x = _context.GlobalClientStatesList.First(x => x.Client.Id == clientID);
@@ -141,13 +145,13 @@ namespace AMWE_RealTime_Server.Hubs
         }
 
         [Authorize(Roles = Role.GlobalAdminRole)]
-        public async void UpdateReportPollingTime(TimeSpan timeSpan)
+        public async Task UpdateReportPollingTime(TimeSpan timeSpan)
         {
             await Clients.All.SendAsync("SetBaseSendingTime", timeSpan);
-            string logMsg = $"Администратор {Context.User.Identity.Name} изменил базовый интервал опроса отчетов с {_context.ReportHubState.First().BaseRepInterval} до {timeSpan}";
+            string logMsg = $"Администратор {Context.User.Identity.Name} изменил базовый интервал опроса отчетов с {(await _context.ReportHubState.FirstAsync()).BaseRepInterval} до {timeSpan}";
             await _admHubContext.Clients.All.SendAsync("Log", logMsg);
             _logger.LogInformation(logMsg);
-            _context.ReportHubState.First().BaseRepInterval = timeSpan;
+            (await _context.ReportHubState.FirstAsync()).BaseRepInterval = timeSpan;
             _ = await _context.SaveChangesAsync();
         }
 

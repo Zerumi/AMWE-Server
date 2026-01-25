@@ -13,7 +13,7 @@ namespace AMWE_RealTime_Server.Models
     {
         private static string Loadcode()
         {
-            return Environment.GetEnvironmentVariable("Security__Legacy_Crypt_Code") ?? throw new Exception("Crypt code not found in environment variables");
+            return Environment.GetEnvironmentVariable("Security__Legacy_Crypt_Code") ?? "Osv_142-s3";
         }
         private static readonly string PassPhrase = Loadcode();
 
